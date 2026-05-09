@@ -895,8 +895,8 @@ function HomeScreen({ setScreen, plan }) {
             <Zap className="w-8 h-8 fill-current" />
           </div>
           <div>
-            <p className="text-yellow-300 text-sm font-bold">Buenos días, Isi</p>
-            <h1 className="text-2xl font-black">¿Nueva inspección eléctrica?</h1>
+            <p className="text-yellow-300 text-sm font-bold">IsiVoltPro</p>
+            <h1 className="text-2xl font-black">Inspecciones eléctricas</h1>
           </div>
         </div>
         <div className="mt-5 relative z-10">
@@ -943,7 +943,7 @@ function HomeScreen({ setScreen, plan }) {
             <Crown className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <h2 className="font-black text-slate-900">IsiVolt Pro Inspect</h2>
+            <h2 className="font-black text-slate-900">IsiVoltPro</h2>
             <p className="text-sm text-slate-500">Demo, Pro y Empresa preparados para Play Store.</p>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-400" />
@@ -1129,7 +1129,7 @@ function SettingsScreen({ plan, setPlan, setScreen }) {
 
         <Section title="Seguridad y versión" number="04">
           <SettingsRow icon={LockKeyhole} title="PIN de acceso" text="Preparado para proteger inspecciones locales." />
-          <SettingsRow icon={Store} title="Play Store" text="IsiVolt Pro Inspect V1.0.0 · Base técnica REBT 2002 V1." />
+          <SettingsRow icon={Store} title="Play Store" text="IsiVoltPro V1.0.0 · Base técnica REBT 2002 V1." />
           <Button variant="soft" onClick={() => setPlan("demo")} className="w-full"><RotateCcw className="w-4 h-4" />Volver a Demo</Button>
         </Section>
       </div>
@@ -1160,7 +1160,7 @@ function ProLockCard({ onUpgrade, compact = false }) {
         </div>
         <div className="flex-1">
           <p className="font-black text-yellow-900">Función Pro</p>
-          <p className="text-sm text-yellow-800 mt-1">Exportar informes PDF completos, quitar marca de agua y usar inspecciones ilimitadas estará incluido en IsiVolt Pro.</p>
+          <p className="text-sm text-yellow-800 mt-1">Exportar informes PDF completos, quitar marca de agua y usar inspecciones ilimitadas estará incluido en IsiVoltPro.</p>
           {!compact && <Button variant="gold" onClick={onUpgrade} className="mt-3 w-full">Ver planes</Button>}
         </div>
       </div>
@@ -1558,7 +1558,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("ISIVOLT PRO", page.margin, 15);
+    doc.text("ISIVOLTPRO", page.margin, 15);
     doc.setTextColor(...navy);
     doc.setFontSize(22);
     doc.text(title, page.margin, 42);
@@ -1585,7 +1585,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  doc.text("ISIVOLT PRO", page.margin, 26);
+  doc.text("ISIVOLTPRO", page.margin, 26);
   doc.setFontSize(10);
   doc.setTextColor(...gold);
   doc.text("INSPECCIONES", page.margin, 36);
@@ -1982,7 +1982,7 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <div className="report-brand">
                 <div className="report-logo"><Zap className="w-9 h-9 fill-current" /></div>
                 <div>
-                  <p className="report-brand-title">ISIVOLT PRO</p>
+                  <p className="report-brand-title">ISIVOLTPRO</p>
                   <p className="report-brand-sub">INSPECCIONES</p>
                 </div>
               </div>
@@ -2179,7 +2179,7 @@ function ReportPage({ title, icon: Icon = FileText, children, cover = false }) {
             <Icon className="w-7 h-7" />
             <h2>{title}</h2>
           </div>
-          <div className="report-mini-brand">ISIVOLT PRO</div>
+          <div className="report-mini-brand">ISIVOLTPRO</div>
         </div>
       )}
       <div className="report-page-content">{children}</div>
