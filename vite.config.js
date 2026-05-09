@@ -2,6 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ command }) => ({
-  base: command === "build" ? "/isivolpro-inspecciones/" : "/",
+  base: command === "build" ? "./" : "/",
   plugins: [react()],
 }));
