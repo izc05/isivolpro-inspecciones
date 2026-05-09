@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
@@ -26,21 +26,29 @@ import {
   Flame,
   Sun,
   Layers,
+  Settings,
+  Crown,
+  Building2,
+  LockKeyhole,
+  RotateCcw,
+  Users,
+  Store,
+  Smartphone,
 } from "lucide-react";
 
 const BLOCKS = [
-  { id: "rebt2002_block_10", code: "10", title: "Documentacion", regulation: "REBT 2002", order: 0, icon: FileText },
-  { id: "rebt2002_block_01", code: "01.01", title: "Instalaciones de enlace", regulation: "REBT 2002", order: 1, icon: Zap },
-  { id: "rebt2002_block_02", code: "02.01", title: "Instalaciones interiores y P.A.T.", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
+  { id: "rebt2002_block_10", code: "10", title: "Documentación", regulation: "REBT 2002", order: 0, icon: FileText },
+  { id: "rebt2002_block_01", code: "01.01", title: "Instalaciónes de enlace", regulation: "REBT 2002", order: 1, icon: Zap },
+  { id: "rebt2002_block_02", code: "02.01", title: "Instalaciónes interiores y P.A.T.", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
   { id: "rebt2002_block_03", code: "03.01", title: "Alumbrado exterior", regulation: "REBT 2002", order: 3, icon: Sun },
-  { id: "rebt2002_block_04", code: "04.01", title: "Publica concurrencia", regulation: "REBT 2002", order: 4, icon: Layers },
+  { id: "rebt2002_block_04", code: "04.01", title: "Pública concurrencia", regulation: "REBT 2002", order: 4, icon: Layers },
   { id: "rebt2002_block_05", code: "05.01", title: "ATEX", regulation: "REBT 2002", order: 5, icon: Flame },
   { id: "rebt2002_block_06", code: "06.01", title: "Locales especiales", regulation: "REBT 2002", order: 6, icon: AlertTriangle },
   { id: "rebt2002_block_08", code: "08.01", title: "Fotovoltaica", regulation: "REBT 2002", order: 8, icon: Sun },
-  { id: "rebt2002_block_13", code: "13.01", title: "Vehiculo electrico / IRVE", regulation: "REBT 2002", order: 13, icon: Zap },
-  { id: "custom_block_24_visual", code: "24", title: "Inspeccion visual general", regulation: "IsiVolt", order: 24, icon: Camera },
+  { id: "rebt2002_block_13", code: "13.01", title: "Vehículo eléctrico / IRVE", regulation: "REBT 2002", order: 13, icon: Zap },
+  { id: "custom_block_24_visual", code: "24", title: "Inspección visual general", regulation: "IsiVolt", order: 24, icon: Camera },
   { id: "custom_block_25_measurements", code: "25", title: "Hoja auxiliar de medidas", regulation: "IsiVolt", order: 25, icon: Gauge },
-  { id: "custom_block_26_calculations", code: "26", title: "Calculos electricos", regulation: "IsiVolt", order: 26, icon: Wrench },
+  { id: "custom_block_26_calculations", code: "26", title: "Cálculos eléctricos", regulation: "IsiVolt", order: 26, icon: Wrench },
   { id: "custom_block_23_summary", code: "23", title: "Resumen y conclusiones", regulation: "IsiVolt", order: 99, icon: FileText },
 ];
 
@@ -48,26 +56,26 @@ const CHECKLIST = [
   {
     id: "01.01.01",
     blockId: "rebt2002_block_01",
-    section: "Caja General de Proteccion",
+    section: "Caja General de Protección",
     title: "Estado exterior y acceso CGP / CGPM",
     question: "Es correcto el estado exterior y el acceso a la CGP?",
     reference: "ITC-BT-13 pto. 1.1",
     favorable: "Libre y permanente acceso.",
     severity: "DG",
     help: {
-      purpose: "Comprobar que la caja general de proteccion puede inspeccionarse y mantenerse sin depender de terceros ni quedar bloqueada.",
+      purpose: "Comprobar que la caja general de protección puede inspecciónarse y mantenerse sin depender de terceros ni quedar bloqueada.",
       whatToCheck: ["Acceso libre y permanente", "Puerta, tapa y cierre", "Ausencia de obstaculos", "Estado exterior del nicho o envolvente"],
       criteria: ["Debe estar en lugar de libre y permanente acceso"],
-      defects: ["CGP cerrada sin acceso", "CGP bloqueada por vehiculos u objetos", "Envolvente deteriorada"],
+      defects: ["CGP cerrada sin acceso", "CGP bloqueada por vehículos u objetos", "Envolvente deteriorada"],
       images: ["Esquema de CGP en fachada", "Foto general de ubicacion"],
     },
   },
   {
     id: "01.01.03",
     blockId: "rebt2002_block_01",
-    section: "Caja General de Proteccion",
+    section: "Caja General de Protección",
     title: "Altura CGP / CGPM",
-    question: "Es la altura de instalacion reglamentaria?",
+    question: "Es la altura de instalación reglamentaria?",
     reference: "ITC-BT-13 pto. 1.1",
     favorable: "Aerea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
     severity: "DG",
@@ -83,17 +91,17 @@ const CHECKLIST = [
   {
     id: "01.01.10",
     blockId: "rebt2002_block_01",
-    section: "Linea General de Alimentacion",
+    section: "Línea General de Alimentación",
     title: "Seccion minima LGA",
     question: "Es la seccion minima de los conductores adecuada?",
     reference: "ITC-BT-14 pto. 3",
-    favorable: "Minimo 10 mm2 Cu o 16 mm2 Al.",
+    favorable: "Mínimo 10 mm2 Cu o 16 mm2 Al.",
     severity: "DG",
     fields: [{ key: "section", label: "Seccion", unit: "mm2" }, { key: "material", label: "Material", unit: "Cu/Al" }],
     help: {
       purpose: "Comprobar que la LGA tiene seccion minima reglamentaria y adecuada al calculo.",
-      whatToCheck: ["Seccion real o documentada", "Material Cu/Al", "Calculo de caida de tension", "Marcado del conductor"],
-      criteria: ["Cobre: minimo 10 mm2", "Aluminio: minimo 16 mm2"],
+      whatToCheck: ["Seccion real o documentada", "Material Cu/Al", "Calculo de caida de tensión", "Marcado del conductor"],
+      criteria: ["Cobre: mínimo 10 mm2", "Aluminio: mínimo 16 mm2"],
       defects: ["Seccion inferior", "No se justifica seccion", "Marcado no visible"],
       images: ["Tabla visual de secciones minimas"],
     },
@@ -101,7 +109,7 @@ const CHECKLIST = [
   {
     id: "01.01.32",
     blockId: "rebt2002_block_01",
-    section: "Centralizacion de contadores",
+    section: "Centralización de contadores",
     title: "Extintor de eficacia 21B",
     question: "Existe extintor 21B proximo a la puerta del local de contadores?",
     reference: "ITC-BT-16 pto. 2.2.1",
@@ -118,15 +126,15 @@ const CHECKLIST = [
     id: "02.01.04",
     blockId: "rebt2002_block_02",
     section: "Cuadros",
-    title: "Grado de proteccion IP30 / IK07",
-    question: "Tiene el cuadro un grado de proteccion IP30 e IK07 como minimo?",
+    title: "Grado de protección IP30 / IK07",
+    question: "Tiene el cuadro un grado de protección IP30 e IK07 como mínimo?",
     reference: "ITC-BT-17",
     favorable: "Envolvente cerrada, sin huecos y entradas obturadas.",
     severity: "DG",
     help: {
-      purpose: "Evitar contactos directos y danos mecanicos en cuadros electricos.",
+      purpose: "Evitar contactos directos y danos mecanicos en cuadros eléctricos.",
       whatToCheck: ["Puerta y tapa", "Huecos sin obturar", "Entradas de cable", "Roturas de envolvente"],
-      criteria: ["Minimo IP30", "Minimo IK07"],
+      criteria: ["Mínimo IP30", "Mínimo IK07"],
       defects: ["Huecos abiertos", "Carcasa rota", "Partes activas accesibles"],
       images: ["Comparativa cuadro correcto / incorrecto"],
     },
@@ -141,10 +149,10 @@ const CHECKLIST = [
     favorable: "Corte omnipolar, mando manual y poder de corte >= 4.500 A.",
     severity: "DG",
     help: {
-      purpose: "Comprobar que el cuadro tiene corte general y proteccion contra sobrecargas y cortocircuitos.",
+      purpose: "Comprobar que el cuadro tiene corte general y protección contra sobrecargas y cortocircuitos.",
       whatToCheck: ["No confundir con seccionador", "Corte omnipolar", "Poder de corte", "Calibre adecuado", "Identificacion"],
-      criteria: ["IGA existente", "Corte omnipolar", "Poder de corte minimo 4.500 A o el calculado"],
-      defects: ["Solo existe seccionador", "No hay proteccion general", "No corta neutro cuando corresponde"],
+      criteria: ["IGA existente", "Corte omnipolar", "Poder de corte mínimo 4.500 A o el calculado"],
+      defects: ["Solo existe seccionador", "No hay protección general", "No corta neutro cuando corresponde"],
       images: ["IGA frente a seccionador"],
     },
   },
@@ -158,7 +166,7 @@ const CHECKLIST = [
     favorable: "El diferencial dispara al pulsar TEST y supera prueba instrumental.",
     severity: "DG",
     help: {
-      purpose: "Verificar proteccion contra contactos indirectos mediante diferenciales.",
+      purpose: "Verificar protección contra contactos indirectos mediante diferenciales.",
       whatToCheck: ["Boton TEST", "Sensibilidad", "Tipo AC/A/B/F", "Tiempo de disparo", "Corriente de disparo"],
       criteria: ["Disparo correcto", "IDn adecuado", "Tiempo correcto"],
       defects: ["No dispara", "Tipo incorrecto", "Sensibilidad inadecuada"],
@@ -168,16 +176,16 @@ const CHECKLIST = [
   {
     id: "02.01.24",
     blockId: "rebt2002_block_02",
-    section: "Puesta a tierra",
-    title: "Tension de contacto",
-    question: "Es la tension de contacto inferior al limite de seguridad?",
+    section: "Puesta a Tierra",
+    title: "Tensión de contacto",
+    question: "Es la tensión de contacto inferior al limite de seguridad?",
     reference: "ITC-BT-18 pto. 9",
     favorable: "<= 50 V en local seco; <= 24 V en mojado/exterior.",
     severity: "DG",
     fields: [{ key: "earth", label: "RA", unit: "ohm" }, { key: "rcd", label: "IDn", unit: "mA" }],
     help: {
       purpose: "Calcular Uc = RA x IDn para comprobar seguridad frente a contactos indirectos.",
-      whatToCheck: ["Resistencia de tierra", "Diferencial asociado", "Tipo de local", "Tension maxima admisible"],
+      whatToCheck: ["Resistencia de tierra", "Diferencial asociado", "Tipo de local", "Tensión maxima admisible"],
       criteria: ["Seco: Uc <= 50 V", "Mojado/exterior: Uc <= 24 V"],
       defects: ["Tierra elevada", "Diferencial no adecuado", "Uc supera limite"],
       images: ["Formula Uc = RA x IDn"],
@@ -187,15 +195,15 @@ const CHECKLIST = [
     id: "03.01.15",
     blockId: "rebt2002_block_03",
     section: "Alumbrado exterior",
-    title: "Tension de contacto en alumbrado exterior",
-    question: "Es la tension de contacto inferior al limite de seguridad?",
+    title: "Tensión de contacto en alumbrado exterior",
+    question: "Es la tensión de contacto inferior al limite de seguridad?",
     reference: "ITC-BT-09 pto. 10",
     favorable: "Uc <= 24 V; criterio app: 300 mA -> 30 ohm, 500 mA -> 5 ohm, 1 A -> 1 ohm.",
     severity: "DG",
     help: {
       purpose: "Verificar seguridad de columnas, baculos y partes metalicas accesibles en intemperie.",
       whatToCheck: ["Red comun de tierras", "Resistencia de tierra", "Diferencial", "Borne de tierra de soportes"],
-      criteria: ["300 mA: maximo 30 ohm", "500 mA: maximo 5 ohm", "1 A: maximo 1 ohm"],
+      criteria: ["300 mA: máximo 30 ohm", "500 mA: máximo 5 ohm", "1 A: máximo 1 ohm"],
       defects: ["Tierra superior al limite", "Soporte sin borne", "Red de tierras discontinua"],
       images: ["Base de baculo con borne de tierra"],
     },
@@ -203,14 +211,14 @@ const CHECKLIST = [
   {
     id: "04.01.01",
     blockId: "rebt2002_block_04",
-    section: "Documentacion y clasificacion",
-    title: "Clasificacion, aforo y servicios de seguridad",
+    section: "Documentación y clasificacion",
+    title: "Clasificación, aforo y servicios de seguridad",
     question: "Consta en proyecto la clasificacion del local, aforo y servicios de seguridad?",
     reference: "ITC-BT-04 / ITC-BT-28",
     favorable: "El proyecto debe indicar tipo de local, aforo, uso y servicios de seguridad aplicables.",
     severity: "DG",
     help: {
-      purpose: "Verificar que la instalacion esta definida tecnicamente como local de publica concurrencia y que el proyecto recoge sus exigencias de seguridad.",
+      purpose: "Verificar que la instalación está definida técnicamente como local de pública concurrencia y que el proyecto recoge sus exigencias de seguridad.",
       whatToCheck: ["Proyecto o memoria tecnica", "Tipo de local y uso", "Aforo previsto", "Servicios de seguridad aplicables"],
       criteria: ["Tipo de local indicado", "Aforo indicado", "Servicios de seguridad definidos"],
       defects: ["No consta clasificacion", "No consta aforo", "Servicios de seguridad no definidos"],
@@ -224,12 +232,12 @@ const CHECKLIST = [
     title: "Suministro complementario operativo",
     question: "Existe suministro complementario operativo y con capacidad suficiente?",
     reference: "Art. 10 / ITC-BT-28",
-    favorable: "Socorro minimo 15% o reserva minimo 25%, segun proceda.",
+    favorable: "Socorro mínimo 15% o reserva mínimo 25%, segun proceda.",
     severity: "DG",
     help: {
       purpose: "Comprobar que el local mantiene los servicios esenciales cuando falla el suministro normal.",
       whatToCheck: ["Tipo de suministro complementario", "Potencia disponible", "Arranque o transferencia", "Servicios alimentados"],
-      criteria: ["Socorro minimo 15%", "Reserva minimo 25%", "Operativo en prueba"],
+      criteria: ["Socorro mínimo 15%", "Reserva mínimo 25%", "Operativo en prueba"],
       defects: ["No existe suministro complementario", "Potencia insuficiente", "No arranca o no conmuta"],
       images: ["Grupo electrogeno o fuente complementaria", "Esquema red-grupo"],
     },
@@ -273,7 +281,7 @@ const CHECKLIST = [
     blockId: "rebt2002_block_04",
     section: "Alumbrado de seguridad",
     title: "Caracteristicas del alumbrado de seguridad",
-    question: "Son correctas las caracteristicas del alumbrado de seguridad y su interconexion?",
+    question: "Son correctas las características del alumbrado de seguridad y su interconexion?",
     reference: "ITC-BT-28 pto. 3.1",
     favorable: "El alumbrado de seguridad debe entrar en servicio cuando falle el alumbrado normal.",
     severity: "DG",
@@ -292,12 +300,12 @@ const CHECKLIST = [
     title: "Alumbrado de evacuacion",
     question: "Existe y es correcto el alumbrado de evacuacion?",
     reference: "ITC-BT-28 pto. 3.1.1",
-    favorable: "Minimo 1 lux en rutas de evacuacion y 5 lux en cuadros, extintores y equipos de proteccion.",
+    favorable: "Mínimo 1 lux en rutas de evacuacion y 5 lux en cuadros, extintores y equipos de protección.",
     severity: "DG",
     fields: [{ key: "lux", label: "Lux", unit: "lx" }],
     help: {
-      purpose: "Comprobar que la evacuacion y actuacion sobre cuadros/equipos de proteccion es segura con fallo de alumbrado normal.",
-      whatToCheck: ["Rutas de evacuacion", "Cuadros electricos", "Extintores", "Equipos PCI"],
+      purpose: "Comprobar que la evacuacion y actuacion sobre cuadros/equipos de protección es segura con fallo de alumbrado normal.",
+      whatToCheck: ["Rutas de evacuacion", "Cuadros eléctricos", "Extintores", "Equipos PCI"],
       criteria: ["Evacuacion: >= 1 lux", "Cuadros/extintores: >= 5 lux"],
       defects: ["Lux insuficiente", "Luminaria no funciona", "Mala ubicacion"],
       images: ["Puntos de medida con luxometro"],
@@ -307,8 +315,8 @@ const CHECKLIST = [
     id: "04.01.07",
     blockId: "rebt2002_block_04",
     section: "Alumbrado de emergencia",
-    title: "Alumbrado antipanico",
-    question: "Existe y es correcto el alumbrado antipanico?",
+    title: "Alumbrado antipánico",
+    question: "Existe y es correcto el alumbrado antipánico?",
     reference: "ITC-BT-28 pto. 3.1.2",
     favorable: "Debe permitir identificar y acceder a rutas de evacuacion desde zonas abiertas.",
     severity: "DG",
@@ -317,7 +325,7 @@ const CHECKLIST = [
       whatToCheck: ["Zonas abiertas", "Acceso a rutas de evacuacion", "Cobertura luminica", "Funcionamiento de equipos"],
       criteria: ["Permite orientacion", "Permite acceder a evacuacion", "Equipos operativos"],
       defects: ["Zonas abiertas sin cobertura", "No funciona", "Distribucion insuficiente"],
-      images: ["Planta con zonas antipanico"],
+      images: ["Planta con zonas antipánico"],
     },
   },
   {
@@ -349,7 +357,7 @@ const CHECKLIST = [
     help: {
       purpose: "Garantizar continuidad de actividad asistencial o critica donde no basta con alumbrado de evacuacion.",
       whatToCheck: ["Salas de curas", "Paritorios", "Urgencias", "Servicios criticos"],
-      criteria: ["Existe donde procede", "Estado correcto", "Alimentacion adecuada"],
+      criteria: ["Existe donde procede", "Estado correcto", "Alimentación adecuada"],
       defects: ["No existe donde procede", "Equipo deteriorado", "Autonomia insuficiente"],
       images: ["Sala sanitaria con alumbrado de reemplazo"],
     },
@@ -361,11 +369,11 @@ const CHECKLIST = [
     title: "Distribucion del alumbrado de seguridad",
     question: "La distribucion del alumbrado de seguridad es correcta?",
     reference: "ITC-BT-28 pto. 3.3.1",
-    favorable: "Debe cubrir recorridos, salidas, cambios de direccion, escaleras, cuadros y equipos de seguridad.",
+    favorable: "Debe cubrir recorridos, salidas, cambios de dirección, escaleras, cuadros y equipos de seguridad.",
     severity: "DG",
     help: {
       purpose: "Comprobar que la ubicacion de luminarias cubre todos los puntos necesarios de evacuacion y seguridad.",
-      whatToCheck: ["Recorridos", "Salidas", "Cambios de direccion", "Escaleras", "Cuadros y equipos de seguridad"],
+      whatToCheck: ["Recorridos", "Salidas", "Cambios de dirección", "Escaleras", "Cuadros y equipos de seguridad"],
       criteria: ["Cobertura completa", "Sin zonas oscuras", "Equipos correctamente situados"],
       defects: ["Faltan luminarias", "Puntos criticos sin cobertura", "Mala orientacion"],
       images: ["Plano de recorridos con luminarias"],
@@ -412,13 +420,13 @@ const CHECKLIST = [
     title: "Fuente central para luminarias",
     question: "Las luminarias alimentadas por fuente central cumplen sus condiciones?",
     reference: "ITC-BT-28 pto. 3.4.2",
-    favorable: "Fuente central con control, lineas suficientes, protecciones, voltimetro y distribucion adecuada.",
+    favorable: "Fuente central con control, lineas suficientes, protecciónes, voltimetro y distribucion adecuada.",
     severity: "DG",
     help: {
-      purpose: "Verificar que las instalaciones con fuente central tienen control, proteccion y distribucion adecuados.",
-      whatToCheck: ["Fuente central", "Control y senalizacion", "Lineas", "Protecciones", "Voltimetro"],
-      criteria: ["Fuente operativa", "Lineas suficientes", "Protecciones correctas", "Voltimetro disponible"],
-      defects: ["Fuente sin control", "Lineas insuficientes", "Protecciones incorrectas"],
+      purpose: "Verificar que las instalaciónes con fuente central tienen control, protección y distribucion adecuados.",
+      whatToCheck: ["Fuente central", "Control y senalizacion", "Lineas", "Protecciónes", "Voltimetro"],
+      criteria: ["Fuente operativa", "Lineas suficientes", "Protecciónes correctas", "Voltimetro disponible"],
+      defects: ["Fuente sin control", "Lineas insuficientes", "Protecciónes incorrectas"],
       images: ["Cuadro de fuente central"],
     },
   },
@@ -450,7 +458,7 @@ const CHECKLIST = [
     severity: "DG",
     help: {
       purpose: "Comprobar que una averia no deja sin alumbrado una zona excesiva del local.",
-      whatToCheck: ["Numero de lineas", "Reparto de luminarias", "Protecciones", "Planos o pruebas de corte"],
+      whatToCheck: ["Número de lineas", "Reparto de luminarias", "Protecciónes", "Planos o pruebas de corte"],
       criteria: ["Una linea no afecta a mas de 1/3 de lamparas", "Reparto equilibrado"],
       defects: ["Una linea apaga demasiadas lamparas", "Circuitos mal repartidos"],
       images: ["Esquema de reparto de alumbrado por lineas"],
@@ -460,16 +468,16 @@ const CHECKLIST = [
     id: "04.01.16",
     blockId: "rebt2002_block_04",
     section: "Canalizaciones y conductores",
-    title: "Canalizaciones en publica concurrencia",
-    question: "Las canalizaciones cumplen las caracteristicas exigidas para publica concurrencia?",
+    title: "Canalizaciones en pública concurrencia",
+    question: "Las canalizaciones cumplen las características exigidas para pública concurrencia?",
     reference: "ITC-BT-28 pto. 4 e)",
     favorable: "Canalizaciones adecuadas, protegidas y con comportamiento frente al fuego correcto.",
     severity: "DG",
     help: {
-      purpose: "Verificar que las canalizaciones mantienen la seguridad en locales con ocupacion publica.",
-      whatToCheck: ["Tipo de canalizacion", "Proteccion mecanica", "Reaccion al fuego", "Trazado"],
+      purpose: "Verificar que las canalizaciones mantienen la seguridad en locales con ocupación pública.",
+      whatToCheck: ["Tipo de canalizacion", "Protección mecanica", "Reaccion al fuego", "Trazado"],
       criteria: ["Canalizacion adecuada", "Protegida", "Comportamiento frente al fuego correcto"],
-      defects: ["Canalizacion no apta", "Sin proteccion", "Material inadecuado frente al fuego"],
+      defects: ["Canalizacion no apta", "Sin protección", "Material inadecuado frente al fuego"],
       images: ["Canalizacion correcta en LPC"],
     },
   },
@@ -497,13 +505,13 @@ const CHECKLIST = [
     title: "Locales de espectaculos",
     question: "Se cumplen las prescripciones especificas de locales de espectaculos?",
     reference: "ITC-BT-28 pto. 5",
-    favorable: "Numero de lineas, canalizaciones moviles, clase II, protecciones, distancias y balizamiento.",
+    favorable: "Número de lineas, canalizaciones moviles, clase II, protecciónes, distancias y balizamiento.",
     severity: "DG",
     help: {
       purpose: "Verificar exigencias particulares en locales de espectaculos, escenarios y zonas con montaje temporal.",
-      whatToCheck: ["Numero de lineas", "Canalizaciones moviles", "Clase II", "Protecciones", "Balizamiento"],
-      criteria: ["Lineas suficientes", "Protecciones adecuadas", "Distancias y balizamiento correctos"],
-      defects: ["Montaje no protegido", "Balizamiento insuficiente", "Protecciones incorrectas"],
+      whatToCheck: ["Número de lineas", "Canalizaciones moviles", "Clase II", "Protecciónes", "Balizamiento"],
+      criteria: ["Lineas suficientes", "Protecciónes adecuadas", "Distancias y balizamiento correctos"],
+      defects: ["Montaje no protegido", "Balizamiento insuficiente", "Protecciónes incorrectas"],
       images: ["Esquema de escenario y lineas"],
     },
   },
@@ -518,8 +526,8 @@ const CHECKLIST = [
     severity: "DG",
     help: {
       purpose: "Comprobar la distribucion electrica en locales de reunion, trabajo o uso publico asimilable.",
-      whatToCheck: ["Uso del local", "Numero de lineas", "Distribucion de circuitos", "Zonas de ocupacion"],
-      criteria: ["Lineas suficientes", "Distribucion adecuada al uso", "Protecciones correctas"],
+      whatToCheck: ["Uso del local", "Número de lineas", "Distribucion de circuitos", "Zonas de ocupacion"],
+      criteria: ["Lineas suficientes", "Distribucion adecuada al uso", "Protecciónes correctas"],
       defects: ["Lineas insuficientes", "Distribucion no adecuada", "Zonas sin cobertura"],
       images: ["Plano de distribucion de circuitos"],
     },
@@ -527,11 +535,11 @@ const CHECKLIST = [
   {
     id: "05.01.01",
     blockId: "rebt2002_block_05",
-    section: "Documentacion ATEX",
+    section: "Documentación ATEX",
     title: "Documento de clasificacion de zonas",
-    question: "Existe Documento de Clasificacion de Zonas?",
+    question: "Existe Documento de Clasificación de Zonas?",
     reference: "ITC-BT-29 pto. 4",
-    favorable: "Documento tecnico con zonas 0, 1, 2 o 20, 21, 22.",
+    favorable: "Documento técnico con zonas 0, 1, 2 o 20, 21, 22.",
     severity: "DG",
     help: {
       purpose: "Sin clasificacion de zonas no se puede verificar si equipos y canalizaciones son adecuados.",
@@ -546,13 +554,13 @@ const CHECKLIST = [
     blockId: "rebt2002_block_06",
     section: "Locales mojados",
     title: "Canalizaciones en locales mojados",
-    question: "Las canalizaciones en local mojado cumplen caracteristicas exigibles?",
+    question: "Las canalizaciones en local mojado cumplen características exigibles?",
     reference: "ITC-BT-30",
     favorable: "Canalizaciones y aparamenta adecuadas al ambiente mojado.",
     severity: "DG",
     help: {
-      purpose: "Verificar que el grado de proteccion y el sistema de instalacion soportan humedad, chorros o condensaciones.",
-      whatToCheck: ["Tipo de canalizacion", "Grado IP", "Entradas de cable", "Puesta a tierra y equipotencialidad"],
+      purpose: "Verificar que el grado de protección y el sistema de instalación soportan humedad, chorros o condensaciones.",
+      whatToCheck: ["Tipo de canalizacion", "Grado IP", "Entradas de cable", "Puesta a Tierra y equipotencialidad"],
       criteria: ["Material adecuado", "Entradas protegidas", "Sin partes expuestas a agua"],
       defects: ["Canalizacion abierta", "IP insuficiente", "Cajas sin tapa"],
       images: ["Ejemplos de local mojado"],
@@ -581,7 +589,7 @@ const CHECKLIST = [
     section: "Fotovoltaica",
     title: "Diferencial y corriente residual CC",
     question: "Se justifica limitacion CC < 6 mA o se instala diferencial tipo B?",
-    reference: "ITC-BT-40 / criterio tecnico FV",
+    reference: "ITC-BT-40 / criterio técnico FV",
     favorable: "Certificado del inversor < 6 mA CC o diferencial tipo B.",
     severity: "DG",
     help: {
@@ -644,15 +652,15 @@ function getRequirements(data) {
   if (types.includes("local_mojado") && power > 25) req.push("Local mojado > 25 kW: activar Bloque 06 y justificar proyecto.");
   if (data.hasEV && power > 50) req.push("IRVE > 50 kW: requiere proyecto.");
   if (data.hasEV && data.isExterior && power > 10) req.push("IRVE exterior > 10 kW: requiere proyecto.");
-  if (data.hasAtex || types.includes("atex")) req.push("ATEX: solicitar Documento de Clasificacion de Zonas.");
-  if (data.hasFV && data.isExterior && power > 25) req.push("Fotovoltaica exterior > 25 kW: activar local mojado/caracteristicas especiales.");
+  if (data.hasAtex || types.includes("atex")) req.push("ATEX: solicitar Documento de Clasificación de Zonas.");
+  if (data.hasFV && data.isExterior && power > 25) req.push("Fotovoltaica exterior > 25 kW: activar local mojado/características especiales.");
   return req;
 }
 
 function calculateVerdict(responses) {
   const values = Object.values(responses);
   if (values.some((r) => r.status === "DMG")) return { label: "NEGATIVA", bg: "bg-red-50", text: "text-red-700", detail: "Existe al menos un defecto muy grave." };
-  if (values.some((r) => r.status === "DG")) return { label: "CONDICIONADA", bg: "bg-orange-50", text: "text-orange-700", detail: "Existen defectos graves pendientes de subsanacion." };
+  if (values.some((r) => r.status === "DG")) return { label: "CONDICIONADA", bg: "bg-orange-50", text: "text-orange-700", detail: "Existen defectos graves pendientes de subsanación." };
   return { label: "FAVORABLE", bg: "bg-emerald-50", text: "text-emerald-700", detail: "Sin defectos graves ni muy graves registrados." };
 }
 
@@ -788,13 +796,14 @@ function Header({ title, subtitle, onBack, right }) {
 function BottomNav({ screen, setScreen, defects, onReportClick }) {
   const items = [
     ["home", Home, "Inicio"],
-    ["blocks", SlidersHorizontal, "Bloques"],
+    ["inspections", ClipboardCheck, "Mis"],
     ["checklist", ClipboardCheck, "Checklist"],
     ["report", FileText, "Informe"],
+    ["settings", Settings, "Ajustes"],
   ];
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-[#071E3D] text-white px-4 py-2 rounded-t-3xl shadow-2xl z-40 print:hidden">
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {items.map(([id, Icon, label]) => (
           <button key={id} type="button" onClick={() => id === "report" ? onReportClick() : setScreen(id)} className={classNames("relative py-2 rounded-2xl flex flex-col items-center gap-1 text-xs", screen === id ? "text-[#FFC928]" : "text-white/70")}>
             <Icon className="w-5 h-5" />
@@ -872,7 +881,7 @@ function StageFlow({ current }) {
   );
 }
 
-function HomeScreen({ setScreen }) {
+function HomeScreen({ setScreen, plan }) {
   const recent = [
     { name: "Bar Ejemplo", type: "Pública concurrencia · REBT 2002", status: "Borrador", progress: 42 },
     { name: "Parking Centro", type: "IRVE + Garaje · REBT 2002", status: "Condicionada", progress: 86 },
@@ -889,6 +898,9 @@ function HomeScreen({ setScreen }) {
             <p className="text-yellow-300 text-sm font-bold">Buenos días, Isi</p>
             <h1 className="text-2xl font-black">¿Nueva inspección eléctrica?</h1>
           </div>
+        </div>
+        <div className="mt-5 relative z-10">
+          <PlanBadge plan={plan} />
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 relative z-10">
           <Button variant="gold" onClick={() => setScreen("data")} className="py-3">Nueva</Button>
@@ -925,7 +937,30 @@ function HomeScreen({ setScreen }) {
             <TemplateButton icon={Flame} title="ATEX" text="Riesgo explosión" onClick={() => setScreen("blocks")} />
           </div>
         </section>
+
+        <button type="button" onClick={() => setScreen("plan")} className="w-full bg-white border border-yellow-100 rounded-[1.5rem] p-4 text-left shadow-sm flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-yellow-50 text-[#071E3D] flex items-center justify-center">
+            <Crown className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-black text-slate-900">IsiVolt Pro Inspect</h2>
+            <p className="text-sm text-slate-500">Demo, Pro y Empresa preparados para Play Store.</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-slate-400" />
+        </button>
       </div>
+    </div>
+  );
+}
+
+function PlanBadge({ plan }) {
+  const label = plan === "empresa" ? "Plan Empresa" : plan === "pro" ? "Plan Pro" : "Plan Demo";
+  const text = plan === "demo" ? "1 inspección de prueba · PDF completo bloqueado" : plan === "pro" ? "Inspecciones ilimitadas · PDF completo" : "Marca de empresa · técnicos múltiples";
+  return (
+    <div className="inline-flex items-center gap-2 rounded-2xl bg-white/10 border border-white/15 px-3 py-2 text-sm">
+      <Crown className="w-4 h-4 text-[#FFC928]" />
+      <span className="font-black">{label}</span>
+      <span className="text-white/60">· {text}</span>
     </div>
   );
 }
@@ -982,6 +1017,151 @@ function InspectionsScreen({ setScreen }) {
           {inspections.map((inspection) => (
             <InspectionCard key={inspection.name} inspection={inspection} onClick={() => setScreen("checklist")} />
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanScreen({ plan, setPlan, setScreen }) {
+  const plans = [
+    {
+      id: "demo",
+      name: "Demo",
+      price: "Gratis",
+      icon: Smartphone,
+      text: "Para probar el flujo de inspección antes de vender la app.",
+      features: ["1 inspección de prueba", "Checklist limitado", "Informe con marca de agua", "PDF completo bloqueado"],
+    },
+    {
+      id: "pro",
+      name: "Pro",
+      price: "9,99 €/mes",
+      icon: Crown,
+      text: "Para técnicos que quieren trabajar con informes completos.",
+      features: ["Inspecciones ilimitadas", "REBT 2002 y REBT 1973", "IRVE, FV, ATEX y LPC", "Fotos, mediciones y PDF completo"],
+    },
+    {
+      id: "empresa",
+      name: "Empresa",
+      price: "29,99 €/mes",
+      icon: Building2,
+      text: "Para instaladores, mantenimientos y equipos pequeños.",
+      features: ["Todo Pro", "Logo y datos de empresa", "Técnicos múltiples", "Plantillas y copias de seguridad"],
+    },
+  ];
+
+  return (
+    <div className="pb-28">
+      <Header title="Plan y suscripción" subtitle="Preparado para Play Store" onBack={() => setScreen("settings")} right={<Crown className="w-6 h-6 text-yellow-300" />} />
+      <div className="p-5 space-y-4">
+        <div className="bg-[#071E3D] text-white rounded-[1.5rem] p-5 shadow-sm">
+          <p className="text-yellow-300 text-sm font-black">Plan actual</p>
+          <h2 className="text-2xl font-black mt-1">{plan === "empresa" ? "Empresa" : plan === "pro" ? "Pro" : "Demo"}</h2>
+          <p className="text-white/70 text-sm mt-2">La V3 deja preparado el modelo comercial: demo limitada, Pro individual y Empresa con personalización.</p>
+        </div>
+
+        {plans.map((item) => {
+          const Icon = item.icon;
+          const active = plan === item.id;
+          return (
+            <section key={item.id} className={classNames("bg-white border rounded-[1.5rem] p-5 shadow-sm", active ? "border-yellow-300" : "border-slate-100")}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={classNames("w-11 h-11 rounded-2xl flex items-center justify-center", active ? "bg-[#FFC928] text-[#071E3D]" : "bg-slate-100 text-[#071E3D]")}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900">{item.name}</h3>
+                    <p className="text-sm text-slate-500">{item.price}</p>
+                  </div>
+                </div>
+                {active && <StatusBadge status="Activo" />}
+              </div>
+              <p className="text-sm text-slate-600 mt-4">{item.text}</p>
+              <div className="mt-4 space-y-2">
+                {item.features.map((feature) => (
+                  <div key={feature} className="flex items-center gap-2 text-sm text-slate-700">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    {feature}
+                  </div>
+                ))}
+              </div>
+              <Button variant={active ? "soft" : "gold"} onClick={() => setPlan(item.id)} className="w-full mt-4">
+                {active ? "Plan seleccionado" : `Cambiar a ${item.name}`}
+              </Button>
+            </section>
+          );
+        })}
+        <Button variant="soft" onClick={() => setScreen("settings")} className="w-full"><RotateCcw className="w-4 h-4" />Restaurar compra</Button>
+      </div>
+    </div>
+  );
+}
+
+function SettingsScreen({ plan, setPlan, setScreen }) {
+  return (
+    <div className="pb-28">
+      <Header title="Configuración" subtitle="Empresa, informe, seguridad y versión" onBack={() => setScreen("home")} right={<Settings className="w-6 h-6 text-yellow-300" />} />
+      <div className="p-5 space-y-5">
+        <Section title="Suscripción" number="01">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-slate-500">Plan actual</p>
+              <h3 className="font-black text-slate-900">{plan === "empresa" ? "Empresa" : plan === "pro" ? "Pro" : "Demo"}</h3>
+            </div>
+            <Button variant="gold" onClick={() => setScreen("plan")} className="px-3 py-2 text-sm"><Crown className="w-4 h-4" />Ver planes</Button>
+          </div>
+          {plan === "demo" && <ProLockCard onUpgrade={() => setScreen("plan")} compact />}
+        </Section>
+
+        <Section title="Empresa" number="02">
+          <SettingsRow icon={Building2} title="Datos de empresa" text="Nombre comercial, CIF/NIF, teléfono, email y web." />
+          <SettingsRow icon={ImageIcon} title="Logo en informe" text={plan === "empresa" ? "Disponible para marca de empresa." : "Disponible en plan Empresa."} locked={plan !== "empresa"} />
+          <SettingsRow icon={Users} title="Técnicos múltiples" text={plan === "empresa" ? "Preparado para equipos." : "Función de plan Empresa."} locked={plan !== "empresa"} />
+        </Section>
+
+        <Section title="Informe" number="03">
+          <SettingsRow icon={FileText} title="Formato resumido o técnico" text="El informe puede salir en versión resumida o completa." />
+          <SettingsRow icon={Camera} title="Fotos y ayudas visuales" text="Anexo fotográfico y fichas técnicas por defecto." />
+          <SettingsRow icon={Download} title="Exportar PDF completo" text={plan === "demo" ? "Bloqueado en Demo." : "Disponible en el plan actual."} locked={plan === "demo"} />
+        </Section>
+
+        <Section title="Seguridad y versión" number="04">
+          <SettingsRow icon={LockKeyhole} title="PIN de acceso" text="Preparado para proteger inspecciones locales." />
+          <SettingsRow icon={Store} title="Play Store" text="IsiVolt Pro Inspect V1.0.0 · Base técnica REBT 2002 V1." />
+          <Button variant="soft" onClick={() => setPlan("demo")} className="w-full"><RotateCcw className="w-4 h-4" />Volver a Demo</Button>
+        </Section>
+      </div>
+    </div>
+  );
+}
+
+function SettingsRow({ icon: Icon, title, text, locked = false }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 border border-slate-100 p-3">
+      <div className={classNames("w-10 h-10 rounded-2xl flex items-center justify-center", locked ? "bg-slate-200 text-slate-500" : "bg-white text-[#071E3D]")}>
+        {locked ? <LockKeyhole className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-slate-900">{title}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function ProLockCard({ onUpgrade, compact = false }) {
+  return (
+    <div className={classNames("bg-yellow-50 border border-yellow-200 rounded-[1.5rem] p-4", compact && "mt-3")}>
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-2xl bg-[#FFC928] text-[#071E3D] flex items-center justify-center">
+          <LockKeyhole className="w-5 h-5" />
+        </div>
+        <div className="flex-1">
+          <p className="font-black text-yellow-900">Función Pro</p>
+          <p className="text-sm text-yellow-800 mt-1">Exportar informes PDF completos, quitar marca de agua y usar inspecciones ilimitadas estará incluido en IsiVolt Pro.</p>
+          {!compact && <Button variant="gold" onClick={onUpgrade} className="mt-3 w-full">Ver planes</Button>}
         </div>
       </div>
     </div>
@@ -1079,7 +1259,7 @@ function IRVEForm({ data, update }) {
         <Field label="Potencia IRVE kW" value={data.irvePowerKW || ""} onChange={(v) => update("irvePowerKW", v)} />
         <Select label="Modo carga" value={data.irveMode || "3"} onChange={(v) => update("irveMode", v)} options={["1", "2", "3", "4"]} />
         <Field label="Lux zona" value={data.irveLux || ""} onChange={(v) => update("irveLux", v)} />
-        <Field label="Caida tension %" value={data.irveVoltageDrop || ""} onChange={(v) => update("irveVoltageDrop", v)} />
+        <Field label="Caida tensión %" value={data.irveVoltageDrop || ""} onChange={(v) => update("irveVoltageDrop", v)} />
       </div>
       <p className="text-xs text-slate-500">Validaciones previstas: lux 20/50, caida &lt;= 5%, clase diferencial A/B, corte omnipolar y Uc exterior &lt;= 24 V.</p>
     </div>
@@ -1171,7 +1351,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen })
   }, {});
   const [helpItem, setHelpItem] = useState(null);
   const [showPending, setShowPending] = useState(false);
-  const [checkMode, setCheckMode] = useState("tecnico");
+  const [checkMode, setCheckMode] = useState("técnico");
 
   const setStatus = (item, status) => {
     setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), item, status, severity: ["DL", "DG", "DMG"].includes(status) ? status : null } }));
@@ -1187,7 +1367,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen })
         <div className="bg-white border border-slate-100 rounded-[1.5rem] p-2 grid grid-cols-3 gap-2 shadow-sm">
           {[
             ["rapido", "Rápido"],
-            ["tecnico", "Técnico"],
+            ["técnico", "Técnico"],
             ["experto", "Experto"],
           ].map(([id, label]) => (
             <button key={id} type="button" onClick={() => setCheckMode(id)} className={classNames("rounded-2xl py-2 text-sm font-black", checkMode === id ? "bg-[#071E3D] text-white" : "text-slate-500")}>{label}</button>
@@ -1222,7 +1402,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen })
                       <button key={s} type="button" onClick={() => setStatus(item, s)} className={classNames("rounded-xl border py-2 text-[11px] font-black", response.status === s ? statusClass(s) : "bg-white border-slate-200 text-slate-600")}>{s}</button>
                     ))}
                   </div>
-                  {checkMode !== "rapido" && <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder="Observaciones, zona, detalle del defecto..." className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />}
+                  {checkMode !== "rapido" && <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder="Observaciónes, zona, detalle del defecto..." className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />}
                   <div className="grid grid-cols-1 gap-2 mt-3">
                     <Button variant="soft" onClick={() => setHelpItem(item)} className="text-sm py-2 justify-start"><BookOpen className="w-4 h-4" />Ver explicación técnica</Button>
                     {checkMode !== "rapido" && (
@@ -1300,7 +1480,7 @@ function ListCard({ title, items, danger }) {
     <div className="bg-white rounded-3xl p-4 border border-slate-100">
       <h3 className={classNames("font-black", danger ? "text-red-700" : "text-slate-900")}>{title}</h3>
       <ul className="mt-2 space-y-2 text-sm text-slate-600">
-        {items.length === 0 && <li>Sin datos especificos todavia.</li>}
+        {items.length === 0 && <li>Sin datos especificos todavía.</li>}
         {items.map((x, i) => <li key={i}>{typeof x === "string" ? x : x.text}</li>)}
       </ul>
     </div>
@@ -1327,7 +1507,7 @@ function MeasurementsScreen({ measurements, setMeasurements, setScreen }) {
             <Field label="Aislamiento Mohm" value={measurements.insulation || ""} onChange={(v) => update("insulation", v)} />
           </div>
           <div className="rounded-3xl bg-slate-50 border border-slate-100 p-4">
-            <p className="text-sm font-bold text-slate-500">Tension de contacto calculada</p>
+            <p className="text-sm font-bold text-slate-500">Tensión de contacto calculada</p>
             <p className="text-3xl font-black text-[#071E3D] mt-1">{vc ?? "-"} V</p>
             <p className="text-xs text-slate-500 mt-2">Seco &lt;= 50 V - mojado/exterior &lt;= 24 V</p>
           </div>
@@ -1337,7 +1517,7 @@ function MeasurementsScreen({ measurements, setMeasurements, setScreen }) {
   );
 }
 
-function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft = false, variant = "tecnico" }) {
+function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft = false, variant = "técnico" }) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const page = { width: 210, height: 297, margin: 15 };
   const navy = [7, 30, 61];
@@ -1356,7 +1536,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   const today = new Date().toLocaleDateString("es-ES");
   const installationType = (data.installationTypes || []).map((type) => type.replaceAll("_", " ")).join(", ") || "Sin indicar";
   const inspectionType = data.inspectionType ? data.inspectionType.charAt(0).toUpperCase() + data.inspectionType.slice(1) : "Sin indicar";
-  const fileName = `isivolt-${draft ? "borrador" : "informe"}-${variant}-${(data.name || "inspeccion").toLowerCase().replace(/[^a-z0-9]+/g, "-") || "inspeccion"}.pdf`;
+  const fileName = `isivolt-${draft ? "borrador" : "informe"}-${variant}-${(data.name || "inspección").toLowerCase().replace(/[^a-z0-9]+/g, "-") || "inspección"}.pdf`;
 
   const footer = () => {
     doc.setDrawColor(...gold);
@@ -1412,20 +1592,20 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   doc.setTextColor(...navy);
   doc.setFontSize(34);
   doc.text(draft ? "Borrador de" : "Informe de", page.margin, 82);
-  doc.text("Inspeccion Electrica", page.margin, 96);
+  doc.text("Inspección Electrica", page.margin, 96);
   doc.setTextColor(217, 154, 0);
   doc.setFontSize(22);
-  doc.text("de Baja Tension", page.margin, 109);
+  doc.text("de Baja Tensión", page.margin, 109);
   autoTable(doc, {
     startY: 128,
     margin: { left: page.margin, right: 105 },
     theme: "plain",
     styles: { fontSize: 11, cellPadding: 2.5, textColor: navy },
     body: [
-      ["Instalacion", data.name || "Sin indicar"],
-      ["Direccion", data.address || "Sin indicar"],
+      ["Instalación", data.name || "Sin indicar"],
+      ["Dirección", data.address || "Sin indicar"],
       ["Reglamento", data.regulation],
-      ["Tipo de inspeccion", inspectionType],
+      ["Tipo de inspección", inspectionType],
       ["Fecha", today],
     ],
   });
@@ -1458,7 +1638,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: y,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Instalacion inspeccionada", data.name || "Sin indicar"],
+      ["Instalación inspecciónada", data.name || "Sin indicar"],
       ["Tipo", installationType],
       ["Potencia instalada", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
       ["Esquema de distribucion", data.distributionSystem],
@@ -1469,10 +1649,10 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Defectos leves", dl],
       ["Defectos graves", dg],
       ["Defectos muy graves", dmg],
-      ["Estado de cumplimentacion", `${completion.percent}% (${completion.completed}/${completion.total})`],
+      ["Estado de cumplimentación", `${completion.percent}% (${completion.completed}/${completion.total})`],
       ["Puntos pendientes", completion.pending],
       ["Dictamen final", verdict.label],
-      ["Plazo de subsanacion", verdict.label === "CONDICIONADA" ? "6 meses" : verdict.label === "NEGATIVA" ? "Inmediato" : "No procede"],
+      ["Plazo de subsanación", verdict.label === "CONDICIONADA" ? "6 meses" : verdict.label === "NEGATIVA" ? "Inmediato" : "No procede"],
     ],
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
@@ -1484,21 +1664,21 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: y,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Nombre de la instalacion", data.name || "Sin indicar"],
-      ["Direccion", data.address || "Sin indicar"],
+      ["Nombre de la instalación", data.name || "Sin indicar"],
+      ["Dirección", data.address || "Sin indicar"],
       ["Localidad", data.city || "Sin indicar"],
       ["Provincia", data.province || "Sin indicar"],
       ["N. pedido", data.orderNumber || "Sin indicar"],
       ["CUPS", data.cups || "Sin indicar"],
       ["Potencia", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
       ["Reglamento", data.regulation],
-      ["Tipo de instalacion", installationType],
-      ["Tipo de inspeccion", inspectionType],
+      ["Tipo de instalación", installationType],
+      ["Tipo de inspección", inspectionType],
       ["Esquema TT/TN/IT", data.distributionSystem],
-      ["Proyecto", data.hasProject ? "Si" : "No indicado"],
-      ["Esquema unifilar", data.hasSingleLine ? "Si" : "No indicado"],
-      ["CIE / Boletin", data.hasCertificate ? "Si" : "No indicado"],
-      ["Acta anterior", data.hasPreviousReport ? "Si" : "No indicado"],
+      ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
+      ["Esquema unifilar", data.hasSingleLine ? "Sí" : "No indicado"],
+      ["CIE / Boletín", data.hasCertificate ? "Sí" : "No indicado"],
+      ["Acta anterior", data.hasPreviousReport ? "Sí" : "No indicado"],
     ],
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
@@ -1512,15 +1692,15 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     head: [["Normativa aplicada"]],
     body: [
       ["REBT 2002 - RD 842/2002"],
-      ["ITC-BT-04 - Documentacion"],
-      ["ITC-BT-13 - Caja General de Proteccion"],
-      ["ITC-BT-14 - Linea General de Alimentacion"],
-      ["ITC-BT-15 - Derivacion Individual"],
-      ["ITC-BT-16 - Centralizacion de contadores"],
+      ["ITC-BT-04 - Documentación"],
+      ["ITC-BT-13 - Caja General de Protección"],
+      ["ITC-BT-14 - Línea General de Alimentación"],
+      ["ITC-BT-15 - Derivación Individual"],
+      ["ITC-BT-16 - Centralización de contadores"],
       ["ITC-BT-17 - Cuadros"],
-      ["ITC-BT-18 - Puesta a tierra"],
-      ["ITC-BT-24 - Proteccion contra contactos"],
-      ["ITC-BT-28 - Publica concurrencia"],
+      ["ITC-BT-18 - Puesta a Tierra"],
+      ["ITC-BT-24 - Protección contra contactos"],
+      ["ITC-BT-28 - Pública concurrencia"],
     ],
     headStyles: { fillColor: navy },
     styles: { fontSize: 10, cellPadding: 3 },
@@ -1528,7 +1708,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 8,
     margin: { left: page.margin, right: page.margin },
-    head: [["Bloques inspeccionados"]],
+    head: [["Bloques inspecciónados"]],
     body: blocks.map((b) => [`Bloque ${b.code} - ${b.title}`]),
     headStyles: { fillColor: navy },
     styles: { fontSize: 10, cellPadding: 3 },
@@ -1538,7 +1718,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   autoTable(doc, {
     startY: y,
     margin: { left: page.margin, right: page.margin },
-    head: [["Codigo", "Punto revisado", "Resultado", "Observacion"]],
+    head: [["Código", "Punto revisado", "Resultado", "Observación"]],
     body: (responseList.length ? responseList : loadedPoints.map((item) => ({ item, status: "Sin revisar", observation: "" }))).map((r) => [
       r.item.id,
       r.item.title,
@@ -1551,7 +1731,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     didDrawPage: () => footer(),
   });
 
-  y = addPage("Estado de cumplimentacion");
+  y = addPage("Estado de cumplimentación");
   autoTable(doc, {
     startY: y,
     margin: { left: page.margin, right: page.margin },
@@ -1568,7 +1748,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 8,
     margin: { left: page.margin, right: page.margin },
-    head: [["Codigo", "Punto pendiente"]],
+    head: [["Código", "Punto pendiente"]],
     body: completion.pendingItems.length ? completion.pendingItems.map((item) => [item.id, item.title]) : [["-", "No hay puntos pendientes"]],
     headStyles: { fillColor: navy },
     styles: { fontSize: 9, cellPadding: 3 },
@@ -1578,14 +1758,14 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   autoTable(doc, {
     startY: y,
     margin: { left: page.margin, right: page.margin },
-    head: [["Codigo", "Defecto", "Gravedad", "Referencia"]],
+    head: [["Código", "Defecto", "Gravedad", "Referencia"]],
     body: defects.length ? defects.map((r) => [r.item.id, r.item.title, r.status, r.item.reference]) : [["-", "No hay defectos registrados", "-", "-"]],
     headStyles: { fillColor: navy },
     styles: { fontSize: 9, cellPadding: 3 },
   });
 
-  if (variant === "tecnico") defects.forEach((r, index) => {
-    y = addPage(`Defecto n. ${String(index + 1).padStart(2, "0")}`);
+  if (variant === "técnico") defects.forEach((r, index) => {
+    y = addPage(`Defecto nº ${String(index + 1).padStart(2, "0")}`);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(...navy);
@@ -1597,13 +1777,13 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
         ["Bloque", getBlock(r.item.blockId)?.title || r.item.blockId],
         ["Referencia", r.item.reference],
         ["Gravedad", r.status],
-        ["Punto inspeccionado", r.item.question],
+        ["Punto inspecciónado", r.item.question],
         ["Criterio favorable", r.item.favorable],
         ["Zona afectada", "Pendiente de detallar"],
-        ["Observacion del inspector", r.observation || "Sin observacion especifica registrada"],
+        ["Observación del inspector", r.observation || "Sin observacion especifica registrada"],
         ["Medicion asociada", "Sin medicion asociada"],
-        ["Conclusion", "El punto inspeccionado no cumple el criterio favorable indicado."],
-        ["Recomendacion", "Revisar, corregir y documentar la subsanacion antes de cerrar la inspeccion."],
+        ["Conclusion", "El punto inspecciónado no cumple el criterio favorable indicado."],
+        ["Recomendacion", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
       ],
       theme: "grid",
       styles: { fontSize: 9, cellPadding: 2.5 },
@@ -1643,11 +1823,11 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     styles: { fontSize: 8, cellPadding: 2.5 },
   });
 
-  if (variant === "tecnico") {
-    y = addPage("Anexo fotografico");
+  if (variant === "técnico") {
+    y = addPage("Anexo fotográfico");
     const photoGroups = defects.length ? defects : [{ item: { id: "SIN.DEFECTOS", title: "Sin defectos registrados" } }];
     photoGroups.forEach((r, index) => {
-      if (y > 230) y = addPage("Anexo fotografico");
+      if (y > 230) y = addPage("Anexo fotográfico");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
       doc.setTextColor(...navy);
@@ -1658,7 +1838,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.text(`Foto ${index * 2 + 1} - Vista general`, page.margin + 5, y + 27);
-      doc.text(`Foto ${index * 2 + 2} - Detalle tecnico`, 118, y + 27);
+      doc.text(`Foto ${index * 2 + 2} - Detalle técnico`, 118, y + 27);
       y += 54;
     });
   }
@@ -1678,8 +1858,8 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Defectos leves", dl],
       ["Defectos graves", dg],
       ["Defectos muy graves", dmg],
-      ["Plazo recomendado", verdict.label === "CONDICIONADA" ? "6 meses para la subsanacion de defectos graves." : verdict.label === "NEGATIVA" ? "Correccion inmediata antes de puesta en servicio." : "No procede."],
-      ["Conclusion", verdict.label === "FAVORABLE" ? "La instalacion puede considerarse favorable con los datos registrados." : "La instalacion no puede considerarse favorable hasta la correccion de los defectos indicados en este informe."],
+      ["Plazo recomendado", verdict.label === "CONDICIONADA" ? "6 meses para la subsanación de defectos graves." : verdict.label === "NEGATIVA" ? "Corrección inmediata antes de puesta en servicio." : "No procede."],
+      ["Conclusion", verdict.label === "FAVORABLE" ? "La instalación puede considerarse favorable con los datos registrados." : "La instalación no puede considerarse favorable hasta la corrección de los defectos indicados en este informe."],
     ],
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
@@ -1728,10 +1908,10 @@ async function exportRenderedReportPdf({ fileName = "isivolt-informe.pdf" } = {}
   pdf.save(fileName);
 }
 
-function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen, reportMode = "final" }) {
+function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen, reportMode = "final", plan = "demo" }) {
   const [printError, setPrintError] = useState("");
   const [isExporting, setIsExporting] = useState(false);
-  const [reportVariant, setReportVariant] = useState("tecnico");
+  const [reportVariant, setReportVariant] = useState("técnico");
   const verdict = calculateVerdict(responses);
   const responseList = Object.values(responses).filter((r) => r.status);
   const defects = responseList.filter((r) => ["DL", "DG", "DMG"].includes(r.status));
@@ -1752,22 +1932,26 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
         window.focus();
         window.print();
       } catch (error) {
-        setPrintError("El navegador ha bloqueado la impresion. Usa Ctrl+P o el menu del navegador para guardar como PDF.");
+        setPrintError("El navegador ha bloqueado la impresiónº Usa Ctrl+P o el menú del navegador para guardar como PDF.");
       }
     }, 80);
   };
   const downloadFinalPdf = async () => {
+    if (plan === "demo") {
+      setPrintError("La exportación PDF completa está bloqueada en Demo. Actualiza a Pro para generar el informe final.");
+      return;
+    }
     if (reportMode !== "draft" && !completion.isComplete) {
-      setPrintError(`No se puede finalizar todavia. Faltan ${completion.pending} puntos por rellenar.`);
+      setPrintError(`No se puede finalizar todavía. Faltan ${completion.pending} puntos por rellenar.`);
       return;
     }
     setPrintError("");
     setIsExporting(true);
     try {
-      const slug = (data.name || "inspeccion").toLowerCase().replace(/[^a-z0-9]+/g, "-") || "inspeccion";
+      const slug = (data.name || "inspección").toLowerCase().replace(/[^a-z0-9]+/g, "-") || "inspección";
       await exportRenderedReportPdf({ fileName: `isivolt-${reportMode === "draft" ? "borrador" : "informe"}-${reportVariant}-${slug}.pdf` });
     } catch (error) {
-      setPrintError("No se ha podido generar el PDF con el mismo formato visual. Revisa que el informe este cargado y vuelve a intentarlo.");
+      setPrintError("No se ha podido generar el PDF con el mismo formato visual. Revisa que el informe esté cargado y vuelve a intentarlo.");
     } finally {
       setIsExporting(false);
     }
@@ -1787,7 +1971,7 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
         <div className="bg-white border border-slate-100 rounded-[1.5rem] p-2 grid grid-cols-2 gap-2 shadow-sm print:hidden">
           {[
             ["resumen", "Informe resumido"],
-            ["tecnico", "Técnico completo"],
+            ["técnico", "Técnico completo"],
           ].map(([id, label]) => (
             <button key={id} type="button" onClick={() => setReportVariant(id)} className={classNames("rounded-2xl py-2 text-sm font-black", reportVariant === id ? "bg-[#071E3D] text-white" : "text-slate-500")}>{label}</button>
           ))}
@@ -1806,19 +1990,19 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <div className="report-cover-body">
                 <div>
                   <p className="report-kicker">Informe de</p>
-                  <h1>Inspeccion Electrica</h1>
-                  <h2>de Baja Tension</h2>
+                  <h1>Inspección Electrica</h1>
+                  <h2>de Baja Tensión</h2>
                 </div>
                 <div className="report-cover-grid">
                   <div className="report-cover-data">
-                    <CoverData icon={Home} label="Instalacion" value={data.name || "Sin indicar"} />
-                    <CoverData icon={Layers} label="Direccion" value={data.address || "Sin indicar"} />
+                    <CoverData icon={Home} label="Instalación" value={data.name || "Sin indicar"} />
+                    <CoverData icon={Layers} label="Dirección" value={data.address || "Sin indicar"} />
                     <CoverData icon={FileText} label="Reglamento" value={data.regulation} />
-                    <CoverData icon={Gauge} label="Tipo de inspeccion" value={inspectionType} />
+                    <CoverData icon={Gauge} label="Tipo de inspección" value={inspectionType} />
                     <CoverData icon={ClipboardCheck} label="Fecha" value={today} />
                   </div>
                   <div className="report-result-card">
-                    <p>Resultado de la inspeccion</p>
+                    <p>Resultado de la inspección</p>
                     <div className={classNames("report-result-badge", verdict.label.toLowerCase())}>
                       <AlertTriangle className="w-8 h-8" />
                       {verdict.label}
@@ -1841,7 +2025,7 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
                 <ProgressCard completion={completion} onReviewPending={() => setPrintError(`Faltan puntos por rellenar: ${completion.pendingItems.slice(0, 6).map((item) => item.id).join(", ")}${completion.pendingItems.length > 6 ? "..." : ""}`)} />
               </div>
               <div className="report-summary-grid">
-                <SummaryBox label="Instalacion inspeccionada" value={data.name || "Sin indicar"} />
+                <SummaryBox label="Instalación inspecciónada" value={data.name || "Sin indicar"} />
                 <SummaryBox label="Tipo" value={installationType} />
                 <SummaryBox label="Potencia instalada" value={data.powerKW ? `${data.powerKW} kW` : "Sin indicar"} />
                 <SummaryBox label="Esquema de distribucion" value={data.distributionSystem} />
@@ -1858,28 +2042,28 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <div className={classNames("report-verdict-panel", verdict.label.toLowerCase())}>
                 <span>Dictamen final</span>
                 <strong>{verdict.label}</strong>
-                <p>{verdict.label === "FAVORABLE" ? "Sin plazo de subsanacion." : verdict.label === "CONDICIONADA" ? "Plazo de subsanacion recomendado: 6 meses." : "La instalacion no puede entrar en servicio hasta corregir los defectos muy graves."}</p>
+                <p>{verdict.label === "FAVORABLE" ? "Sin plazo de subsanación." : verdict.label === "CONDICIONADA" ? "Plazo de subsanación recomendado: 6 meses." : "La instalación no puede entrar en servicio hasta corregir los defectos muy graves."}</p>
               </div>
             </ReportPage>
 
             <ReportPage title="Datos generales" icon={FileText}>
               <ReportTable
                 rows={[
-                  ["Nombre de la instalacion", data.name || "Sin indicar"],
-                  ["Direccion", data.address || "Sin indicar"],
+                  ["Nombre de la instalación", data.name || "Sin indicar"],
+                  ["Dirección", data.address || "Sin indicar"],
                   ["Localidad", data.city || "Sin indicar"],
                   ["Provincia", data.province || "Sin indicar"],
                   ["N. pedido", data.orderNumber || "Sin indicar"],
                   ["CUPS", data.cups || "Sin indicar"],
                   ["Potencia", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
                   ["Reglamento", data.regulation],
-                  ["Tipo de instalacion", installationType],
-                  ["Tipo de inspeccion", inspectionType],
+                  ["Tipo de instalación", installationType],
+                  ["Tipo de inspección", inspectionType],
                   ["Esquema TT/TN/IT", data.distributionSystem],
-                  ["Proyecto", data.hasProject ? "Si" : "No indicado"],
-                  ["Esquema unifilar", data.hasSingleLine ? "Si" : "No indicado"],
-                  ["CIE / Boletin", data.hasCertificate ? "Si" : "No indicado"],
-                  ["Acta anterior", data.hasPreviousReport ? "Si" : "No indicado"],
+                  ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
+                  ["Esquema unifilar", data.hasSingleLine ? "Sí" : "No indicado"],
+                  ["CIE / Boletín", data.hasCertificate ? "Sí" : "No indicado"],
+                  ["Acta anterior", data.hasPreviousReport ? "Sí" : "No indicado"],
                 ]}
               />
             </ReportPage>
@@ -1888,18 +2072,18 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <div className="report-norm-grid">
                 {[
                   "REBT 2002 - RD 842/2002",
-                  "ITC-BT-04 - Documentacion",
-                  "ITC-BT-13 - Caja General de Proteccion",
-                  "ITC-BT-14 - Linea General de Alimentacion",
-                  "ITC-BT-15 - Derivacion Individual",
-                  "ITC-BT-16 - Centralizacion de contadores",
+                  "ITC-BT-04 - Documentación",
+                  "ITC-BT-13 - Caja General de Protección",
+                  "ITC-BT-14 - Línea General de Alimentación",
+                  "ITC-BT-15 - Derivación Individual",
+                  "ITC-BT-16 - Centralización de contadores",
                   "ITC-BT-17 - Cuadros",
-                  "ITC-BT-18 - Puesta a tierra",
-                  "ITC-BT-24 - Proteccion contra contactos",
-                  "ITC-BT-28 - Publica concurrencia",
+                  "ITC-BT-18 - Puesta a Tierra",
+                  "ITC-BT-24 - Protección contra contactos",
+                  "ITC-BT-28 - Pública concurrencia",
                 ].map((item) => <ReportPill key={item} text={item} />)}
               </div>
-              <h3 className="report-subtitle">Bloques inspeccionados</h3>
+              <h3 className="report-subtitle">Bloques inspecciónados</h3>
               <div className="report-block-list">
                 {blocks.map((b) => <ReportPill key={b.id} text={`Bloque ${b.code} - ${b.title}`} checked />)}
               </div>
@@ -1909,7 +2093,7 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <CompactPointsTable rows={responseList.length ? responseList : loadedPoints.slice(0, 18).map((item) => ({ item, status: "Sin revisar", observation: "" }))} />
             </ReportPage>
 
-            <ReportPage title="Estado de cumplimentacion" icon={ClipboardCheck}>
+            <ReportPage title="Estado de cumplimentación" icon={ClipboardCheck}>
               <ReportTable rows={[
                 ["Porcentaje completado", `${completion.percent}%`],
                 ["Puntos revisados", `${completion.completed} / ${completion.total}`],
@@ -1928,7 +2112,7 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               {defects.length === 0 ? <EmptyReportText text="No hay defectos registrados." /> : <DefectSummaryTable defects={defects} />}
             </ReportPage>
 
-            {reportVariant === "tecnico" && (defects.length === 0 ? (
+            {reportVariant === "técnico" && (defects.length === 0 ? (
               <ReportPage title="Fichas de defectos" icon={AlertTriangle}>
                 <EmptyReportText text="No se generan fichas individuales porque no hay defectos registrados." />
               </ReportPage>
@@ -1940,13 +2124,13 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
               <MeasurementsReportTable measurements={measurements} />
             </ReportPage>
 
-            {reportVariant === "tecnico" && (
-              <ReportPage title="Anexo fotografico" icon={Camera}>
+            {reportVariant === "técnico" && (
+              <ReportPage title="Anexo fotográfico" icon={Camera}>
                 <PhotoAnnex defects={defects} />
               </ReportPage>
             )}
 
-            <ReportPage title="Observaciones generales" icon={FileText}>
+            <ReportPage title="Observaciónes generales" icon={FileText}>
               <div className="report-note-box">
                 {data.notes || "Sin observaciones generales registradas."}
               </div>
@@ -1962,8 +2146,8 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
                 <p><b>Defectos leves:</b> {dl}</p>
                 <p><b>Defectos graves:</b> {dg}</p>
                 <p><b>Defectos muy graves:</b> {dmg}</p>
-                <p><b>Plazo recomendado:</b> {verdict.label === "CONDICIONADA" ? "6 meses para la subsanacion de defectos graves." : verdict.label === "NEGATIVA" ? "Correccion inmediata antes de puesta en servicio." : "No procede."}</p>
-                <p><b>Conclusion:</b> {verdict.label === "FAVORABLE" ? "La instalacion puede considerarse favorable con los datos registrados." : "La instalacion no puede considerarse favorable hasta la correccion de los defectos indicados en este informe."}</p>
+                <p><b>Plazo recomendado:</b> {verdict.label === "CONDICIONADA" ? "6 meses para la subsanación de defectos graves." : verdict.label === "NEGATIVA" ? "Corrección inmediata antes de puesta en servicio." : "No procede."}</p>
+                <p><b>Conclusion:</b> {verdict.label === "FAVORABLE" ? "La instalación puede considerarse favorable con los datos registrados." : "La instalación no puede considerarse favorable hasta la corrección de los defectos indicados en este informe."}</p>
               </div>
               <div className="report-signatures">
                 <SignatureLine label="Firma del inspector" />
@@ -1976,9 +2160,10 @@ function ReportScreen({ data, selectedBlocks, responses, measurements, setScreen
 
         <div className="print-actions print:hidden">
           {printError && <p className="print-error">{printError}</p>}
-          <Button onClick={downloadFinalPdf} className="w-full"><Download className="w-5 h-5" />{isExporting ? "Generando PDF..." : reportMode === "draft" ? "Descargar borrador PDF" : "Finalizar / guardar PDF"}</Button>
+          {plan === "demo" && <ProLockCard onUpgrade={() => setScreen("plan")} />}
+          <Button onClick={downloadFinalPdf} className="w-full mt-3"><Download className="w-5 h-5" />{isExporting ? "Generando PDF..." : plan === "demo" ? "Exportar PDF completo (Pro)" : reportMode === "draft" ? "Descargar borrador PDF" : "Finalizar / guardar PDF"}</Button>
           <Button onClick={requestPrint} variant="soft" className="w-full mt-3"><Download className="w-5 h-5" />Imprimir desde navegador</Button>
-          <p>Si el navegador bloquea el dialogo, pulsa <b>Ctrl+P</b> y elige "Guardar como PDF".</p>
+          <p>Si el navegador bloquea el diálogo, pulsa <b>Ctrl+P</b> y elige "Guardar como PDF".</p>
         </div>
       </div>
     </div>
@@ -2067,7 +2252,7 @@ function ReportSection({ title, children }) {
 }
 
 function ReportPill({ text }) {
-  return <div className="report-pill"><span>✓</span>{text}</div>;
+  return <div className="report-pill"><span>âœ“</span>{text}</div>;
 }
 
 function ReportPoint({ r }) {
@@ -2085,7 +2270,7 @@ function DefectSheet({ r }) {
         </div>
         <AlertTriangle className="w-7 h-7 text-orange-700" />
       </div>
-      <p className="text-sm text-slate-700 mt-3"><b>Observacion:</b> {r.observation || r.item.question}</p>
+      <p className="text-sm text-slate-700 mt-3"><b>Observación:</b> {r.observation || r.item.question}</p>
       <div className="mt-3 bg-white/70 border border-dashed border-orange-200 rounded-2xl p-5 text-center text-slate-400"><ImageIcon className="w-7 h-7 mx-auto mb-2" />Fotos asociadas al defecto</div>
     </div>
   );
@@ -2096,10 +2281,10 @@ function CompactPointsTable({ rows }) {
     <table className="report-compact-table">
       <thead>
         <tr>
-          <th>Codigo</th>
+          <th>Código</th>
           <th>Punto revisado</th>
           <th>Resultado</th>
-          <th>Observacion</th>
+          <th>Observación</th>
         </tr>
       </thead>
       <tbody>
@@ -2121,7 +2306,7 @@ function DefectSummaryTable({ defects }) {
     <table className="report-compact-table">
       <thead>
         <tr>
-          <th>Codigo</th>
+          <th>Código</th>
           <th>Defecto</th>
           <th>Gravedad</th>
           <th>Referencia</th>
@@ -2143,7 +2328,7 @@ function DefectSummaryTable({ defects }) {
 
 function DefectReportPage({ r, index }) {
   return (
-    <ReportPage title={`Defecto n. ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
+    <ReportPage title={`Defecto nº ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
       <div className="defect-report-card">
         <div className="defect-report-head">
           <span className={classNames("status-chip", r.status.toLowerCase())}>{r.status} - {r.status === "DL" ? "Defecto leve" : r.status === "DG" ? "Defecto grave" : "Defecto muy grave"}</span>
@@ -2153,17 +2338,17 @@ function DefectReportPage({ r, index }) {
         <ReportTable rows={[
           ["Bloque", getBlock(r.item.blockId)?.title || r.item.blockId],
           ["Referencia", r.item.reference],
-          ["Punto inspeccionado", r.item.question],
+          ["Punto inspecciónado", r.item.question],
           ["Criterio favorable", r.item.favorable],
           ["Zona afectada", r.zone || "Pendiente de detallar"],
-          ["Observacion del inspector", r.observation || "Sin observacion especifica registrada"],
+          ["Observación del inspector", r.observation || "Sin observacion especifica registrada"],
           ["Medicion asociada", r.measurement || "Sin medicion asociada"],
-          ["Conclusion", "El punto inspeccionado no cumple el criterio favorable indicado."],
-          ["Recomendacion", "Revisar, corregir y documentar la subsanacion antes de cerrar la inspeccion."],
+          ["Conclusion", "El punto inspecciónado no cumple el criterio favorable indicado."],
+          ["Recomendacion", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
         ]} />
         <div className="defect-help-grid">
           <div>
-            <h4>Criterios tecnicos</h4>
+            <h4>Criterios técnicos</h4>
             <ul>{(r.item.help?.criteria || [r.item.favorable]).map((item) => <li key={item}>{item}</li>)}</ul>
           </div>
           <div className="visual-placeholder">
@@ -2238,7 +2423,7 @@ function PhotoAnnex({ defects }) {
           <h3>{r.item.id} - {r.item.title}</h3>
           <div className="photo-grid">
             <PhotoBox label={`Foto ${index * 2 + 1}`} text="Vista general" />
-            <PhotoBox label={`Foto ${index * 2 + 2}`} text="Detalle tecnico" />
+            <PhotoBox label={`Foto ${index * 2 + 2}`} text="Detalle técnico" />
           </div>
         </div>
       ))}
@@ -2272,6 +2457,7 @@ export default function IsiVoltProInspecciones() {
   const [screen, setScreen] = useState("home");
   const [showFinalReview, setShowFinalReview] = useState(false);
   const [reportMode, setReportMode] = useState("final");
+  const [plan, setPlan] = useState("demo");
   const [data, setData] = useState(INITIAL_INSPECTION);
   const [selectedBlocks, setSelectedBlocks] = useState(getRecommendedBlockIds(INITIAL_INSPECTION));
   const [responses, setResponses] = useState({});
@@ -2289,13 +2475,15 @@ export default function IsiVoltProInspecciones() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex justify-center print:block print:bg-white">
       <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white">
-        {screen === "home" && <HomeScreen setScreen={setScreen} />}
+        {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} />}
         {screen === "inspections" && <InspectionsScreen setScreen={setScreen} />}
+        {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} />}
+        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} />}
         {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} />}
         {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} />}
         {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} />}
         {screen === "measurements" && <MeasurementsScreen measurements={measurements} setMeasurements={setMeasurements} setScreen={setScreen} />}
-        {screen === "report" && <ReportScreen data={data} selectedBlocks={selectedBlocks} responses={responses} measurements={measurements} setScreen={setScreen} reportMode={reportMode} />}
+        {screen === "report" && <ReportScreen data={data} selectedBlocks={selectedBlocks} responses={responses} measurements={measurements} setScreen={setScreen} reportMode={reportMode} plan={plan} />}
         {screen !== "report" && <BottomNav screen={screen} setScreen={setScreen} defects={defects} onReportClick={openReportReview} />}
         {showFinalReview && (
           <FinalReviewModal
@@ -2313,3 +2501,8 @@ export default function IsiVoltProInspecciones() {
     </div>
   );
 }
+
+
+
+
+
