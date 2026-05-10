@@ -435,6 +435,9 @@ const CHECKLIST = [
     reference: "ITC-BT-13",
     favorable: "Libre y permanente acceso. Sin obstculos.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_01_estado_exterior_acceso_cgp.png"],
+    },
   },
   {
     id: "01.01.02",
@@ -455,6 +458,9 @@ const CHECKLIST = [
     reference: "ITC-BT-13",
     favorable: "Aerea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_03_ubicacion_montaje_cgp.png"],
+    },
   },
   {
     id: "01.01.04",
@@ -527,6 +533,9 @@ const CHECKLIST = [
     reference: "ITC-BT-14 pto. 3",
     favorable: "Minimo 10 mm2 Cu o 16 mm2 Al.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_10_seccion_minima_lga.png"],
+    },
   },
   {
     id: "01.01.11",
@@ -609,6 +618,9 @@ const CHECKLIST = [
     reference: "ITC-BT-15 pto. 3",
     favorable: "Conductores unipolares aislados, tensin asignada adecuada.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_18_derivacion_individual.png"],
+    },
   },
   {
     id: "01.01.19",
@@ -701,6 +713,9 @@ const CHECKLIST = [
     reference: "ITC-BT-16",
     favorable: "En local, armario o espacio adecuado y accesible.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_27_centralizacion_contadores.png"],
+    },
   },
   {
     id: "01.01.28",
@@ -741,6 +756,9 @@ const CHECKLIST = [
     reference: "ITC-BT-16 pto. 2.2.1",
     favorable: "Ventilacion suficiente y alumbrado de emergencia m2n. 5 lux.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_31_seguridad_cuarto_contadores.png"],
+    },
   },
   {
     id: "01.01.32",
@@ -821,6 +839,9 @@ const CHECKLIST = [
     reference: "ITC-BT-16 pto. 3",
     favorable: "Obligatorio para m2s de dos usuarios. Minimo 160 A.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_39_interruptor_general_maniobra.png"],
+    },
   },
   {
     id: "01.01.40",
@@ -831,6 +852,9 @@ const CHECKLIST = [
     reference: "ITC-BT-16",
     favorable: "Sin deterioros, calentamientos ni partes activas accesibles.",
     severity: "DG",
+    help: {
+      images: ["/help/01_01_40_puesta_tierra_continuidad.png"],
+    },
   },
 
   // BLOQUE 02 - Instalaciones Interiores y Protecciones
@@ -6760,9 +6784,11 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen })
                     </div>
                   )}
                 </div>
-              );
-            })}
-          </section>
+                  );
+                })}
+              </section>
+            ))}
+          </div>
         ))}
       </div>
       {helpItem && <HelpModal item={helpItem} onClose={() => setHelpItem(null)} />}
