@@ -3218,8 +3218,8 @@ const CHECKLIST = [
     title: "Tipo de esquema de instalacion",
     question: "Esta identificado correctamente el esquema usado segun ITC-BT-52?",
     reference: "ITC-BT-52",
-    favorable: "Debe identificarse correctamente el esquema usado segun la ITC-BT-52: vivienda, garaje comunitario, centralizacion, contador propio, etc.",
-    favorableCriteria: "Debe identificarse correctamente el esquema usado segun la ITC-BT-52: vivienda, garaje comunitario, centralizacion, contador propio, etc.",
+    favorable: "Debe identificarse correctamente el esquema ITC-BT-52 aplicable: 1a, 1b, 1c, 2, 3a, 3b, 4a o 4b.",
+    favorableCriteria: "Debe identificarse correctamente el esquema ITC-BT-52 aplicable: 1a, 1b, 1c, 2, 3a, 3b, 4a o 4b.",
     severity: "DG",
     defaultSeverity: "DG",
     requiresPhotoIfDefect: true,
@@ -3228,9 +3228,18 @@ const CHECKLIST = [
     help: {
       purpose: "Tipo de esquema de instalacion.",
       whatToCheck: ["Documentacion", "Ejecucion", "Protecciones", "Mediciones"],
-      criteria: ["Debe identificarse correctamente el esquema usado segun la ITC-BT-52: vivienda, garaje comunitario, centralizacion, contador propio, etc."],
+      criteria: ["Debe identificarse correctamente el esquema ITC-BT-52 aplicable: 1a, 1b, 1c, 2, 3a, 3b, 4a o 4b."],
       defects: ["No cumple el criterio favorable", "Falta documentacion o verificacion", "Ejecucion no coherente"],
-      images: ["13_01_03_esquema_irve.png"],
+      images: [
+        "13_01_03_esquema_1a_irve.png",
+        "13_01_03_esquema_1b_irve.png",
+        "13_01_03_esquema_1c_irve.png",
+        "13_01_03_esquema_2_irve.png",
+        "13_01_03_esquema_3a_irve.png",
+        "13_01_03_esquema_3b_irve.png",
+        "13_01_03_esquema_4a_irve.png",
+        "13_01_03_esquema_4b_irve.png",
+      ],
     },
   },
   {
@@ -5341,7 +5350,7 @@ function getRecommendedBlockIds(data) {
       "parking con cargadores",
       "garaje con recarga",
     ].some((term) => irveText.includes(term));
-  const irveInGarage = hasIrve && (data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => irveText.includes(term)));
+  const irveInGarage = hasIrve && (data.irveLocation === "garaje_comunitario" || data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => irveText.includes(term)));
   const isPublicConcurrencyTrigger =
     types.includes("publica_concurrencia") ||
     (data.hasExternalPublic && Boolean(publicUse)) ||
@@ -5424,7 +5433,7 @@ function getRequirements(data) {
     ["irve", "vehiculo electrico", "recarga", "cargador electrico", "save", "wallbox", "punto de carga", "electrolinera"].some((term) => text.includes(term));
   const irveChargePoints = parseNumber(data.irveChargePoints);
   const irveIsExterior = data.isExterior || data.irveExterior;
-  const irveInGarage = hasIrve && (data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => text.includes(term)));
+  const irveInGarage = hasIrve && (data.irveLocation === "garaje_comunitario" || data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => text.includes(term)));
   if (types.includes("publica_concurrencia")) {
     req.push("Local de publica concurrencia: requiere proyecto, alumbrado de emergencia y evaluacin de suministro complementario.");
     const supplyHint = getPublicConcurrencySupplyHint(data);
@@ -5763,7 +5772,11 @@ function Select({ label, value, onChange, options }) {
     <label className="block">
       <span className="text-sm font-bold text-slate-700">{label}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#FFC928]">
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        {options.map((o) => {
+          const value = typeof o === "object" ? o.value : o;
+          const optionLabel = typeof o === "object" ? o.label : o;
+          return <option key={value} value={value}>{optionLabel}</option>;
+        })}
       </select>
     </label>
   );
@@ -6408,12 +6421,50 @@ function IRVEForm({ data, update }) {
   const needsSplWarning = chargePoints > 1 && !data.irveHasSpl;
   const needsDcWarning = (data.irveRcdType || "A") === "A" && !data.irveDcLeakageDetection;
   const needsGarageWarning = data.irveGarageOrParking && !data.irveHasVentilationJustification;
+  const schemaOptionsByLocation = {
+    vivienda_unifamiliar: ["4a - Circuito adicional para recarga"],
+    garaje_comunitario: [
+      "1a - Colectivo o troncal",
+      "1b - Colectivo o troncal",
+      "1c - Colectivo o troncal",
+      "2 - Individual con contador comun vivienda + recarga",
+      "3a - Individual con contador para cada estacion",
+      "3b - Individual con contador para cada estacion",
+      "4b - Circuito adicional colectivo para recarga",
+    ],
+    otras_instalaciones: [
+      "1a - Colectivo o troncal",
+      "1b - Colectivo o troncal",
+      "1c - Colectivo o troncal",
+      "3a - Individual con contador para cada estacion",
+      "3b - Individual con contador para cada estacion",
+      "4b - Circuito adicional colectivo para recarga",
+    ],
+  };
+  const irveLocation = data.irveLocation || "garaje_comunitario";
+  const schemaOptions = schemaOptionsByLocation[irveLocation] || schemaOptionsByLocation.garaje_comunitario;
+  const selectedSchema = schemaOptions.includes(data.irveScheme) ? data.irveScheme : schemaOptions[0];
 
   return (
     <div className="bg-blue-50 border border-blue-100 rounded-3xl p-4 space-y-3">
       <h3 className="font-black text-[#071E3D] flex items-center gap-2"><Zap className="w-5 h-5" />Datos IRVE</h3>
       <div className="grid grid-cols-2 gap-3">
-        <Select label="Esquema ITC-BT-52" value={data.irveScheme || "no_indicado"} onChange={(v) => update("irveScheme", v)} options={["vivienda", "garaje_comunitario", "centralizacion", "contador_propio", "electrolinera", "no_indicado"]} />
+        <Select
+          label="Emplazamiento IRVE"
+          value={irveLocation}
+          onChange={(v) => {
+            const nextOptions = schemaOptionsByLocation[v] || schemaOptionsByLocation.garaje_comunitario;
+            update("irveLocation", v);
+            update("irveScheme", nextOptions[0]);
+            update("irveGarageOrParking", v === "garaje_comunitario");
+          }}
+          options={[
+            { value: "vivienda_unifamiliar", label: "Vivienda unifamiliar" },
+            { value: "garaje_comunitario", label: "Garaje comunitario / parking en edificio" },
+            { value: "otras_instalaciones", label: "Otras instalaciones" },
+          ]}
+        />
+        <Select label="Esquema ITC-BT-52" value={selectedSchema} onChange={(v) => update("irveScheme", v)} options={schemaOptions} />
         <Field label="Num. puntos" value={data.irveChargePoints || ""} onChange={(v) => update("irveChargePoints", v)} />
         <Field label="Potencia IRVE kW" value={data.irvePowerKW || ""} onChange={(v) => update("irvePowerKW", v)} />
         <Select label="Modo carga" value={data.irveMode || "3"} onChange={(v) => update("irveMode", v)} options={["1", "2", "3", "4"]} />
