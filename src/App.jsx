@@ -5294,10 +5294,19 @@ function getHelpImageSource(img) {
   const value = String(img || "");
   const isRemoteOrEmbedded = value.startsWith("http") || value.startsWith("data:");
   const isPublicAsset = value.startsWith("/assets/") || value.startsWith("./assets/") || value.startsWith("/help/") || value.startsWith("./help/");
-  if (!value || value.includes("/src/assets/help/") || (!isRemoteOrEmbedded && !isPublicAsset)) {
+
+  // Si no tiene prefijo de ruta, asumimos que es un nombre de archivo en /help/
+  if (!isRemoteOrEmbedded && !isPublicAsset && value.length > 0 && !value.includes(" ")) {
+    // Intentamos servirlo desde /help/
+    return `/help/${value}${value.includes(".") ? "" : ".png"}`;
+  }
+
+  if (!value || (!isRemoteOrEmbedded && !isPublicAsset)) {
     return buildTechnicalHelpSvg(getHelpImageLabel(value));
   }
-  return value;
+
+  // Limpiamos rutas antiguas de src/assets si quedara alguna
+  return value.replace("/src/assets/help/", "/help/");
 }
 
 function getBlock(id) {
@@ -6606,15 +6615,28 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen }) {
 }
 
 function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen }) {
+  const [search, setSearch] = useState("");
   const items = CHECKLIST.filter((item) => selectedBlocks.includes(item.blockId));
+
+  // Filtrado por búsqueda
+  const filteredItems = items.filter(item =>
+    item.title.toLowerCase().includes(search.toLowerCase()) ||
+    item.id.includes(search) ||
+    item.section.toLowerCase().includes(search.toLowerCase())
+  );
+
   const completion = getInspectionCompletion(selectedBlocks, responses);
-  const grouped = items.reduce((acc, item) => {
+
+  // Agrupación jerárquica: Bloque -> Sección
+  const grouped = filteredItems.reduce((acc, item) => {
     const block = getBlock(item.blockId);
-    const key = block?.title || item.blockId;
-    acc[key] ||= [];
-    acc[key].push(item);
+    const blockTitle = block?.title || item.blockId;
+    acc[blockTitle] ||= {};
+    acc[blockTitle][item.section] ||= [];
+    acc[blockTitle][item.section].push(item);
     return acc;
   }, {});
+
   const [helpItem, setHelpItem] = useState(null);
   const [showPending, setShowPending] = useState(false);
   const [checkMode, setCheckMode] = useState("tecnico");
@@ -6631,31 +6653,67 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen })
       <StageFlow current="checklist" />
       <div className="p-5 space-y-6">
         <ProgressCard completion={completion} onReviewPending={() => setShowPending((value) => !value)} sticky />
-        <div className="bg-white border border-slate-100 rounded-[1.5rem] p-2 grid grid-cols-3 gap-2 shadow-sm">
-          {[
-            ["rapido", "Rapido"],
-            ["tecnico", "Tecnico"],
-            ["experto", "Experto"],
-          ].map(([id, label]) => (
-            <button key={id} type="button" onClick={() => setCheckMode(id)} className={classNames("rounded-2xl py-2 text-sm font-black", checkMode === id ? "bg-[#071E3D] text-white" : "text-slate-500")}>{label}</button>
-          ))}
+
+        {/* Buscador y Modos */}
+        <div className="space-y-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar punto, código o sección..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-4 shadow-sm outline-none focus:ring-2 focus:ring-[#FFC928] text-sm font-bold"
+            />
+            <Plus className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 rotate-45" />
+          </div>
+
+          <div className="bg-white border border-slate-100 rounded-[1.5rem] p-2 grid grid-cols-3 gap-2 shadow-sm">
+            {[
+              ["rapido", "Rapido"],
+              ["tecnico", "Tecnico"],
+              ["experto", "Experto"],
+            ].map(([id, label]) => (
+              <button key={id} type="button" onClick={() => setCheckMode(id)} className={classNames("rounded-2xl py-2 text-sm font-black transition-all", checkMode === id ? "bg-[#071E3D] text-white shadow-lg shadow-blue-900/20" : "text-slate-500 hover:bg-slate-50")}>{label}</button>
+            ))}
+          </div>
         </div>
+
         {showPending && (
           <PendingItemsPanel
             pendingItems={completion.pendingItems}
             onSelectItem={(item) => {
-              document.getElementById(`check-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+              setSearch(""); // Limpiar búsqueda para asegurar que el punto sea visible
+              setShowPending(false);
+              setTimeout(() => {
+                document.getElementById(`check-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 100);
             }}
           />
         )}
-        {items.length === 0 && <EmptyState title="No hay puntos cargados" text="Activa algn bloque para comenzar la inspeccion." />}
-        {Object.entries(grouped).map(([blockTitle, blockItems]) => (
-          <section key={blockTitle} className="space-y-3">
-            <h2 className="font-black text-slate-900 text-lg flex items-center gap-2"><ClipboardCheck className="w-5 h-5 text-[#0B4EA2]" />{blockTitle}</h2>
-            {blockItems.map((item) => {
-              const response = responses[item.id] || {};
-              return (
-                <div key={item.id} id={`check-${item.id}`} className="bg-white border border-slate-100 rounded-[1.5rem] p-4 shadow-sm scroll-mt-6">
+
+        {items.length === 0 && <EmptyState title="No hay puntos cargados" text="Activa algun bloque para comenzar la inspeccion." />}
+
+        {Object.entries(grouped).map(([blockTitle, sections]) => (
+          <div key={blockTitle} className="space-y-8">
+            <div className="flex items-center gap-3 border-b-2 border-[#FFC928] pb-2 mt-4">
+              <ClipboardCheck className="w-6 h-6 text-[#071E3D]" />
+              <h2 className="font-black text-[#071E3D] text-xl uppercase tracking-tight">{blockTitle}</h2>
+            </div>
+
+            {Object.entries(sections).map(([sectionName, sectionItems]) => (
+              <section key={sectionName} className="space-y-4 ml-2">
+                <h3 className="font-black text-slate-400 text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#FFC928]" />
+                  {sectionName}
+                </h3>
+
+                {sectionItems.map((item) => {
+                  const response = responses[item.id] || {};
+                  return (
+                    <div key={item.id} id={`check-${item.id}`} className={classNames(
+                      "bg-white border rounded-[1.75rem] p-5 shadow-sm scroll-mt-32 transition-all duration-300",
+                      response.status ? "border-slate-100 opacity-90" : "border-slate-200 ring-1 ring-slate-100 shadow-md"
+                    )}>
                   <div className="flex items-start gap-3">
                     <div className="bg-slate-100 text-[#071E3D] rounded-2xl px-3 py-2 text-xs font-black">{item.id}</div>
                     <div className="flex-1 min-w-0">
