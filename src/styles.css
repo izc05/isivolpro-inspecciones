@@ -395,6 +395,11 @@ textarea {
   margin-top: 18px;
 }
 
+.report-counter-grid.field-summary-grid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 16px;
+}
+
 .counter-card strong {
   display: block;
   font-size: 28px;
@@ -522,6 +527,152 @@ textarea {
   color: #b91c1c;
   font-weight: 900;
 }
+
+.report-subtitle {
+  margin: -8px 0 18px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field-board-index {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.field-board-index-card,
+.field-board-report-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 8px 18px rgba(7, 30, 61, 0.06);
+}
+
+.field-board-index-card strong,
+.field-board-index-card span {
+  display: block;
+}
+
+.field-board-index-card strong {
+  font-size: 13px;
+  font-weight: 900;
+  color: #071e3d;
+}
+
+.field-board-index-card span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.field-measure-conclusion {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.field-measure-conclusion.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.field-measure-conclusion.with-defects {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.field-board-report-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.field-board-report-head span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.field-board-report-head h3,
+.field-cont-title {
+  margin: 3px 0 0;
+  font-size: 24px;
+  line-height: 1.05;
+  font-weight: 900;
+  color: #071e3d;
+}
+
+.field-board-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.field-board-meta .summary-box {
+  padding: 10px;
+}
+
+.field-board-meta .summary-box strong {
+  font-size: 11px;
+}
+
+.field-board-photo {
+  width: 100%;
+  max-height: 46mm;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.field-board-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 46mm;
+  object-fit: cover;
+}
+
+.field-report-table-title {
+  margin: 14px 0 8px;
+  color: #071e3d;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.field-measure-table {
+  font-size: 9px;
+}
+
+.field-measure-table th,
+.field-measure-table td {
+  padding: 6px;
+}
+
+.field-result-chip {
+  display: inline-block;
+  min-width: 58px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.field-result-chip.correct { background: #dcfce7; color: #166534; }
+.field-result-chip.defect { background: #fee2e2; color: #991b1b; }
+.field-result-chip.pending { background: #e2e8f0; color: #334155; }
+.field-result-chip.na { background: #f1f5f9; color: #64748b; }
 
 .report-final-list p {
   margin: 0;
