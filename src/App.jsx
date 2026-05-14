@@ -5851,23 +5851,105 @@ function buildTechnicalHelpSvg(title, subtitle = "Referencia visual de inspecciÃ
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+const AVAILABLE_HELP_IMAGES = new Set([
+  "01_01_01_estado_exterior_acceso_cgp.png",
+  "01_01_02_tapa_envolvente_interior_cgp.png",
+  "01_01_03_altura_instalacion_cgp_cgpm.png",
+  "01_01_03_ubicacion_montaje_cgp.png",
+  "01_01_04_distancia_otras_canalizaciones.png",
+  "01_01_05_caracteristicas_cgp_cgpm.png",
+  "01_01_06_tipo_canalizacion_lga.png",
+  "01_01_07_trazado_zonas_comunes_dimensiones.png",
+  "01_01_08_conducto_vertical_resistente_fuego.png",
+  "01_01_10_seccion_minima_lga.png",
+  "01_01_18_derivacion_individual.png",
+  "01_01_27_centralizacion_contadores.png",
+  "01_01_31_seguridad_cuarto_contadores.png",
+  "01_01_39_interruptor_general_maniobra.png",
+  "01_01_40_puesta_tierra_continuidad.png",
+  "02_01_01_identificacion.png",
+  "02_01_05_protecciones.png",
+  "02_01_15_sobretensiones.png",
+  "02_01_20_canalizaciones.png",
+  "02_01_22_cajas_empalmes.png",
+  "02_01_31_tension_contacto.png",
+  "02_01_32_puesta_tierra.png",
+  "02_01_45_volumenes_bano.png",
+  "03_01_04_cuadro_alumbrado_exterior.png",
+  "03_01_05_envolvente_exterior_ip_ik.png",
+  "03_01_07_control_encendido.png",
+  "03_01_08_canalizacion_subterranea.png",
+  "03_01_13_columnas_baculos.png",
+  "03_01_14_puerta_registro_columna.png",
+  "03_01_16_proteccion_punto_luz.png",
+  "03_01_17_tierra_soportes_metalicos.png",
+  "03_01_25_tension_contacto_24v.png",
+  "04_01_03_senalizacion_salidas_evacuacion.png",
+  "04_01_07_ubicacion_luminarias_emergencia.png",
+  "04_01_15_distribucion_alumbrado_tercios.png",
+  "04_01_17_cables_as_asplus.png",
+  "04_01_18_suministro_complementario.png",
+  "04_01_21_cuadros_no_accesibles_publico.png",
+  "05_01_01_clasificacion_zonas.png",
+  "05_01_03_categoria_equipos.png",
+  "05_01_04_entradas_cables_selladas.png",
+  "05_01_05_sellado_entre_zonas.png",
+  "08_01_01_documentacion_fv.png",
+  "08_01_06_seccionamiento_cc.png",
+  "08_01_10_diferencial_fv.png",
+  "08_01_12_sobretensiones_cc.png",
+  "08_01_14_puesta_tierra_estructura.png",
+  "08_01_18_cableado_cc_solar.png",
+  "08_01_22_ubicacion_inversor.png",
+  "08_01_31_estado_modulos.png",
+  "13_01_01_documentacion_irve.png",
+  "13_01_03_esquema_1a_irve.png",
+  "13_01_03_esquema_1b_irve.png",
+  "13_01_03_esquema_1c_irve.png",
+  "13_01_03_esquema_2_irve.png",
+  "13_01_03_esquema_3a_irve.png",
+  "13_01_03_esquema_3b_irve.png",
+  "13_01_03_esquema_4a_irve.png",
+  "13_01_03_esquema_4b_irve.png",
+  "13_01_03_esquema_irve.png",
+  "13_01_08_save_emplazamiento.png",
+  "13_01_12_cartel_prohibicion_gases.png",
+  "13_01_15_canalizacion_irve.png",
+  "13_01_24_diferencial_tipo_a_irve.png",
+  "13_01_25_proteccion_6ma_dc_irve.png",
+  "13_01_31_puesta_tierra_save.png",
+  "13_01_36_iluminacion_zona_recarga.png",
+]);
+
+function normalizeHelpImageFileName(value) {
+  return String(value || "")
+    .replace(/\\/g, "/")
+    .replace(/^.*\/src\/assets\/help\//, "")
+    .replace(/^\.?\/help\//, "")
+    .trim();
+}
+
 function getHelpImageSource(img) {
   const value = String(img || "");
   const isRemoteOrEmbedded = value.startsWith("http") || value.startsWith("data:");
-  const isPublicAsset = value.startsWith("/assets/") || value.startsWith("./assets/") || value.startsWith("/help/") || value.startsWith("./help/");
+  const isAsset = value.startsWith("/assets/") || value.startsWith("./assets/");
 
-  // Si no tiene prefijo de ruta, asumimos que es un nombre de archivo en /help/
-  if (!isRemoteOrEmbedded && !isPublicAsset && value.length > 0 && !value.includes(" ")) {
-    // Intentamos servirlo desde /help/
-    return `/help/${value}${value.includes(".") ? "" : ".png"}`;
+  if (isRemoteOrEmbedded) {
+    return value;
   }
 
-  if (!value || (!isRemoteOrEmbedded && !isPublicAsset)) {
-    return buildTechnicalHelpSvg(getHelpImageLabel(value));
+  if (isAsset) {
+    return value.startsWith("/") ? `.${value}` : value;
   }
 
-  // Limpiamos rutas antiguas de src/assets si quedara alguna
-  return value.replace("/src/assets/help/", "/help/");
+  const fileName = normalizeHelpImageFileName(value);
+  const helpFileName = fileName && fileName.includes(".") ? fileName : `${fileName}.png`;
+
+  if (fileName && !fileName.includes(" ") && AVAILABLE_HELP_IMAGES.has(helpFileName)) {
+    return `./help/${helpFileName}`;
+  }
+
+  return buildTechnicalHelpSvg(getHelpImageLabel(value));
 }
 
 function getBlock(id) {
