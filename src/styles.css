@@ -435,6 +435,7 @@ textarea {
 .measure-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 12px;
 }
 
@@ -447,6 +448,17 @@ textarea {
   padding: 10px;
   border: 1px solid #cbd5e1;
   text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.35;
+}
+
+.report-data-table tr,
+.report-compact-table tr,
+.measure-table tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .report-data-table th,
@@ -479,6 +491,43 @@ textarea {
   text-align: center;
   font-size: 11px;
   font-weight: 900;
+  white-space: nowrap;
+}
+
+.report-compact-table th:first-child,
+.report-compact-table td:first-child {
+  width: 22mm;
+}
+
+.report-compact-table th:nth-child(3),
+.report-compact-table td:nth-child(3) {
+  width: 25mm;
+}
+
+.report-itc-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.report-itc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #071e3d;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.report-itc-item svg {
+  flex: 0 0 auto;
+  color: #0f766e;
 }
 
 .status-chip.favorable { background: #dcfce7; color: #166534; }
@@ -518,9 +567,64 @@ textarea {
   gap: 12px;
 }
 
+.report-photo-grid {
+  align-items: start;
+}
+
+.report-photo-card {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(7, 30, 61, 0.08);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.report-photo-card img {
+  display: block;
+  width: 100%;
+  height: 44mm;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.report-photo-card figcaption {
+  padding: 8px 10px;
+  color: #334155;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.report-photo-empty {
+  padding: 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
 .photo-annex {
   display: grid;
   gap: 18px;
+}
+
+.photo-annex-group {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.photo-annex-group h3 {
+  margin: 0 0 8px;
+  color: #071e3d;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .bad-measure {

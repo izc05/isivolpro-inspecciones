@@ -5257,6 +5257,23 @@ const CHECKLIST = [
 const INITIAL_INSPECTION = {
   name: "",
   address: "",
+  city: "",
+  province: "",
+  ownerName: "",
+  holderNif: "",
+  contactPhone: "",
+  contactEmail: "",
+  orderNumber: "",
+  cups: "",
+  supplyCompany: "",
+  technicianName: "",
+  technicianCredential: "",
+  inspectionDate: "",
+  previousInspectionDate: "",
+  nextInspectionDate: "",
+  inspectionScope: "completa",
+  inspectionReason: "",
+  reportLocation: "",
   regulation: "REBT_2002",
   inspectionType: "inicial",
   powerKW: "",
@@ -5278,11 +5295,39 @@ const INITIAL_INSPECTION = {
   hasPublicAccessiblePanels: false,
   hasEvacuationRoutes: false,
   hasSpecialPublicZones: false,
+  hasProject: false,
+  hasSingleLine: false,
+  hasCertificate: false,
+  hasPreviousReport: false,
   notes: "",
   coverImage: null,
   fieldSheets: [],
   attachments: [],
 };
+
+const REGULATION_OPTIONS = [
+  { value: "REBT_2002", label: "REBT 2002" },
+  { value: "REBT_1973", label: "REBT 1973" },
+  { value: "MIXED", label: "Mixta / ampliación" },
+  { value: "NO_INDICADO", label: "Sin indicar" },
+];
+
+const INSPECTION_TYPE_OPTIONS = [
+  { value: "inicial", label: "Inicial" },
+  { value: "periodica", label: "Periódica" },
+  { value: "modificacion", label: "Modificación / ampliación" },
+  { value: "mantenimiento", label: "Revisión de mantenimiento" },
+  { value: "subsanacion", label: "Subsanación de defectos" },
+  { value: "puesta_servicio", label: "Previa puesta en servicio" },
+];
+
+const INSPECTION_SCOPE_OPTIONS = [
+  { value: "completa", label: "Completa" },
+  { value: "parcial", label: "Parcial" },
+  { value: "documental", label: "Documental" },
+  { value: "visual", label: "Visual" },
+  { value: "mediciones", label: "Mediciones" },
+];
 
 const APP_VERSION = "1.0.0";
 const LEGAL_VERSION = "1.0.0";
@@ -5976,6 +6021,57 @@ const AUXILIARY_BLOCK_IDS = [
   "custom_block_26_calculations",
 ];
 
+const BLOCK_ITC_REFERENCES = {
+  rebt2002_block_10: ["ITC-BT-04 - Documentación"],
+  rebt2002_block_01: [
+    "ITC-BT-13 - Caja General de Protección",
+    "ITC-BT-14 - Línea General de Alimentación",
+    "ITC-BT-15 - Derivación Individual",
+    "ITC-BT-16 - Centralización de contadores",
+    "ITC-BT-17 - Dispositivos generales de mando y protección",
+    "ITC-BT-18 - Puesta a tierra",
+  ],
+  rebt2002_block_02: [
+    "ITC-BT-17 - Cuadros y dispositivos generales",
+    "ITC-BT-18 - Puesta a tierra",
+    "ITC-BT-19 - Instalaciones interiores",
+    "ITC-BT-20 - Sistemas de instalación",
+    "ITC-BT-21 - Tubos y canales protectoras",
+    "ITC-BT-22 - Protección contra sobreintensidades",
+    "ITC-BT-23 - Protección contra sobretensiones",
+    "ITC-BT-24 - Contactos directos e indirectos",
+  ],
+  rebt2002_block_02b: ["ITC-BT-27 - Locales con bañera o ducha"],
+  rebt2002_block_03: ["ITC-BT-09 - Instalaciones de alumbrado exterior"],
+  rebt2002_block_04: ["ITC-BT-28 - Locales de pública concurrencia"],
+  rebt2002_block_05: ["ITC-BT-29 - Locales con riesgo de incendio o explosión / ATEX"],
+  rebt2002_block_06: ["ITC-BT-30 - Locales de características especiales"],
+  rebt2002_block_08: [
+    "ITC-BT-40 - Instalaciones generadoras de baja tensión",
+    "ITC-BT-18 - Puesta a tierra",
+    "ITC-BT-22 - Sobreintensidades",
+    "ITC-BT-23 - Sobretensiones",
+    "ITC-BT-24 - Contactos directos e indirectos",
+    "ITC-BT-30 - Exterior o local mojado, si aplica",
+  ],
+  rebt2002_block_13: [
+    "ITC-BT-52 - Infraestructura para recarga de vehículos eléctricos",
+    "ITC-BT-18 - Puesta a tierra",
+    "ITC-BT-22 - Sobreintensidades",
+    "ITC-BT-23 - Sobretensiones",
+    "ITC-BT-24 - Contactos directos e indirectos",
+    "ITC-BT-30 - Exterior o local mojado, si aplica",
+    "ITC-BT-29 - Garaje o riesgo ATEX, si aplica",
+  ],
+};
+
+function getSelectedItcReferences(selectedBlocks = []) {
+  const references = selectedBlocks
+    .filter(isInspectableBlockId)
+    .flatMap((blockId) => BLOCK_ITC_REFERENCES[blockId] || []);
+  return [...new Set(references)];
+}
+
 function isInspectableBlockId(blockId) {
   return CHECKLIST_INSPECTABLE_BLOCK_IDS.includes(blockId) && !AUXILIARY_BLOCK_IDS.includes(blockId);
 }
@@ -6191,10 +6287,55 @@ function getPublicConcurrencySupplyHint(data) {
   return "Pública concurrencia: alumbrado de emergencia obligatorio; suministro complementario según uso y aforo.";
 }
 
+const DEFECT_STATUSES = ["DL", "DG", "DMG"];
+const isDefectStatus = (status) => DEFECT_STATUSES.includes(status);
+const createLocalId = (prefix = "id") => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+function getDefectLocation(entry) {
+  return entry?.defectLocation || entry?.zone || entry?.location || "";
+}
+
+function getResponseDefectEntries(response) {
+  if (!response || !isDefectStatus(response.status)) return [];
+
+  const baseLocation = getDefectLocation(response);
+  const baseEntry = {
+    ...response,
+    defectEntryId: `${response.item?.id || "punto"}::principal`,
+    defectLocation: baseLocation,
+    zone: baseLocation,
+    occurrenceLabel: "Principal",
+  };
+
+  const extraEntries = (response.defectInstances || []).map((instance, index) => {
+    const status = isDefectStatus(instance.status) ? instance.status : response.status;
+    const location = getDefectLocation(instance);
+    return {
+      ...response,
+      ...instance,
+      item: response.item,
+      status,
+      severity: status,
+      photos: instance.photos?.length ? instance.photos : response.photos,
+      documents: response.documents,
+      defectEntryId: instance.id || `${response.item?.id || "punto"}::ubicacion-${index + 2}`,
+      defectLocation: location,
+      zone: location,
+      occurrenceLabel: `Ubicación ${index + 2}`,
+    };
+  });
+
+  return [baseEntry, ...extraEntries];
+}
+
+function getDefectEntriesFromResponses(responses) {
+  return Object.values(responses || {}).flatMap(getResponseDefectEntries);
+}
+
 function calculateVerdict(responses, isComplete) {
-  const values = Object.values(responses);
-  const hasDMG = values.some((r) => r.status === "DMG");
-  const hasDG = values.some((r) => r.status === "DG");
+  const defects = getDefectEntriesFromResponses(responses);
+  const hasDMG = defects.some((r) => r.status === "DMG");
+  const hasDG = defects.some((r) => r.status === "DG");
 
   if (hasDMG) {
     return {
@@ -6235,12 +6376,20 @@ function getInspectionCompletion(selectedBlocks, responses, checklist = CHECKLIS
   const items = getInspectableChecklistItems(selectedBlocks, checklist);
   const completed = items.filter((item) => responses[item.id]?.status);
   const pending = items.filter((item) => !responses[item.id]?.status);
+  const countStatus = (status) => completed.filter((item) => responses[item.id]?.status === status).length;
+  const dl = countStatus("DL");
+  const dg = countStatus("DG");
+  const dmg = countStatus("DMG");
   const percent = items.length === 0 ? 0 : Math.round((completed.length / items.length) * 100);
 
   return {
     total: items.length,
     completed: completed.length,
     pending: pending.length,
+    dl,
+    dg,
+    dmg,
+    defects: dl + dg + dmg,
     percent,
     pendingItems: pending,
     isComplete: pending.length === 0 && items.length > 0,
@@ -6248,6 +6397,34 @@ function getInspectionCompletion(selectedBlocks, responses, checklist = CHECKLIS
 }
 
 function ProgressCard({ completion, onReviewPending, sticky = false }) {
+  const hasDefects = completion.defects > 0;
+  const completeTone = completion.dmg > 0
+    ? {
+        badge: "bg-red-50 text-red-800 border border-red-200",
+        bar: "bg-red-600",
+        panel: "bg-red-50 border border-red-200 text-red-900",
+        label: `Checklist completo con ${completion.dmg} defecto${completion.dmg === 1 ? "" : "s"} muy grave${completion.dmg === 1 ? "" : "s"}.`,
+      }
+    : completion.dg > 0
+      ? {
+          badge: "bg-orange-50 text-orange-800 border border-orange-200",
+          bar: "bg-orange-500",
+          panel: "bg-orange-50 border border-orange-200 text-orange-900",
+          label: `Checklist completo con ${completion.dg} defecto${completion.dg === 1 ? "" : "s"} grave${completion.dg === 1 ? "" : "s"}.`,
+        }
+      : completion.dl > 0
+        ? {
+            badge: "bg-yellow-50 text-yellow-900 border border-yellow-200",
+            bar: "bg-yellow-500",
+            panel: "bg-yellow-50 border border-yellow-200 text-yellow-900",
+            label: `Checklist completo con ${completion.dl} defecto${completion.dl === 1 ? "" : "s"} leve${completion.dl === 1 ? "" : "s"}.`,
+          }
+        : {
+            badge: "bg-emerald-50 text-emerald-700",
+            bar: "bg-emerald-600",
+            panel: "bg-emerald-50 border border-emerald-100 text-emerald-800",
+            label: "Todos los puntos están cumplimentados sin defectos.",
+          };
   return (
     <div className={classNames(
       "bg-white shadow-lg border border-slate-100",
@@ -6261,25 +6438,30 @@ function ProgressCard({ completion, onReviewPending, sticky = false }) {
         <div className={classNames(
           "rounded-3xl flex items-center justify-center font-black",
           sticky ? "w-12 h-12 text-base" : "w-16 h-16 text-lg",
-          completion.isComplete ? "bg-emerald-50 text-emerald-700" : "bg-yellow-300 text-[#071E3D]"
+          completion.isComplete ? completeTone.badge : "bg-yellow-300 text-[#071E3D]"
         )}>
           {completion.percent}%
         </div>
       </div>
       <div className={classNames("bg-slate-200 border border-slate-300 rounded-full overflow-hidden", sticky ? "mt-2 h-2" : "mt-4 h-4")}>
-        <div className={classNames("h-full rounded-full transition-all duration-500", completion.isComplete ? "bg-emerald-600" : "bg-yellow-400")} style={{ width: `${completion.percent}%` }} />
+        <div className={classNames("h-full rounded-full transition-all duration-500", completion.isComplete ? completeTone.bar : "bg-yellow-400")} style={{ width: `${completion.percent}%` }} />
       </div>
       {completion.pending > 0 ? (
         <div className={classNames("bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-between gap-3", sticky ? "mt-2 p-2" : "mt-4 p-3")}>
           <div>
             <p className={classNames("font-black text-orange-800", sticky && "text-sm")}>Faltan {completion.pending} puntos</p>
-            {!sticky && <p className="text-xs text-orange-700">Antes de finalizar, la app avisara de los puntos sin rellenar.</p>}
+            {!sticky && <p className="text-xs text-orange-700">Antes de finalizar, la app avisará de los puntos sin revisar.</p>}
           </div>
           <button type="button" onClick={onReviewPending} className={classNames("bg-orange-600 text-white rounded-xl text-xs font-black", sticky ? "px-3 py-1.5" : "px-3 py-2")}>Ver</button>
         </div>
       ) : (
-        <div className={classNames("bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 font-bold", sticky ? "mt-2 p-2 text-xs" : "mt-4 p-3 text-sm")}>
-          Todos los puntos están cumplimentados.
+        <div className={classNames("rounded-2xl font-bold", completeTone.panel, sticky ? "mt-2 p-2 text-xs" : "mt-4 p-3 text-sm")}>
+          {completeTone.label}
+          {hasDefects && !sticky && (
+            <span className="block mt-1 text-xs font-black">
+              DL: {completion.dl} · DG: {completion.dg} · DMG: {completion.dmg}
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -7164,12 +7346,61 @@ function DataScreen({ data, setData, setScreen }) {
           <Field label="Nombre de la instalación" value={data.name} onChange={(v) => update("name", v)} placeholder="Ej. Bar, almazara, parking, FV cubierta..." />
           <Field label="Dirección" value={data.address} onChange={(v) => update("address", v)} placeholder="Dirección" />
           <div className="grid grid-cols-2 gap-3">
-            <Select label="Reglamento" value={data.regulation} onChange={(v) => update("regulation", v)} options={["REBT_2002", "REBT_1973", "MIXED"]} />
-            <Select label="Inspección" value={data.inspectionType} onChange={(v) => update("inspectionType", v)} options={["inicial", "periódica", "modificacion"]} />
+            <Select label="Reglamento" value={data.regulation} onChange={(v) => update("regulation", v)} options={REGULATION_OPTIONS} />
+            <Select label="Inspección" value={data.inspectionType} onChange={(v) => update("inspectionType", v)} options={INSPECTION_TYPE_OPTIONS} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Potencia kW" value={data.powerKW} onChange={(v) => update("powerKW", v)} placeholder="Ej. 45" />
             <Select label="Sistema" value={data.distributionSystem} onChange={(v) => update("distributionSystem", v)} options={["TT", "TN", "IT"]} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Municipio" value={data.city || ""} onChange={(v) => update("city", v)} placeholder="Introduce el municipio" />
+            <Field label="Provincia" value={data.province || ""} onChange={(v) => update("province", v)} placeholder="Introduce la provincia" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Titular" value={data.ownerName || ""} onChange={(v) => update("ownerName", v)} placeholder="Nombre del titular" />
+            <Field label="NIF / CIF" value={data.holderNif || ""} onChange={(v) => update("holderNif", v)} placeholder="NIF o CIF" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Teléfono" value={data.contactPhone || ""} onChange={(v) => update("contactPhone", v)} placeholder="Teléfono de contacto" />
+            <Field label="Email" value={data.contactEmail || ""} onChange={(v) => update("contactEmail", v)} placeholder="correo@empresa.com" type="email" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="CUPS" value={data.cups || ""} onChange={(v) => update("cups", v)} placeholder="ES..." />
+            <Field label="Compañía suministradora" value={data.supplyCompany || ""} onChange={(v) => update("supplyCompany", v)} placeholder="Compañía" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="N.º de expediente / orden" value={data.orderNumber || ""} onChange={(v) => update("orderNumber", v)} placeholder="Expediente" />
+            <Field label="Lugar de emisión" value={data.reportLocation || ""} onChange={(v) => update("reportLocation", v)} placeholder="Municipio" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Select label="Alcance" value={data.inspectionScope || "completa"} onChange={(v) => update("inspectionScope", v)} options={INSPECTION_SCOPE_OPTIONS} />
+            <Field label="Motivo de inspección" value={data.inspectionReason || ""} onChange={(v) => update("inspectionReason", v)} placeholder="Inicial, periódica, subsanación..." />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Fecha de inspección" value={data.inspectionDate || ""} onChange={(v) => update("inspectionDate", v)} type="date" />
+            <Field label="Última inspección" value={data.previousInspectionDate || ""} onChange={(v) => update("previousInspectionDate", v)} type="date" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Próximo vencimiento" value={data.nextInspectionDate || ""} onChange={(v) => update("nextInspectionDate", v)} type="date" />
+            <Field label="Técnico inspector" value={data.technicianName || ""} onChange={(v) => update("technicianName", v)} placeholder="Nombre del técnico" />
+          </div>
+          <Field label="Identificación profesional" value={data.technicianCredential || ""} onChange={(v) => update("technicianCredential", v)} placeholder="Colegiado, empresa, carné o referencia" />
+        </Section>
+
+        <Section title="Documentación aportada" number="01B">
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              ["hasProject", "Proyecto o MTD"],
+              ["hasCertificate", "CIE / boletín"],
+              ["hasSingleLine", "Esquema unifilar"],
+              ["hasPreviousReport", "Acta OCA anterior"],
+            ].map(([key, label]) => (
+              <label key={key} className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+                <input type="checkbox" checked={Boolean(data[key])} onChange={(e) => update(key, e.target.checked)} />
+                <span className="font-bold">{fixText(label)}</span>
+              </label>
+            ))}
           </div>
         </Section>
 
@@ -7564,9 +7795,59 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
   }, [focusItemId, items, onFocusHandled]);
 
   const setStatus = (item, status) => {
-    setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), item, status, severity: ["DL", "DG", "DMG"].includes(status) ? status : null } }));
+    setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), item, status, severity: isDefectStatus(status) ? status : null } }));
   };
   const setObs = (item, observation) => setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || { item }), item, observation } }));
+  const setDefectLocation = (item, defectLocation) => {
+    setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || { item }), item, defectLocation } }));
+  };
+  const addDefectInstance = (item) => {
+    setResponses((prev) => {
+      const response = prev[item.id] || { item };
+      const status = isDefectStatus(response.status) ? response.status : "DG";
+      return {
+        ...prev,
+        [item.id]: {
+          ...response,
+          item,
+          status,
+          severity: status,
+          defectInstances: [
+            ...(response.defectInstances || []),
+            { id: createLocalId("defect-location"), defectLocation: "", status, observation: "" },
+          ],
+        },
+      };
+    });
+  };
+  const updateDefectInstance = (item, instanceId, patch) => {
+    setResponses((prev) => {
+      const response = prev[item.id] || { item };
+      return {
+        ...prev,
+        [item.id]: {
+          ...response,
+          item,
+          defectInstances: (response.defectInstances || []).map((instance) =>
+            instance.id === instanceId ? { ...instance, ...patch } : instance
+          ),
+        },
+      };
+    });
+  };
+  const deleteDefectInstance = (item, instanceId) => {
+    setResponses((prev) => {
+      const response = prev[item.id] || { item };
+      return {
+        ...prev,
+        [item.id]: {
+          ...response,
+          item,
+          defectInstances: (response.defectInstances || []).filter((instance) => instance.id !== instanceId),
+        },
+      };
+    });
+  };
   const setDocumentState = (item, documentState) => setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || { item }), item, documentState } }));
   const addPointPhotos = async (item, files) => {
     try {
@@ -7651,7 +7932,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
 
   const renderChecklistItem = (item) => {
     const response = responses[item.id] || {};
-    const hasDefect = ["DL", "DG", "DMG"].includes(response.status);
+    const hasDefect = isDefectStatus(response.status);
 
     return (
       <div
@@ -7702,7 +7983,57 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
           </div>
         )}
 
-        <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder="Observaciones, zona, detalle del defecto..." className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+        {hasDefect && (
+          <div className="mt-3 rounded-[1.25rem] border border-orange-100 bg-orange-50/70 p-3 space-y-3">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-wide text-orange-700">Zona / ubicación del defecto</label>
+              <input
+                value={response.defectLocation || ""}
+                onChange={(e) => setDefectLocation(item, e.target.value)}
+                placeholder="Ej. Cuadro cocina, planta baja, salida de emergencia..."
+                className="mt-1 w-full bg-white border border-orange-100 rounded-2xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]"
+              />
+            </div>
+
+            {(response.defectInstances || []).map((instance, index) => (
+              <div key={instance.id} className="rounded-2xl bg-white border border-orange-100 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-black text-slate-700">Otra ubicación {index + 2}</p>
+                  <button type="button" onClick={() => deleteDefectInstance(item, instance.id)} className="text-red-600 text-[11px] font-black flex items-center gap-1">
+                    <Trash2 className="w-3.5 h-3.5" />Eliminar
+                  </button>
+                </div>
+                <input
+                  value={instance.defectLocation || instance.zone || ""}
+                  onChange={(e) => updateDefectInstance(item, instance.id, { defectLocation: e.target.value })}
+                  placeholder="Ubicación de este defecto"
+                  className="w-full bg-white border border-slate-200 rounded-2xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]"
+                />
+                <select
+                  value={instance.status || response.status}
+                  onChange={(e) => updateDefectInstance(item, instance.id, { status: e.target.value })}
+                  className="w-full bg-white border border-slate-200 rounded-2xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#FFC928]"
+                >
+                  <option value="DL">DL - Defecto leve</option>
+                  <option value="DG">DG - Defecto grave</option>
+                  <option value="DMG">DMG - Defecto muy grave</option>
+                </select>
+                <textarea
+                  value={instance.observation || ""}
+                  onChange={(e) => updateDefectInstance(item, instance.id, { observation: e.target.value })}
+                  placeholder="Observación específica de esta ubicación"
+                  className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]"
+                />
+              </div>
+            ))}
+
+            <button type="button" onClick={() => addDefectInstance(item)} className="w-full rounded-2xl border border-orange-200 bg-white px-3 py-2 text-xs font-black text-orange-700">
+              Añadir otra ubicación del mismo punto
+            </button>
+          </div>
+        )}
+
+        <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder={hasDefect ? "Observacion general del punto..." : "Observaciones del punto..."} className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
 
         <PhotoThumbGrid photos={response.photos || []} onDelete={(photo) => deletePointPhoto(item, photo)} />
         <DocumentList documents={response.documents || []} onDelete={(doc) => deletePointDocument(item, doc)} />
@@ -7780,6 +8111,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
             const allBlockItems = items.filter((item) => item.blockId === block.id);
             const summary = getBlockChecklistSummary(block.id, allBlockItems, responses);
             const isOpen = Boolean(openBlocks[block.id]);
+            const usesDarkTone = isOpen && summary.pending > 0 && summary.dl === 0 && summary.dg === 0 && summary.dmg === 0;
             const sections = entry.items.reduce((acc, item) => {
               acc[item.section] ||= [];
               acc[item.section].push(item);
@@ -7801,17 +8133,17 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
                   className="w-full p-4 text-left cursor-pointer"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={classNames("w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm", isOpen ? "bg-white/10 text-[#FFC928]" : "bg-slate-100 text-[#071E3D]")}>{block.code}</div>
+                    <div className={classNames("w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm", usesDarkTone ? "bg-white/10 text-[#FFC928]" : "bg-white/80 text-[#071E3D]")}>{block.code}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-3">
                         <h2 className="font-black text-base leading-tight">{fixText(block.title)}</h2>
                         <ChevronRight className={classNames("w-5 h-5 shrink-0 transition-transform", isOpen && "rotate-90")} />
                       </div>
-                      <p className={classNames("text-xs mt-1 font-bold", isOpen ? "text-white/70" : "text-slate-500")}>
+                      <p className={classNames("text-xs mt-1 font-bold", usesDarkTone ? "text-white/70" : "text-slate-600")}>
                         {summary.reviewed} / {summary.total} revisados - {summary.pending} pendientes - {summary.dl} DL - {summary.dg} DG - {summary.dmg} DMG
                       </p>
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
-                        <span className={classNames("text-[10px] font-black px-2 py-1 rounded-lg", isOpen ? "bg-white/10 text-white" : "bg-white border border-slate-100 text-slate-500")}>
+                        <span className={classNames("text-[10px] font-black px-2 py-1 rounded-lg", usesDarkTone ? "bg-white/10 text-white" : "bg-white border border-slate-100 text-slate-600")}>
                           {summary.total} puntos
                         </span>
                         <button
@@ -7820,7 +8152,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
                             event.stopPropagation();
                             goToFirstPending({ ...entry, items: allBlockItems });
                           }}
-                          className={classNames("text-[10px] font-black px-3 py-1 rounded-lg border active:scale-95 transition", isOpen ? "border-white/20 bg-white/10 text-white" : "border-slate-200 bg-white text-[#071E3D]")}
+                          className={classNames("text-[10px] font-black px-3 py-1 rounded-lg border active:scale-95 transition", usesDarkTone ? "border-white/20 bg-white/10 text-white" : "border-slate-200 bg-white text-[#071E3D]")}
                         >
                           Ir al primer pendiente
                         </button>
@@ -8331,7 +8663,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   const verdict = calculateVerdict(responses, completion.isComplete);
 
   const responseList = Object.values(responses).filter((r) => r.status);
-  const defects = responseList.filter((r) => ["DL", "DG", "DMG"].includes(r.status));
+  const defects = getDefectEntriesFromResponses(responses);
   const favorable = responseList.filter((r) => r.status === "Favorable");
   const dl = defects.filter((r) => r.status === "DL").length;
   const dg = defects.filter((r) => r.status === "DG").length;
@@ -8349,7 +8681,9 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     ];
   });
   const blocks = selectedBlocks.map((id) => getBlock(id)).filter(Boolean).sort((a, b) => a.order - b.order);
+  const itcReferences = getSelectedItcReferences(selectedBlocks);
   const today = new Date().toLocaleDateString("es-ES");
+  const reportDate = data.inspectionDate ? new Date(data.inspectionDate).toLocaleDateString("es-ES") : today;
   const installationType = (data.installationTypes || []).map((type) => type.replaceAll("_", " ")).join(", ") || "Sin indicar";
   const inspectionType = data.inspectionType ? data.inspectionType.charAt(0).toUpperCase() + data.inspectionType.slice(1) : "Sin indicar";
   const fileName = `isivolt-${draft ? "borrador" : "informe"}-${variant}-${(data.name || "inspección").toLowerCase().replace(/[^a-z0-9]+/g, "-") || "inspección"}.pdf`;
@@ -8422,7 +8756,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Dirección", data.address || "Sin indicar"],
       ["Reglamento", data.regulation],
       ["Tipo de inspección", inspectionType],
-      ["Fecha", today],
+      ["Fecha", reportDate],
     ],
   });
   doc.setDrawColor(...gold);
@@ -8459,7 +8793,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Potencia instalada", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
       ["Esquema de distribución", data.distributionSystem],
       ["Reglamento aplicado", data.regulation],
-      ["ITC principales", blocks.map((b) => b.code).join(", ") || "Sin indicar"],
+      ["ITC principales", itcReferences.join(", ") || "Sin indicar"],
       ["Puntos revisados", loadedPoints.length],
       ["Puntos favorables", favorable.length],
       ["Defectos leves", dl],
@@ -8484,12 +8818,25 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Dirección", data.address || "Sin indicar"],
       ["Localidad", data.city || "Sin indicar"],
       ["Provincia", data.province || "Sin indicar"],
+      ["Titular", data.ownerName || "Sin indicar"],
+      ["NIF / CIF", data.holderNif || "Sin indicar"],
+      ["Teléfono", data.contactPhone || "Sin indicar"],
+      ["Email", data.contactEmail || "Sin indicar"],
       ["N. pedido", data.orderNumber || "Sin indicar"],
       ["CUPS", data.cups || "Sin indicar"],
+      ["Compañía suministradora", data.supplyCompany || "Sin indicar"],
       ["Potencia", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
       ["Reglamento", data.regulation],
       ["Tipo de instalación", installationType],
       ["Tipo de inspección", inspectionType],
+      ["Alcance", data.inspectionScope || "Sin indicar"],
+      ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
+      ["Fecha de inspección", reportDate],
+      ["Última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+      ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+      ["Técnico inspector", data.technicianName || "Sin indicar"],
+      ["Identificación profesional", data.technicianCredential || "Sin indicar"],
+      ["Lugar de emisión", data.reportLocation || "Sin indicar"],
       ["Esquema TT/TN/IT", data.distributionSystem],
       ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
       ["Aforo previsto", data.occupancy || "Sin indicar"],
@@ -8538,15 +8885,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     head: [["Normativa aplicada"]],
     body: [
       ["REBT 2002 - RD 842/2002"],
-      ["ITC-BT-04 - Documentación"],
-      ["ITC-BT-13 - Caja General de Protección"],
-      ["ITC-BT-14 - Línea General de Alimentación"],
-      ["ITC-BT-15 - Derivación Individual"],
-      ["ITC-BT-16 - Centralización de contadores"],
-      ["ITC-BT-17 - Cuadros"],
-      ["ITC-BT-18 - Puesta a Tierra"],
-      ["ITC-BT-24 - Protección contra contactos"],
-      ["ITC-BT-28 - Pública concurrencia"],
+      ...(itcReferences.length ? itcReferences.map((reference) => [reference]) : [["Sin ITC asociadas a los bloques seleccionados"]]),
     ],
     headStyles: { fillColor: navy },
     styles: { fontSize: 10, cellPadding: 3 },
@@ -8560,52 +8899,55 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     styles: { fontSize: 10, cellPadding: 3 },
   });
 
-  y = addPage("Tabla resumen de puntos");
-  autoTable(doc, {
-    startY: y,
-    margin: { left: page.margin, right: page.margin },
-    head: [["Código", "Punto revisado", "Resultado", "Observación"]],
-    body: (responseList.length ? responseList : loadedPoints.map((item) => ({ item, status: "Sin revisar", observation: "" }))).map((r) => [
-      r.item.id,
-      r.item.title,
-      r.status,
-      r.observation || r.item.favorable || "-",
-    ]),
-    headStyles: { fillColor: navy },
-    styles: { fontSize: 8, cellPadding: 2 },
-    columnStyles: { 0: { cellWidth: 22 }, 2: { cellWidth: 24 } },
-    didDrawPage: () => footer(),
-  });
+  if (variant === "tecnico") {
+    y = addPage("Tabla resumen de puntos");
+    autoTable(doc, {
+      startY: y,
+      margin: { left: page.margin, right: page.margin },
+      head: [["Código", "Punto revisado", "Resultado", "Observación"]],
+      body: (responseList.length ? responseList : loadedPoints.map((item) => ({ item, status: "Sin revisar", observation: "" }))).map((r) => [
+        r.item.id,
+        r.item.title,
+        r.status,
+        r.observation || r.item.favorable || "-",
+      ]),
+      headStyles: { fillColor: navy },
+      styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
+      columnStyles: { 0: { cellWidth: 22 }, 2: { cellWidth: 24 } },
+      didDrawPage: () => footer(),
+    });
 
-  y = addPage("Estado de cumplimentación");
-  autoTable(doc, {
-    startY: y,
-    margin: { left: page.margin, right: page.margin },
-    body: [
-      ["Porcentaje completado", `${completion.percent}%`],
-      ["Puntos revisados", `${completion.completed} / ${completion.total}`],
-      ["Puntos pendientes", completion.pending],
-      ["Estado", completion.isComplete ? "Completa" : "Pendiente de cumplimentar"],
-    ],
-    theme: "grid",
-    styles: { fontSize: 10, cellPadding: 3 },
-    columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
-  });
-  autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 8,
-    margin: { left: page.margin, right: page.margin },
-    head: [["Código", "Punto pendiente"]],
-    body: completion.pendingItems.length ? completion.pendingItems.map((item) => [item.id, item.title]) : [["-", "No hay puntos pendientes"]],
-    headStyles: { fillColor: navy },
-    styles: { fontSize: 9, cellPadding: 3 },
-  });
+    y = addPage("Estado de cumplimentación");
+    autoTable(doc, {
+      startY: y,
+      margin: { left: page.margin, right: page.margin },
+      body: [
+        ["Porcentaje completado", `${completion.percent}%`],
+        ["Puntos revisados", `${completion.completed} / ${completion.total}`],
+        ["Puntos pendientes", completion.pending],
+        ["Estado", completion.isComplete ? "Completa" : "Pendiente de cumplimentar"],
+      ],
+      theme: "grid",
+      styles: { fontSize: 10, cellPadding: 3 },
+      columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
+    });
+
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 8,
+      margin: { left: page.margin, right: page.margin },
+      head: [["Código", "Punto pendiente"]],
+      body: completion.pendingItems.length ? completion.pendingItems.map((item) => [item.id, item.title]) : [["-", "No hay puntos pendientes"]],
+      headStyles: { fillColor: navy },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+  }
 
   y = addPage("Tabla resumen de defectos");
   autoTable(doc, {
     startY: y,
     margin: { left: page.margin, right: page.margin },
-    head: [["Código", "Defecto", "Gravedad", "Referencia"]],
-    body: defects.length ? defects.map((r) => [r.item.id, r.item.title, r.status, r.item.reference]) : [["-", "No hay defectos registrados", "-", "-"]],
+    head: [["Código", "Defecto", "Ubicación", "Gravedad", "Referencia"]],
+    body: defects.length ? defects.map((r) => [r.item.id, r.item.title, getDefectLocation(r) || "Sin indicar", r.status, r.item.reference]) : [["-", "No hay defectos registrados", "-", "-", "-"]],
     headStyles: { fillColor: navy },
     styles: { fontSize: 9, cellPadding: 3 },
   });
@@ -8625,7 +8967,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
         ["Gravedad", r.status],
         ["Punto inspeccionado", r.item.question],
         ["Criterio favorable", r.item.favorable],
-        ["Zona afectada", "Pendiente de detallar"],
+        ["Zona / ubicación afectada", getDefectLocation(r) || "Sin indicar"],
         ["Observación del inspector", r.observation || "Sin observación específica registrada"],
         ["Medición asociada", "Sin medición asociada"],
         ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
@@ -8739,6 +9081,7 @@ async function exportRenderedReportPdf({ fileName = "isivolt-informe.pdf" } = {}
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   for (let index = 0; index < pages.length; index += 1) {
     const pageNode = pages[index];
+    await waitForImages(pageNode);
     const canvas = await html2canvas(pageNode, {
       scale: 2,
       backgroundColor: "#ffffff",
@@ -8754,18 +9097,32 @@ async function exportRenderedReportPdf({ fileName = "isivolt-informe.pdf" } = {}
   pdf.save(fileName);
 }
 
+async function waitForImages(root) {
+  const images = Array.from(root.querySelectorAll("img"));
+  await Promise.all(images.map((image) => {
+    if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      image.onload = resolve;
+      image.onerror = resolve;
+    });
+  }));
+}
+
 const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE }, ref) => {
   const completion = getInspectionCompletion(selectedBlocks, responses);
   const verdict = calculateVerdict(responses, completion.isComplete);
   const responseList = Object.values(responses).filter((r) => r.status);
-  const defects = responseList.filter((r) => ["DL", "DG", "DMG"].includes(r.status));
+  const defects = getDefectEntriesFromResponses(responses);
   const favorable = responseList.filter((r) => r.status === "Favorable");
   const dl = defects.filter((r) => r.status === "DL").length;
   const dg = defects.filter((r) => r.status === "DG").length;
   const dmg = defects.filter((r) => r.status === "DMG").length;
   const loadedPoints = getInspectableChecklistItems(selectedBlocks);
   const blocks = selectedBlocks.map((id) => getBlock(id)).filter(Boolean).sort((a, b) => a.order - b.order);
+  const itcReferences = getSelectedItcReferences(selectedBlocks);
   const today = new Date().toLocaleDateString("es-ES");
+  const reportDate = data.inspectionDate ? new Date(data.inspectionDate).toLocaleDateString("es-ES") : today;
+  const hasDetailedPointTable = reportVariant === "tecnico";
   const inspectionType = data.inspectionType ? data.inspectionType.charAt(0).toUpperCase() + data.inspectionType.slice(1) : "Sin indicar";
   const installationType = (data.installationTypes || []).map((type) => type.replaceAll("_", " ")).join(", ") || "Sin indicar";
 
@@ -8781,8 +9138,8 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
   // Preparamos los puntos para la tabla (si no hay respuestas, mostramos los cargados)
   const pointsToDisplay = responseList.length ? responseList : loadedPoints.map(item => ({ item, status: "Sin revisar", observation: "" }));
 
-  // Dividimos los puntos en grupos de 18 por página
-  const pointChunks = chunkArray(pointsToDisplay, 18);
+  // Dividimos los puntos en grupos más pequeños para evitar cortes en el PDF A4.
+  const pointChunks = chunkArray(pointsToDisplay, 12);
 
   return (
     <div ref={ref} className="report-document print-root">
@@ -8812,7 +9169,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
               <CoverData icon={Layers} label="Dirección" value={data.address || "Sin indicar"} />
               <CoverData icon={FileText} label="Reglamento" value={data.regulation} />
               <CoverData icon={Gauge} label="Tipo de inspección" value={inspectionType} />
-              <CoverData icon={ClipboardCheck} label="Fecha" value={today} />
+              <CoverData icon={ClipboardCheck} label="Fecha" value={reportDate} />
             </div>
             <div className="report-result-card">
               <p>Resultado de la inspección</p>
@@ -8846,9 +9203,9 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             <SummaryBox label="Instalación inspeccionada" value={data.name || "Sin indicar"} />
             <SummaryBox label="Tipo" value={installationType} />
             <SummaryBox label="Potencia" value={data.powerKW ? `${data.powerKW} kW` : "Sin indicar"} />
-            <SummaryBox label="Distribucion" value={data.distributionSystem} />
+            <SummaryBox label="Distribución" value={data.distributionSystem} />
             <SummaryBox label="Reglamento" value={data.regulation} />
-            <SummaryBox label="ITC principales" value={blocks.map((b) => b.code).join(", ")} />
+            <SummaryBox label="ITC principales" value={itcReferences.join(", ") || "Sin indicar"} />
           </div>
           {data.coverImage && (
             <div className="w-[60mm] h-[60mm] rounded-2xl overflow-hidden border border-slate-100 shrink-0">
@@ -8878,12 +9235,25 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Dirección", data.address || "Sin indicar"],
             ["Localidad", data.city || "Sin indicar"],
             ["Provincia", data.province || "Sin indicar"],
+            ["Titular", data.ownerName || "Sin indicar"],
+            ["NIF / CIF", data.holderNif || "Sin indicar"],
+            ["Teléfono", data.contactPhone || "Sin indicar"],
+            ["Email", data.contactEmail || "Sin indicar"],
             ["N. pedido", data.orderNumber || "Sin indicar"],
             ["CUPS", data.cups || "Sin indicar"],
+            ["Compañía suministradora", data.supplyCompany || "Sin indicar"],
             ["Potencia", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
             ["Reglamento", data.regulation],
             ["Tipo de instalación", installationType],
             ["Tipo de inspección", inspectionType],
+            ["Alcance", data.inspectionScope || "Sin indicar"],
+            ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
+            ["Fecha de inspección", reportDate],
+            ["Última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+            ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+            ["Técnico inspector", data.technicianName || "Sin indicar"],
+            ["Identificación profesional", data.technicianCredential || "Sin indicar"],
+            ["Lugar de emisión", data.reportLocation || "Sin indicar"],
             ["Esquema TT/TN/IT", data.distributionSystem],
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
@@ -8891,13 +9261,32 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
             ["Suministro complementario", data.complementarySupplyType || "No indicado"],
             ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
+            ["CIE / boletín", data.hasCertificate ? "Sí" : "No indicado"],
             ["Esquema unifilar", data.hasSingleLine ? "Sí" : "No indicado"],
+            ["Acta OCA anterior", data.hasPreviousReport ? "Sí" : "No indicado"],
           ]}
         />
       </ReportPage>
 
+      <ReportPage title="Normativa e ITC aplicables" icon={BookOpen}>
+        <p className="report-subtitle">Resumen de instrucciones técnicas según el reglamento y los bloques seleccionados.</p>
+        {itcReferences.length ? (
+          <div className="report-itc-list">
+            {itcReferences.map((reference) => (
+              <div className="report-itc-item" key={reference}>
+                <ShieldCheck className="w-4 h-4" />
+                <span>{reference}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyReportText text="No hay ITC asociadas a los bloques seleccionados." />
+        )}
+        <ReportTable rows={blocks.map((block) => [`Bloque ${block.code}`, block.title])} />
+      </ReportPage>
+
       {/* TABLA DE PUNTOS MULTI-PÁGINA */}
-      {pointChunks.map((chunk, idx) => (
+      {hasDetailedPointTable && pointChunks.map((chunk, idx) => (
         <ReportPage
           key={`points-page-${idx}`}
           title={idx === 0 ? "Tabla resumen de puntos" : "Tabla de puntos (cont.)"}
@@ -8912,8 +9301,14 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
       </ReportPage>
 
       {reportVariant === "tecnico" && defects.map((r, index) => (
-        <DefectReportPage key={r.item.id} r={r} index={index} />
+        <DefectReportPage key={r.defectEntryId || `${r.item.id}-${index}`} r={r} index={index} />
       ))}
+
+      {reportVariant === "tecnico" && defects.some((r) => getReportPhotos(r).length > 0) && (
+        <ReportPage title="Fotografías asociadas" icon={ImageIcon}>
+          <PhotoAnnex defects={defects} />
+        </ReportPage>
+      )}
 
       <FieldSheetsReportPages fieldSheets={fieldSheets} />
 
@@ -9281,15 +9676,17 @@ function DefectSummaryTable({ defects }) {
         <tr>
           <th>Código</th>
           <th>Defecto</th>
+          <th>Ubicación</th>
           <th>Gravedad</th>
           <th>Referencia</th>
         </tr>
       </thead>
       <tbody>
         {defects.map((r) => (
-          <tr key={r.item.id}>
+          <tr key={r.defectEntryId || r.item.id}>
             <td>{r.item.id}</td>
             <td>{fixText(r.item.title)}</td>
+            <td>{fixText(getDefectLocation(r) || "Sin indicar")}</td>
             <td><span className={classNames("status-chip", r.status.toLowerCase())}>{r.status}</span></td>
             <td>{fixText(r.item.reference)}</td>
           </tr>
@@ -9299,9 +9696,34 @@ function DefectSummaryTable({ defects }) {
   );
 }
 
-function DefectReportPage({ r, index }) {
+function getReportPhotos(entry) {
+  return (entry?.photos || []).filter((photo) => photo?.dataUrl || photo?.thumbnailUrl);
+}
+
+function ReportPhotoGrid({ photos = [], emptyText = "No hay fotografías asociadas." }) {
+  if (!photos.length) {
+    return <div className="report-photo-empty">{fixText(emptyText)}</div>;
+  }
+
   return (
-    <ReportPage title={`Defecto n ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
+    <div className="photo-grid report-photo-grid">
+      {photos.map((photo, index) => (
+        <figure className="report-photo-card" key={photo.fileId || `${photo.fileName}-${index}`}>
+          <img src={photo.dataUrl || photo.thumbnailUrl} alt={photo.fileName || `Fotografía ${index + 1}`} />
+          <figcaption>
+            Foto {index + 1}{photo.fileName ? ` · ${photo.fileName}` : ""}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function DefectReportPage({ r, index }) {
+  const photos = getReportPhotos(r);
+  const location = getDefectLocation(r) || "Sin indicar";
+  return (
+    <ReportPage title={`Defecto ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
       <div className="defect-report-card">
         <div className="defect-report-head">
           <span className={classNames("status-chip", r.status.toLowerCase())}>{r.status} - {r.status === "DL" ? "Defecto leve" : r.status === "DG" ? "Defecto grave" : "Defecto muy grave"}</span>
@@ -9313,7 +9735,7 @@ function DefectReportPage({ r, index }) {
           ["Referencia", r.item.reference],
           ["Punto inspeccionado", r.item.question],
           ["Criterio favorable", r.item.favorable],
-          ["Zona afectada", r.zone || "Pendiente de detallar"],
+          ["Zona / ubicación afectada", location],
           ["Observación del inspector", r.observation || "Sin observación específica registrada"],
           ["Medición asociada", r.measurement || "Sin medición asociada"],
           ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
@@ -9329,10 +9751,7 @@ function DefectReportPage({ r, index }) {
           </div>
         </div>
         <h4 className="photo-title">Fotografías asociadas</h4>
-        <div className="photo-grid">
-          <PhotoBox label="Foto 1" text="Vista general del defecto" />
-          <PhotoBox label="Foto 2" text="Detalle / medición" />
-        </div>
+        <ReportPhotoGrid photos={photos} emptyText="No hay fotografías asociadas a este defecto." />
       </div>
     </ReportPage>
   );
@@ -9620,16 +10039,17 @@ function InsulationCircuitReportTable({ circuits }) {
 }
 
 function PhotoAnnex({ defects }) {
-  const items = defects.length ? defects : [{ item: { id: "SIN.DEFECTOS", title: "Sin defectos registrados" } }];
+  const photoItems = defects.flatMap((r) => getReportPhotos(r).map((photo, index) => ({ r, photo, index })));
+  if (!photoItems.length) {
+    return <EmptyReportText text="No hay fotografías asociadas a defectos." />;
+  }
+
   return (
     <div className="photo-annex">
-      {items.map((r, index) => (
-        <div className="photo-annex-group" key={`${r.item.id}-${index}`}>
-          <h3>{r.item.id} - {fixText(r.item.title)}</h3>
-          <div className="photo-grid">
-            <PhotoBox label={`Foto ${index * 2 + 1}`} text="Vista general" />
-            <PhotoBox label={`Foto ${index * 2 + 2}`} text="Detalle técnico" />
-          </div>
+      {photoItems.map(({ r, photo, index }) => (
+        <div className="photo-annex-group" key={`${r.defectEntryId || r.item.id}-${photo.fileId || index}`}>
+          <h3>{r.item.id} - {fixText(r.item.title)}{getDefectLocation(r) ? ` (${fixText(getDefectLocation(r))})` : ""}</h3>
+          <ReportPhotoGrid photos={[photo]} emptyText="No hay fotografía disponible." />
         </div>
       ))}
     </div>
@@ -9737,7 +10157,7 @@ export default function IsiVoltProInspecciónes() {
 
     const completion = getInspectionCompletion(selectedBlocks, responses);
     const verdict = calculateVerdict(responses, completion.isComplete);
-    const defectCount = Object.values(responses).filter((r) => ["DL", "DG", "DMG"].includes(r.status)).length;
+    const defectCount = getDefectEntriesFromResponses(responses).length;
 
     setInspections((prev) =>
       prev.map((ins) => {
@@ -9887,7 +10307,7 @@ export default function IsiVoltProInspecciónes() {
     setShowLegalIntro(false);
   };
 
-  const defects = Object.values(responses).filter((r) => ["DL", "DG", "DMG"].includes(r.status)).length;
+  const defects = getDefectEntriesFromResponses(responses).length;
   const completion = getInspectionCompletion(selectedBlocks, responses);
   const openReportReview = () => setShowFinalReview(true);
   const openReport = (mode) => {
