@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IsiVoltPro</title>
+    <meta name="theme-color" content="#071E3D" />
+    <title>IsiVoltPro Inspecciones</title>
     <script>
-      var repo = "/isivolpro-inspecciones/";
-      if (location.pathname.indexOf(repo) === 0) {
-        location.replace(repo);
-      } else {
-        location.replace("/");
+      if (location.hostname.endsWith("github.io") && !location.pathname.includes("/docs/")) {
+        location.replace("/isivolpro-inspecciones/docs/");
       }
     </script>
+    <script type="module" crossorigin src="./assets/index-viWeikmv.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-t5-_tAaO.css">
   </head>
   <body>
-    <p>Abriendo IsiVoltPro...</p>
+    <div id="root"></div>
   </body>
 </html>
