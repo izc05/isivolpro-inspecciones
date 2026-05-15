@@ -1,0 +1,25 @@
+{
+  "name": "IsiVoltPro Inspecciones Eléctricas",
+  "short_name": "IsiVoltPro",
+  "description": "Aplicación de apoyo para inspecciones eléctricas de baja tensión.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#061F3E",
+  "theme_color": "#071E3D",
+  "icons": [
+    {
+      "src": "./assets/branding/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/branding/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

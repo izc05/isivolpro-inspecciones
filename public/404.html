@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IsiVoltPro</title>
     <script>
-      var repo = "/isivolpro-inspecciones/";
-      if (location.pathname.indexOf(repo) === 0) {
-        location.replace(repo);
-      } else {
-        location.replace("/");
-      }
+      const repo = "/isivolpro-inspecciones/";
+      const target = location.hostname.endsWith("github.io") ? repo : "/";
+      location.replace(target);
     </script>
   </head>
   <body>
