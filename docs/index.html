@@ -14,5 +14,17 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        const repoBase = "/isivolpro-inspecciones/";
+        const isGithubPages = location.hostname.endsWith("github.io");
+        const isRawViteEntry = !!document.querySelector('script[src="/src/main.jsx"]');
+        const isDocsBuild = location.pathname.startsWith(repoBase + "docs/");
+
+        if (isGithubPages && isRawViteEntry && !isDocsBuild) {
+          location.replace(repoBase + "docs/");
+        }
+      })();
+    </script>
   </body>
 </html>
