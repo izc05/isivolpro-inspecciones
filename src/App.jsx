@@ -1579,24 +1579,36 @@ function Section({ title, number, children }) {
   );
 }
 
-function StageFlow({ current }) {
+function StageFlow({ current, setScreen }) {
   const stages = [
     ["data", "1", "Datos"],
     ["blocks", "2", "Bloques"],
     ["checklist", "3", "Inspección"],
-    ["measurements", "4", "Medidas"],
-    ["photos", "5", "Fotos"],
-    ["report", "6", "Informe"],
+    ["fieldSheet", "4", "Medidas"],
+    ["report", "5", "Informe"],
   ];
   return (
     <div className="px-5 pt-4 pb-2 print:hidden sticky top-0 z-30 bg-slate-100/95 backdrop-blur">
-      <div className="bg-white border border-slate-100 rounded-[1.5rem] p-3 shadow-sm overflow-x-auto">
+      <div className="bg-white border border-slate-100 rounded-[1.5rem] p-3 shadow-sm overflow-x-auto no-scrollbar">
         <div className="flex gap-2 min-w-max">
           {stages.map(([id, number, label]) => (
-            <div key={id} className={classNames("flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black", current === id ? "bg-[#071E3D] text-white" : "bg-slate-50 text-slate-500")}>
-              <span className={classNames("w-5 h-5 rounded-full flex items-center justify-center", current === id ? "bg-[#FFC928] text-[#071E3D]" : "bg-white border border-slate-200")}>{number}</span>
+            <button
+              key={id}
+              type="button"
+              onClick={() => setScreen && setScreen(id)}
+              className={classNames(
+                "flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all active:scale-95",
+                current === id ? "bg-[#071E3D] text-white shadow-md" : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+              )}
+            >
+              <span className={classNames(
+                "w-5 h-5 rounded-full flex items-center justify-center",
+                current === id ? "bg-[#FFC928] text-[#071E3D]" : "bg-white border border-slate-200"
+              )}>
+                {number}
+              </span>
               {fixText(label)}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -2196,7 +2208,7 @@ function DataScreen({ data, setData, setScreen }) {
   return (
     <div className="pb-32">
       <Header title="Datos de instalación" subtitle="Identificación y características" onBack={() => setScreen("inspections")} right={<Save className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="data" />
+      <StageFlow current="data" setScreen={setScreen} />
       <div className="p-5 space-y-5">
         <Section title="Imagen principal" number="00">
           <div className="relative group">
@@ -2560,7 +2572,7 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen }) {
   return (
     <div className="pb-32">
       <Header title="Bloques de inspección" subtitle="Automático + manual" onBack={() => setScreen("data")} right={<SlidersHorizontal className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="blocks" />
+      <StageFlow current="blocks" setScreen={setScreen} />
       <div className="p-5 space-y-5">
         <div className="bg-[#071E3D] text-white rounded-[2rem] p-5 shadow-xl">
           <h2 className="font-black text-lg">Bloques recomendados</h2>
@@ -2946,7 +2958,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
   return (
     <div className="pb-32">
       <Header title="Checklist" subtitle={`${items.length} puntos inspeccionables`} onBack={() => setScreen("blocks")} right={<ClipboardCheck className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="checklist" />
+      <StageFlow current="checklist" setScreen={setScreen} />
       <div className="p-5 space-y-5">
         <ProgressCard completion={completion} onReviewPending={() => setShowPending((value) => !value)} sticky />
 
@@ -3374,6 +3386,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, setScreen, currentId }
   return (
     <div className="pb-32">
       <Header title="Hoja de campo" subtitle="Mediciones por cuadro eléctrico" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
+      <StageFlow current="fieldSheet" setScreen={setScreen} />
       <div className="p-5 space-y-5">
         {!currentId && (
           <div className="bg-yellow-50 border border-yellow-100 rounded-[1.5rem] p-4 text-sm text-yellow-900 font-bold">
@@ -3502,7 +3515,7 @@ function MeasurementsScreen({ measurements, setMeasurements, setScreen, data }) 
   return (
     <div className="pb-32">
       <Header title="Hoja auxiliar de medidas" subtitle="Bloque 25" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="measurements" />
+      <StageFlow current="fieldSheet" setScreen={setScreen} />
       <div className="p-5 space-y-5">
         <Section title="Mediciones" number="25">
           <Field label="Local / circuito / cuadro" value={measurements.location || ""} onChange={(v) => update("location", v)} placeholder="Ej. Cuadro general" />
@@ -4371,6 +4384,7 @@ function ReportScreen({
           </button>
         }
       />
+      <StageFlow current="report" setScreen={setScreen} />
 
       <div className="p-4 flex gap-2 no-print bg-slate-100/50 backdrop-blur sticky top-16 z-40">
         <button onClick={() => setReportVariant("resumen")} className={classNames("flex-1 py-3 rounded-2xl font-black text-xs transition-all", reportVariant === "resumen" ? "bg-[#071E3D] text-white shadow-lg" : "bg-white text-slate-500 border border-slate-200")}>Resumido</button>
