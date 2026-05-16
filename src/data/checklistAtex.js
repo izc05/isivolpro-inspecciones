@@ -40,7 +40,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Documento de clasificación de zonas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir documentación técnica que clasifique zonas 0, 1, 2 / 20, 21, 22.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Documento de clasificación de zonas.",
@@ -90,7 +90,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Coherencia de la clasificación de zonas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La clasificación debe coincidir con la instalación ejecutada y sus condiciones reales de ventilación y riesgo.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Coherencia de la clasificación de zonas.",
@@ -138,7 +138,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Categoría del material según zona.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Zona 0: Cat. 1; Zona 1: Cat. 1 o 2; Zona 2: Cat. 1, 2 o 3.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Categoría del material según zona.",
@@ -285,7 +285,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Canalizaciones y cables adecuados.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Canalizaciones y cables protegidos frente a agresiones mecánicas, químicas y condiciones del local.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Canalizaciones y cables adecuados.",
@@ -335,7 +335,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Modo de protección y marcado reglamentario.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material debe estar marcado y ser apto para la zona correspondiente, sin manipulaciones que invaliden la protección.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Modo de protección y marcado reglamentario.",
@@ -385,7 +385,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Protección física de cables.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Los cables deben estar correctamente fijados, protegidos y sin deterioros que afecten su seguridad.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Protección física de cables.",
@@ -437,7 +437,7 @@ export const checklistAtex = [
       ]
     },
     "itc": "ITC-BT-29",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones en locales con riesgo de incendio o explosión, clasificación de zonas, material ATEX, canalizaciones y sellados. Aplicado al punto: Validación global del cumplimiento ATEX.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir coherencia global entre clasificación, material, canalización, puesta a tierra y ejecución.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Validación global del cumplimiento ATEX.",

@@ -40,7 +40,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Clasificación como local de pública concurrencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El tipo de local y su uso deben estar correctamente identificados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Clasificación como local de pública concurrencia.",
@@ -58,7 +58,7 @@ export const checklistPublicaConcurrencia = [
     "code": "04.01.02",
     "section": "A. Clasificación y documentación",
     "title": "Aforo / ocupación prevista",
-    "question": "¿Consta la ocupacin prevista o aforo del local?",
+    "question": "¿Consta la ocupación prevista o aforo del local?",
     "reference": "REBT 2002 / ITC-BT-28",
     "favorable": "Debe constar la ocupación prevista o aforo para determinar requisitos de suministro y emergencia.",
     "favorableCriteria": "Debe constar la ocupación prevista o aforo para determinar requisitos de suministro y emergencia.",
@@ -88,7 +88,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Aforo / ocupación prevista.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe constar la ocupación prevista o aforo para determinar requisitos de suministro y emergencia.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Aforo / ocupación prevista.",
@@ -135,7 +135,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-04 / ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la documentación técnica, proyecto o memoria técnica de diseño, certificados y documentación de puesta en servicio según el tipo de instalación. Aplicado al punto: Proyecto técnico.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El local debe disponer de proyecto cuando sea exigible por pública concurrencia.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Proyecto técnico.",
@@ -184,7 +184,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-04 / ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la documentación técnica, proyecto o memoria técnica de diseño, certificados y documentación de puesta en servicio según el tipo de instalación. Aplicado al punto: Esquema unifilar actualizado.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe coincidir con la instalación real inspecciónada.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Esquema unifilar actualizado.",
@@ -232,7 +232,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Documentación de alumbrado de emergencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben existir datos, mantenimiento o características de las luminarias de emergencia.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Documentación de alumbrado de emergencia.",
@@ -254,9 +254,14 @@ export const checklistPublicaConcurrencia = [
     "title": "Necesidad de suministro complementario",
     "question": "¿La necesidad de suministro de socorro o reserva est determinada según uso y aforo?",
     "reference": "REBT 2002 / ITC-BT-28",
-    "favorable": "La app debe determinar si necesita socorro o reserva según uso y aforo.",
-    "favorableCriteria": "La app debe determinar si necesita socorro o reserva según uso y aforo.",
+    "favorable": "La necesidad de suministro complementario debe estar justificada según uso, aforo, actividad y servicios de seguridad aplicables.",
+    "favorableCriteria": "La necesidad de suministro complementario debe estar justificada según uso, aforo, actividad y servicios de seguridad aplicables.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_06.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": false,
@@ -283,7 +288,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Necesidad de suministro complementario.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La app debe determinar si necesita socorro o reserva según uso y aforo.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Necesidad de suministro complementario.",
@@ -292,7 +297,8 @@ export const checklistPublicaConcurrencia = [
     "evidenciasRequeridas": [
       "Fotografía del punto si existe defecto"
     ],
-    "medicionesRequeridas": []
+    "medicionesRequeridas": [],
+    "tipoPunto": "dato_clasificacion"
   },
   {
     "id": "04.01.07",
@@ -331,7 +337,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Suministro de socorro.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si aplica, debe cubrir los servicios reglamentarios.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Suministro de socorro.",
@@ -350,8 +356,8 @@ export const checklistPublicaConcurrencia = [
     "title": "Suministro de reserva",
     "question": "¿Si aplica, existe suministro de reserva en locales específicos que lo requieren?",
     "reference": "REBT 2002 / ITC-BT-28",
-    "favorable": "Obligatorio en hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m2, estadios y pabellones deportivos.",
-    "favorableCriteria": "Obligatorio en locales específicos como hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m2, estadios y pabellones deportivos.",
+    "favorable": "Obligatorio en hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m², estadios y pabellones deportivos.",
+    "favorableCriteria": "Obligatorio en locales específicos como hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m², estadios y pabellones deportivos.",
     "severity": "DG",
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
@@ -378,9 +384,9 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Suministro de reserva.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Obligatorio en locales específicos como hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m2, estadios y pabellones deportivos.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Obligatorio en locales específicos como hospitales, estaciones, aeropuertos, aparcamientos subterráneos >100 vehículos, centros comerciales >2.000 m², estadios y pabellones deportivos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Suministro de reserva.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-28. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -427,7 +433,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Conmutación / entrada del suministro de seguridad.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe entrar en funcionamiento cuando proceda, de forma automática si corresponde.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Conmutación / entrada del suministro de seguridad.",
@@ -477,7 +483,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Servicios de seguridad alimentados.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben alimentarse alumbrado de emergencia, sistemas contra incendios, ascensores u otros servicios urgentes si aplica.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Servicios de seguridad alimentados.",
@@ -501,6 +507,11 @@ export const checklistPublicaConcurrencia = [
     "favorable": "Debe existir alumbrado de emergencia en el local.",
     "favorableCriteria": "Debe existir alumbrado de emergencia en el local.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_11.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": false,
@@ -526,7 +537,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Existencia de alumbrado de emergencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir alumbrado de emergencia en el local.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Existencia de alumbrado de emergencia.",
@@ -579,7 +590,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Funcionamiento de luminarias de emergencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Las luminarias deben funcionar al fallo de red o mediante prueba.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Funcionamiento de luminarias de emergencia.",
@@ -601,6 +612,11 @@ export const checklistPublicaConcurrencia = [
     "favorable": "Mínimo 1 hora para alumbrado de evacuación y antipánico.",
     "favorableCriteria": "Mínimo 1 hora para alumbrado de evacuación y antipánico.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_13.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": false,
@@ -627,7 +643,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Autonomía mínima.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 1 hora para alumbrado de evacuación y antipánico.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Autonomía mínima.",
@@ -683,7 +699,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Iluminancia en rutas de evacuación.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 1 lux en suelo, en el eje de pasos principales.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Iluminancia en rutas de evacuación.",
@@ -740,7 +756,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Iluminancia en cuadros y equipos contra incendios.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 5 lux en cuadros de distribución y equipos de protección contra incendios de uso manual.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Iluminancia en cuadros y equipos contra incendios.",
@@ -766,6 +782,11 @@ export const checklistPublicaConcurrencia = [
     "favorable": "Debe permitir identificar y acceder a rutas de evacuación; referencia habitual 0,5 lux hasta 1 m de altura.",
     "favorableCriteria": "Debe permitir identificar y acceder a rutas de evacuación; referencia habitual 0,5 lux hasta 1 m de altura.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_16.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": true,
@@ -782,7 +803,7 @@ export const checklistPublicaConcurrencia = [
       "whatToCheck": [
         "Zonas abiertas",
         "Acceso a rutas de evacuación",
-        "Cobertura lum2nica",
+        "Cobertura lum²nica",
         "Funcionamiento"
       ],
       "criteria": [
@@ -799,7 +820,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Alumbrado antipánico / ambiente.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe permitir identificar y acceder a rutas de evacuación; referencia habitual 0,5 lux hasta 1 m de altura.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Alumbrado antipánico / ambiente.",
@@ -820,10 +841,10 @@ export const checklistPublicaConcurrencia = [
     "code": "04.01.17",
     "section": "C. Alumbrado de emergencia",
     "title": "Ubicación de emergencias en puntos críticos",
-    "question": "¿Existen luminarias en salidas, cambios de direccin, intersecciónes y recorridos de evacuacin?",
+    "question": "¿Existen luminarias en salidas, cambios de direccin, intersecciones y recorridos de evacuacin?",
     "reference": "REBT 2002 / ITC-BT-28",
-    "favorable": "Deben existir luminarias en salidas, cambios de dirección, intersecciónes de pasillos y recorridos de evacuación.",
-    "favorableCriteria": "Deben existir luminarias en salidas, cambios de dirección, intersecciónes de pasillos y recorridos de evacuación.",
+    "favorable": "Deben existir luminarias en salidas, cambios de dirección, intersecciones de pasillos y recorridos de evacuación.",
+    "favorableCriteria": "Deben existir luminarias en salidas, cambios de dirección, intersecciones de pasillos y recorridos de evacuación.",
     "severity": "DG",
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
@@ -834,7 +855,7 @@ export const checklistPublicaConcurrencia = [
       "whatToCheck": [
         "Salidas",
         "Cambios de dirección",
-        "Intersecciónes",
+        "Intersecciones",
         "Escaleras",
         "Recorridos"
       ],
@@ -851,9 +872,9 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Ubicación de emergencias en puntos críticos.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben existir luminarias en salidas, cambios de dirección, intersecciónes de pasillos y recorridos de evacuación.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben existir luminarias en salidas, cambios de dirección, intersecciones de pasillos y recorridos de evacuación.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ubicación de emergencias en puntos críticos.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-28. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -905,7 +926,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Emergencia junto a cuadros eléctricos.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir iluminación suficiente junto a cuadros de distribución.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Emergencia junto a cuadros eléctricos.",
@@ -955,7 +976,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Señalización de salidas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Las salidas y señales de seguridad reglamentarias deben estar iluminadas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Señalización de salidas.",
@@ -1007,7 +1028,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Estado físico de luminarias.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin roturas, sin baterías agotadas, sin pilotos de fallo y correctamente fijadas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Estado físico de luminarias.",
@@ -1055,7 +1076,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Ubicación de cuadros fuera del acceso público.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Los cuadros deben estar en zonas no accesibles al público o protegidos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ubicación de cuadros fuera del acceso público.",
@@ -1104,7 +1125,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Cuadros protegidos y cerrados.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin partes activas accesibles, con cierre y envolvente adecuada.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cuadros protegidos y cerrados.",
@@ -1151,7 +1172,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Identificación de circuitos.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Todos los circuitos deben estar claramente identificados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Identificación de circuitos.",
@@ -1198,7 +1219,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: División del alumbrado por circuitos.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El corte de una línea no debe afectar a más de un tercio del alumbrado del local o zona.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: División del alumbrado por circuitos.",
@@ -1247,7 +1268,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-22 / ITC-BT-24 / ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección contra sobreintensidades mediante dispositivos adecuados a sección, corriente admisible y condiciones de cortocircuito. Aplicado al punto: Protección diferencial y magnetotérmica.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Circuitos protegidos de forma adecuada según uso y sección.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Protección diferencial y magnetotérmica.",
@@ -1271,6 +1292,11 @@ export const checklistPublicaConcurrencia = [
     "favorable": "Las protecciones no deben comprometer los servicios esenciales de seguridad.",
     "favorableCriteria": "Las protecciones no deben comprometer los servicios esenciales de seguridad.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_26.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": false,
@@ -1296,7 +1322,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Selectividad / continuidad de servicios de seguridad.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Las protecciones no deben comprometer los servicios esenciales de seguridad.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Selectividad / continuidad de servicios de seguridad.",
@@ -1346,7 +1372,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Cables tipo AS en pública concurrencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Cables no propagadores de incendio y baja emisión de humos donde aplique.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cables tipo AS en pública concurrencia.",
@@ -1393,7 +1419,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Cables resistentes al fuego en servicios de seguridad.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: En servicios críticos deben mantenerse las condiciones de funcionamiento durante incendio si aplica.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cables resistentes al fuego en servicios de seguridad.",
@@ -1442,7 +1468,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28 / ITC-BT-20",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Canalizaciones adecuadas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Tubos, canales o bandejas adecuados, cerrados y protegidos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Canalizaciones adecuadas.",
@@ -1490,7 +1516,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Sin conductores expuestos al público.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: No deben existir cables accesibles, sueltos o sin protección.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Sin conductores expuestos al público.",
@@ -1539,7 +1565,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28 / ITC-BT-19",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Cajas y empalmes cerrados.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Empalmes dentro de cajas, con tapa y bornes adecuados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cajas y empalmes cerrados.",
@@ -1588,7 +1614,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28 / ITC-BT-20",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Separación respecto a otras instalaciones.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Separación o protección frente a agua, gas, climatización u otros servicios.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Separación respecto a otras instalaciones.",
@@ -1610,6 +1636,11 @@ export const checklistPublicaConcurrencia = [
     "favorable": "Si hay riesgo de caída, escaleras o desniveles deben estar señalizados/iluminados.",
     "favorableCriteria": "Si hay riesgo de caída, escaleras o desniveles deben estar señalizados/iluminados.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/04_01_33.png"
+      ]
+    },
     "defaultSeverity": "DG",
     "requiresPhotoIfDefect": true,
     "requiresMeasurement": false,
@@ -1636,7 +1667,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Balizamiento en escaleras.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si hay riesgo de caída, escaleras o desniveles deben estar señalizados/iluminados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Balizamiento en escaleras.",
@@ -1683,7 +1714,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Balizamiento en rampas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Rampas con inclinación significativa deben contar con alumbrado o señalización adecuada.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Balizamiento en rampas.",
@@ -1737,7 +1768,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Zonas de alto riesgo.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben disponer de alumbrado suficiente para interrumpir trabajos peligrosos con seguridad. Referencia: 15 lux o 10 % de la iluminación normal.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Zonas de alto riesgo.",
@@ -1787,7 +1818,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Locales sanitarios o asistenciales.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si aplica, comprobar alumbrado de reemplazamiento y servicios esenciales.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales sanitarios o asistenciales.",
@@ -1838,7 +1869,7 @@ export const checklistPublicaConcurrencia = [
       ]
     },
     "itc": "ITC-BT-28",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de pública concurrencia, alumbrado de emergencia, suministros de seguridad, evacuación, distribución de alumbrado y cables adecuados. Aplicado al punto: Compatibilidad con otros bloques.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si hay cocina, piscina, garaje, ATEX, quirófano, FV o IRVE, activar también los bloques correspondientes.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Compatibilidad con otros bloques.",
@@ -1848,8 +1879,7 @@ export const checklistPublicaConcurrencia = [
       "Fotografía del punto si existe defecto"
     ],
     "medicionesRequeridas": [
-      "Medición de corriente de string cuando proceda"
-    ]
+      ]
   }
 ];
 

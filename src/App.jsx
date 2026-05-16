@@ -67,7 +67,7 @@ const BLOCKS = [
   { id: "rebt2002_block_10", code: "00.01", title: "Documentación general", regulation: "REBT 2002", order: 0, icon: FileText },
   { id: "rebt2002_block_01", code: "01.01", title: "Instalaciones de enlace", regulation: "REBT 2002", order: 1, icon: Zap },
   { id: "rebt2002_block_02", code: "02.01", title: "Instalaciones interiores", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
-  { id: "rebt2002_block_02b", code: "02B", title: "Baños y duchas", regulation: "REBT 2002 (BT-27)", order: 3, icon: ShieldCheck },
+  { id: "rebt2002_block_02b", code: "02B", title: "Zonas húmedas, mojadas o con condiciones especiales", regulation: "REBT 2002 (BT-27)", order: 3, icon: ShieldCheck },
   { id: "rebt2002_block_03", code: "03.01", title: "Alumbrado exterior", regulation: "REBT 2002", order: 4, icon: Sun },
   { id: "rebt2002_block_04", code: "04.01", title: "Locales de pública concurrencia", regulation: "REBT 2002", order: 5, icon: Layers },
   { id: "rebt2002_block_05", code: "05.01", title: "Locales con riesgo de incendio o explosión / ATEX", regulation: "REBT 2002", order: 6, icon: Flame },
@@ -104,7 +104,7 @@ const INITIAL_INSPECTION = {
   inspectionType: "inicial",
   powerKW: "",
   distributionSystem: "TT",
-  installationTypes: ["publica_concurrencia"],
+  installationTypes: [],
   isExterior: false,
   hasAtex: false,
   hasEV: false,
@@ -113,7 +113,7 @@ const INITIAL_INSPECTION = {
   publicUse: "",
   occupancy: "",
   usableAreaM2: "",
-  hasExternalPublic: true,
+  hasExternalPublic: false,
   hasEmergencyLighting: false,
   hasComplementarySupply: false,
   complementarySupplyType: "no_indicado",
@@ -336,7 +336,7 @@ Las marcas, nombres comerciales, logotipos o productos mencionados pertenecen a 
 
 Versión de la app: ${APP_VERSION}
 Versión legal: ${LEGAL_VERSION}
-Úúúltima actualización legal: ${LEGAL_UPDATED_AT}
+última actualización legal: ${LEGAL_UPDATED_AT}
 Base normativa: REBT 2002
 
 Responsable: configurable desde Datos de empresa.
@@ -397,7 +397,7 @@ function fixText(value) {
     .replace(/\bSección\b/g, "Sección").replace(/\bsección\b/g, "sección")
     .replace(/\bBusqueda\b/g, "Búsqueda").replace(/\bbusqueda\b/g, "búsqueda")
     .replace(/\bTodavia\b/g, "Todavía").replace(/\btodavia\b/g, "todavía")
-    .replace(/\bÚúúltima\b/g, "Úúúltima").replace(/\bÚúúltima\b/g, "úúúltima")
+    .replace(/\búltima\b/g, "última").replace(/\búltima\b/g, "úúúltima")
     .replace(/\bTensión\b/g, "Tensión").replace(/\btensión\b/g, "tensión")
     .replace(/\bMínimo\b/g, "Mínimo").replace(/\bmínimo\b/g, "mínimo")
     .replace(/\bMaximo\b/g, "Máximo").replace(/\bmáximo\b/g, "máximo")
@@ -452,7 +452,7 @@ function fixText(value) {
     .replace(/\bTuberías\b/g, "Tuberías").replace(/\btuberías\b/g, "tuberías")
     .replace(/\bDanos\b/g, "Daños").replace(/\bdaños\b/g, "daños")
     .replace(/\bCategoría\b/g, "Categoría").replace(/\bcategoría\b/g, "categoría")
-    .replace(/\bIm2genes\b/g, "Imágenes")
+    .replace(/\bIm²genes\b/g, "Imágenes")
     .replace(/\bAnadir\b/g, "Añadir").replace(/\bAnade\b/g, "Añade")
     .replace(/\bSelecionar\b/g, "Seleccionar").replace(/\bselecionar\b/g, "seleccionar")
     .replace(/\bNo aplica\b/g, "N/A");
@@ -723,6 +723,23 @@ function buildTechnicalHelpSvg(title, subtitle = "Referencia visual de inspecci�
 }
 
 const AVAILABLE_HELP_IMAGES = new Set([
+  "04_01_33.png",
+  "04_01_26.png",
+  "04_01_16.png",
+  "04_01_13.png",
+  "04_01_11.png",
+  "04_01_06.png",
+  "02_01_38.png",
+  "02_01_36.png",
+  "02_01_32.png",
+  "02_01_31.png",
+  "02_01_11.png",
+  "01_01_34.png",
+  "01_01_29.png",
+  "01_01_27.png",
+  "01_01_21.png",
+  "01_01_13.png",
+  "01_01_11.png",
   "01_01_01_estado_exterior_acceso_cgp.png",
   "01_01_02_tapa_envolvente_interior_cgp.png",
   "01_01_03_altura_instalacion_cgp_cgpm.png",
@@ -1627,7 +1644,7 @@ function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generate
             )}
             <div className="flex items-center justify-between relative z-10">
               <div className="flex-1 min-w-0 pr-4">
-                <p className="text-[10px] font-black text-[#FFC928] uppercase tracking-widest mb-1">Úúúltima inspección</p>
+                <p className="text-[10px] font-black text-[#FFC928] uppercase tracking-widest mb-1">última inspección</p>
                 <h2 className="font-black text-slate-900 truncate text-lg leading-tight">{last.data?.name || "Sin nombre"}</h2>
                 <p className="text-sm text-slate-500 mt-1">{last.progress || 0} % completado</p>
               </div>
@@ -2005,7 +2022,7 @@ function SettingsScreen({
         <Section title="Version" number="06">
           <SettingsRow icon={Store} title="Version de la app" text={`IsiVolt Pro ${APP_VERSION}`} />
           <SettingsRow icon={FileText} title="Base normativa" text="REBT 2002 · Base técnica V1." />
-          <SettingsRow icon={ShieldCheck} title="Úúúltima actualización legal" text={LEGAL_UPDATED_AT} />
+          <SettingsRow icon={ShieldCheck} title="última actualización legal" text={LEGAL_UPDATED_AT} />
           <SettingsRow icon={Download} title="Exportar diagnóstico" text="Preparado para soporte técnico en futuras versiones." />
         </Section>
       </div>
@@ -2242,7 +2259,7 @@ function DataScreen({ data, setData, setScreen }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Fecha de inspección" value={data.inspectionDate || ""} onChange={(v) => update("inspectionDate", v)} type="date" />
-            <Field label="Úúúltima inspección" value={data.previousInspectionDate || ""} onChange={(v) => update("previousInspectionDate", v)} type="date" />
+            <Field label="última inspección" value={data.previousInspectionDate || ""} onChange={(v) => update("previousInspectionDate", v)} type="date" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Próximo vencimiento" value={data.nextInspectionDate || ""} onChange={(v) => update("nextInspectionDate", v)} type="date" />
@@ -2365,7 +2382,7 @@ function PublicConcurrencyForm({ data, update }) {
       />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Aforo previsto" value={data.occupancy || ""} onChange={(v) => update("occupancy", v)} placeholder="Ej. 120" type="number" />
-        <Field label="Superficie Útil m2" value={data.usableAreaM2 || ""} onChange={(v) => update("usableAreaM2", v)} placeholder="Ej. 280" type="number" />
+        <Field label="Superficie Útil m²" value={data.usableAreaM2 || ""} onChange={(v) => update("usableAreaM2", v)} placeholder="Ej. 280" type="number" />
       </div>
       <Select
         label="Suministro complementario"
@@ -2383,7 +2400,7 @@ function PublicConcurrencyForm({ data, update }) {
         {[
           ["hasExternalPublic", "Hay público ajeno al establecimiento"],
           ["hasEmergencyLighting", "Existe alumbrado de emergencia"],
-          ["hasGeneratorOrSai", "Hay grupo electrgeno, SAI o baterías"],
+          ["hasGeneratorOrSai", "Hay grupo electrógeno, SAI o baterías"],
           ["hasPublicAccessiblePanels", "Hay cuadros accesibles al público"],
           ["hasEvacuationRoutes", "Hay escaleras, rampas o recorridos de evacuación"],
           ["hasSpecialPublicZones", "Hay cocina, garaje, piscina, ATEX, FV, IRVE o zonas especiales"],
@@ -3695,7 +3712,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Alcance", data.inspectionScope || "Sin indicar"],
       ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
       ["Fecha de inspección", reportDate],
-      ["Úúúltima inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+      ["última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
       ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
       ["Técnico inspector", data.technicianName || "Sin indicar"],
       ["Identificación profesional", data.technicianCredential || "Sin indicar"],
@@ -3703,7 +3720,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       ["Esquema TT/TN/IT", data.distributionSystem],
       ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
       ["Aforo previsto", data.occupancy || "Sin indicar"],
-      ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m2` : "Sin indicar"],
+      ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar"],
       ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
       ["Suministro complementario", data.complementarySupplyType || "No indicado"],
       ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
@@ -4135,7 +4152,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Alcance", data.inspectionScope || "Sin indicar"],
             ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
             ["Fecha de inspección", reportDate],
-            ["Úúúltima inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+            ["última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Técnico inspector", data.technicianName || "Sin indicar"],
             ["Identificación profesional", data.technicianCredential || "Sin indicar"],
@@ -4143,7 +4160,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Esquema TT/TN/IT", data.distributionSystem],
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
-            ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m2` : "Sin indicar"],
+            ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar"],
             ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
             ["Suministro complementario", data.complementarySupplyType || "No indicado"],
             ["Proyecto", data.hasProject ? "Sí" : "No indicado"],

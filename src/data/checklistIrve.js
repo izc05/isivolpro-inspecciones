@@ -39,7 +39,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-04",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Documentación técnica IRVE.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Existe proyecto o MTD, esquema unifilar, características del SAVE, protecciones, potencia y modo de carga.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Documentación técnica IRVE.",
@@ -88,7 +88,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Correspondencia documentación-instalación real.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Lo instalado coincide con esquema, potencia, circuito, protecciones, canalización y ubicación del punto de recarga.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Correspondencia documentación-instalación real.",
@@ -194,7 +194,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Modo de carga.",
     "criterioInspeccion": "Comprobar que el modo de carga declarado coincide con el SAVE, conector, protecciones y uso previsto.",
     "defectoSiNoCumple": "Modo de carga no identificado, no adecuado o incoherente con el equipo instalado.",
@@ -243,7 +243,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Potencia del punto de recarga.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Potencia definida y coherente con sección, protecciones, contrato y previsión de cargas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Potencia del punto de recarga.",
@@ -390,7 +390,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: SAVE adecuado al emplazamiento.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El equipo de recarga debe ser apto para interior/exterior, potencia, modo de carga y uso previsto.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: SAVE adecuado al emplazamiento.",
@@ -438,7 +438,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Estado físico del SAVE.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin roturas, partes activas accesibles, daños, humedad interior, calentamientos o conectores deteriorados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Estado físico del SAVE.",
@@ -486,7 +486,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Cierre o control de acceso.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Los cuadros o SAVE deben impedir el acceso de personas no autorizadas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cierre o control de acceso.",
@@ -534,7 +534,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Grado de protección IP/IK.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El SAVE debe tener grado IP/IK adecuado al emplazamiento, especialmente en exterior.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Grado de protección IP/IK.",
@@ -631,7 +631,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Identificación del punto de recarga.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El punto debe estar identificado: circuito, potencia, protecciones, titular/usuario si procede.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Identificación del punto de recarga.",
@@ -680,7 +680,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Accesibilidad y maniobra.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El SAVE, cuadros y protecciones deben ser accesibles para operación, inspección y mantenimiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Accesibilidad y maniobra.",
@@ -728,7 +728,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-20",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Canalización adecuada.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Canalización protegida, adecuada al trazado, uso, exterior/interior y riesgo mecánico.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Canalización adecuada.",
@@ -776,7 +776,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-19",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Conductores adecuados.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sección, aislamiento, tensión asignada e identificación de conductores adecuados al circuito.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Conductores adecuados.",
@@ -827,7 +827,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Protección mecánica de cables.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Cableado protegido frente a golpes, rozamientos, paso de vehículos, aplastamientos o intemperie.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Protección mecánica de cables.",
@@ -875,7 +875,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-20 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula sistemas de instalación de canalizaciones, elección de tubos, canales, bandejas y protección frente a influencias externas. Aplicado al punto: Separación de otras instalaciones.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Separación o protección frente a agua, gas, telecomunicaciones u otras canalizaciones.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Separación de otras instalaciones.",
@@ -973,7 +973,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-19 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones interiores o receptoras: circuitos, conductores, aislamiento, identificación, conexiones y condiciones generales de ejecución. Aplicado al punto: Identificación de conductores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Neutro azul, protección amarillo-verde y fases correctamente identificadas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Identificación de conductores.",
@@ -1022,7 +1022,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-22",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Protección magnetotérmica.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir protección contra sobreintensidades adecuada a sección, potencia e intensidad del SAVE.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Protección magnetotérmica.",
@@ -1070,7 +1070,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Curva del magnetotérmico.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El dispositivo de sobreintensidad debe ser adecuado al equipo; criterio base de app: curva C cuando proceda.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Curva del magnetotérmico.",
@@ -1118,7 +1118,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Corte omnipolar.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Las protecciones deben cortar todos los conductores activos, incluido neutro cuando proceda.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Corte omnipolar.",
@@ -1266,7 +1266,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Sensibilidad diferencial.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sensibilidad adecuada, normalmente 30 mA para protección adicional de personas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Sensibilidad diferencial.",
@@ -1317,7 +1317,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección contra contactos directos e indirectos, incluyendo diferenciales, corte automático y límites de tensión de contacto. Aplicado al punto: Funcionamiento diferencial / botón test.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El diferencial debe disparar al pulsar TEST y superar ensayo de disparo.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Funcionamiento diferencial / botón test.",
@@ -1368,7 +1368,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-23 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección frente a sobretensiones transitorias o permanentes cuando proceda por emplazamiento, riesgo o características de la instalación. Aplicado al punto: Protección contra sobretensiones.",
     "criterioInspeccion": "Comprobar SPD cuando proceda por ubicación, exposición, esquema o proyecto, coordinado con el resto de la instalación.",
     "defectoSiNoCumple": "Falta protección contra sobretensiones exigible o está instalada sin coordinación adecuada.",
@@ -1465,7 +1465,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52 / ITC-BT-22",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Selectividad y coordinación de protecciones.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Las protecciones deben estar coordinadas para evitar disparos indebidos y garantizar seguridad.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Selectividad y coordinación de protecciones.",
@@ -1515,7 +1515,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-18 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Conexión al conductor de protección.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El SAVE, masas metálicas y circuitos deben estar conectados al conductor de protección.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Conexión al conductor de protección.",
@@ -1563,7 +1563,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-18",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Continuidad de tierra.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe verificarse continuidad del conductor PE hasta el punto de recarga.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Continuidad de tierra.",
@@ -1614,7 +1614,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-18 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Resistencia de tierra.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Valor compatible con diferencial instalado y tensión de contacto admisible.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Resistencia de tierra.",
@@ -1666,7 +1666,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-18 / ITC-BT-24 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Tensión de contacto.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: En exterior o local mojado, Uc <= 24 V. En local seco, Uc <= 50 V.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Tensión de contacto.",
@@ -1717,7 +1717,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-18",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Equipotencialidad de masas metálicas próximas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Masas accesibles próximas deben estar correctamente unidas si procede.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Equipotencialidad de masas metálicas próximas.",
@@ -1765,7 +1765,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Iluminación mínima en zona de recarga.",
     "criterioInspeccion": "Comprobar iluminación suficiente para operación segura; criterio app: 50 lux en interior y 20 lux en exterior.",
     "defectoSiNoCumple": "Iluminación insuficiente para lectura, conexión, maniobra o seguridad del usuario.",
@@ -1816,7 +1816,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Ubicación segura del punto de recarga.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe estar protegido frente a golpes de vehículos, agua, calor, manipulación y riesgos propios del emplazamiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ubicación segura del punto de recarga.",
@@ -1864,7 +1864,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Protección contra impacto de vehículos.",
     "criterioInspeccion": "Revisar protección frente a impactos de vehículos mediante ubicación, bolardos, defensas o canalización protegida.",
     "defectoSiNoCumple": "SAVE o canalización expuestos a golpes de vehículos sin protección suficiente.",
@@ -1912,7 +1912,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-30 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Instalación en exterior / intemperie.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si está en exterior, activar Bloque 06 y verificar IP, estanqueidad, UV, humedad y tensión de contacto 24 V.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Instalación en exterior / intemperie.",
@@ -2010,7 +2010,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-19 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones interiores o receptoras: circuitos, conductores, aislamiento, identificación, conexiones y condiciones generales de ejecución. Aplicado al punto: Ensayo de aislamiento.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Resistencia de aislamiento adecuada al circuito de recarga.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ensayo de aislamiento.",
@@ -2061,7 +2061,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección contra contactos directos e indirectos, incluyendo diferenciales, corte automático y límites de tensión de contacto. Aplicado al punto: Ensayo de diferencial.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Registrar corriente y tiempo de disparo.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ensayo de diferencial.",
@@ -2113,7 +2113,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-19 / ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones interiores o receptoras: circuitos, conductores, aislamiento, identificación, conexiones y condiciones generales de ejecución. Aplicado al punto: Comprobación de polaridad / secuencia.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Polaridad correcta; en trifásica, secuencia adecuada si el equipo lo requiere.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Comprobación de polaridad / secuencia.",
@@ -2163,7 +2163,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Prueba funcional del SAVE.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El equipo debe iniciar, controlar y finalizar la carga correctamente.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Prueba funcional del SAVE.",
@@ -2213,7 +2213,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Comunicación / control / backend, si aplica.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si existe comunicación, RFID, app, OCPP o control externo, debe funcionar correctamente.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Comunicación / control / backend, si aplica.",
@@ -2261,7 +2261,7 @@ export const checklistIrve = [
       ]
     },
     "itc": "ITC-BT-52",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula infraestructura para recarga de vehículo eléctrico: esquemas, circuitos, SAVE, protecciones, SPL, caída de tensión, señalización y seguridad. Aplicado al punto: Validación global IRVE.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La instalación debe ser coherente con documentación, protecciones, medidas, emplazamiento y uso previsto.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Validación global IRVE.",

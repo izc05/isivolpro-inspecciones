@@ -43,7 +43,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Identificación del tipo de local especial.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe identificarse correctamente si el local es húmedo, mojado, corrosivo, polvoriento, con temperatura extrema o con baterías.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Identificación del tipo de local especial.",
@@ -94,7 +94,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales húmedos: protección del material eléctrico.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material debe ser adecuado a la humedad prevista y estar protegido frente a condensaciones.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales húmedos: protección del material eléctrico.",
@@ -144,7 +144,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30 / ITC-BT-20 / ITC-BT-21",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales húmedos: canalizaciones y cajas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Canalizaciones, cajas y mecanismos deben estar instalados de forma que no acumulen humedad ni permitan deterioro del aislamiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales húmedos: canalizaciones y cajas.",
@@ -196,7 +196,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales mojados: grado de protección IP adecuado.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material instalado debe tener grado de protección adecuado frente a chorros, salpicaduras, agua o intemperie.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales mojados: grado de protección IP adecuado.",
@@ -247,7 +247,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales mojados: canalizaciones estancas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Tubos, cajas, empalmes y entradas de cable deben ser estancos o adecuados al ambiente mojado.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales mojados: canalizaciones estancas.",
@@ -298,7 +298,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30 / ITC-BT-24",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales mojados: tensión de contacto máxima.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: En emplazamientos mojados o exteriores debe verificarse que la tensión de contacto no supere 24 V.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales mojados: tensión de contacto máxima.",
@@ -351,7 +351,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con riesgo de corrosión.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material eléctrico debe ser resistente a la corrosión o estar protegido frente a agentes químicos, vapores o ambientes agresivos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con riesgo de corrosión.",
@@ -388,7 +388,7 @@ export const checklistLocalesEspeciales = [
       ],
       "criteria": [
         "Sin corrosión perjudicial",
-        "Fijaciones ííntegras",
+        "Fijaciones íntegras",
         "Continuidad mecánica"
       ],
       "defects": [
@@ -401,7 +401,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Conductores y canalizaciones en ambiente corrosivo.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Canalizaciones, envolventes, bandejas y conexiones deben conservar su integridad frente a corrosión.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Conductores y canalizaciones en ambiente corrosivo.",
@@ -451,7 +451,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales polvorientos sin riesgo de incendio/explosión.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material debe impedir entrada perjudicial de polvo y permitir limpieza/mantenimiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales polvorientos sin riesgo de incendio/explosión.",
@@ -501,7 +501,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Acumulación de polvo sobre equipos eléctricos.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: No debe existir acumulación de polvo que provoque calentamientos, fallos de aislamiento o deterioro del material.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Acumulación de polvo sobre equipos eléctricos.",
@@ -553,7 +553,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con temperatura elevada.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Conductores, canalizaciones y equipos deben ser adecuados a la temperatura del emplazamiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con temperatura elevada.",
@@ -605,7 +605,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con muy baja temperatura.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El material debe mantener sus características mecánicas y eléctricas a baja temperatura.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con muy baja temperatura.",
@@ -657,7 +657,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con baterías de acumuladores: ventilación.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir ventilación suficiente para evitar acumulación de gases desprendidos por baterías.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con baterías de acumuladores: ventilación.",
@@ -695,7 +695,7 @@ export const checklistLocalesEspeciales = [
       "criteria": [
         "Protección contra derrames",
         "Sin corrosión",
-        "Conexiones ííntegras"
+        "Conexiones íntegras"
       ],
       "defects": [
         "Derrames sin contencin",
@@ -707,7 +707,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con baterías: protección contra corrosión y electrolito.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Material, soportes, bandejas y conexiones deben estar protegidos frente a corrosión y derrames.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con baterías: protección contra corrosión y electrolito.",
@@ -757,7 +757,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Locales con baterías: ausencia de fuentes de ignición.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: No deben existir elementos eléctricos inadecuados que puedan generar chispas en zonas con gases de batería.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Locales con baterías: ausencia de fuentes de ignición.",
@@ -807,7 +807,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Mantenimiento y limpieza del local especial.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El local debe permitir mantenimiento, limpieza y revisión segura del material eléctrico.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Mantenimiento y limpieza del local especial.",
@@ -858,7 +858,7 @@ export const checklistLocalesEspeciales = [
       ]
     },
     "itc": "ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula locales de características especiales: húmedos, mojados, corrosivos, polvorientos, temperaturas extremas y baterías de acumuladores. Aplicado al punto: Validación global del local especial.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La instalación debe ser coherente con las condiciones reales del emplazamiento: humedad, agua, polvo, corrosión, temperatura o baterías.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Validación global del local especial.",
