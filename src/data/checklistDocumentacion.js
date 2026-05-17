@@ -4,7 +4,7 @@
 export const checklistDocumentacion = [
   {
     "id": "00.01.01",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.01",
     "section": "Documentación general",
@@ -41,7 +41,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.02",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.02",
     "section": "Documentación general",
@@ -78,7 +78,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.03",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.03",
     "section": "Documentación general",
@@ -115,7 +115,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.04",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.04",
     "section": "Documentación general",
@@ -152,7 +152,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.05",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.05",
     "section": "Documentación general",
@@ -189,7 +189,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.06",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.06",
     "section": "Documentación general",
@@ -220,7 +220,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.07",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.07",
     "section": "Documentación general",
@@ -256,7 +256,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.08",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.08",
     "section": "Documentación general",
@@ -287,7 +287,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.09",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.09",
     "section": "Documentación general",
@@ -320,7 +320,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.10",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.10",
     "section": "Documentación específica",
@@ -357,7 +357,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.11",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.11",
     "section": "Documentación específica",
@@ -389,7 +389,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.12",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.12",
     "section": "Documentación específica",
@@ -420,7 +420,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.13",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.13",
     "section": "Documentación específica",
@@ -451,7 +451,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.14",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.14",
     "section": "Documentación específica",
@@ -485,7 +485,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.15",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.15",
     "section": "Documentación específica",
@@ -517,7 +517,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.16",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.16",
     "section": "Documentación específica",
@@ -551,7 +551,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.17",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.17",
     "section": "Documentación general",
@@ -583,7 +583,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.18",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.18",
     "section": "Validación documental",
@@ -620,7 +620,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.19",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.19",
     "section": "Validación documental",
@@ -652,7 +652,7 @@ export const checklistDocumentacion = [
   },
   {
     "id": "00.01.20",
-    "blockId": "rebt2002_block_10",
+    "blockId": "rebt2002_block_00",
     "blockName": "Documentación general",
     "code": "00.01.20",
     "section": "Validación documental",

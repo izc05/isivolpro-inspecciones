@@ -4,7 +4,7 @@
 export const checklistIrve = [
   {
     "id": "13.01.01",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.01",
     "section": "A. Documentación, esquema y datos generales",
@@ -53,7 +53,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.02",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.02",
     "section": "A. Documentación, esquema y datos generales",
@@ -102,7 +102,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.03",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.03",
     "section": "A. Documentación, esquema y datos generales",
@@ -159,7 +159,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.04",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.04",
     "section": "A. Documentación, esquema y datos generales",
@@ -208,7 +208,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.05",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.05",
     "section": "A. Documentación, esquema y datos generales",
@@ -258,7 +258,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.06",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.06",
     "section": "A. Documentación, esquema y datos generales",
@@ -307,7 +307,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.07",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.07",
     "section": "A. Documentación, esquema y datos generales",
@@ -355,7 +355,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.08",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.08",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -403,7 +403,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.09",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.09",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -451,7 +451,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.10",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.10",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -499,7 +499,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.11",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.11",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -547,7 +547,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.12",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.12",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -596,7 +596,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.13",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.13",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -645,7 +645,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.14",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.14",
     "section": "B. SAVE, envolvente, accesibilidad y señalización",
@@ -693,7 +693,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.15",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.15",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -741,7 +741,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.16",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.16",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -792,7 +792,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.17",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.17",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -840,7 +840,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.18",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.18",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -888,7 +888,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.19",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.19",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -938,7 +938,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.20",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.20",
     "section": "C. Canalizaciones, cableado y caída de tensión",
@@ -987,7 +987,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.21",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.21",
     "section": "D. Protecciones eléctricas",
@@ -1035,7 +1035,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.22",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.22",
     "section": "D. Protecciones eléctricas",
@@ -1083,7 +1083,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.23",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.23",
     "section": "D. Protecciones eléctricas",
@@ -1131,7 +1131,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.24",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.24",
     "section": "D. Protecciones eléctricas",
@@ -1181,7 +1181,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.25",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.25",
     "section": "D. Protecciones eléctricas",
@@ -1231,7 +1231,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.26",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.26",
     "section": "D. Protecciones eléctricas",
@@ -1282,7 +1282,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.27",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.27",
     "section": "D. Protecciones eléctricas",
@@ -1333,7 +1333,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.28",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.28",
     "section": "D. Protecciones eléctricas",
@@ -1382,7 +1382,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.29",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.29",
     "section": "D. Protecciones eléctricas",
@@ -1430,7 +1430,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.30",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.30",
     "section": "D. Protecciones eléctricas",
@@ -1480,7 +1480,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.31",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.31",
     "section": "E. Puesta a tierra y seguridad de contacto",
@@ -1528,7 +1528,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.32",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.32",
     "section": "E. Puesta a tierra y seguridad de contacto",
@@ -1579,7 +1579,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.33",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.33",
     "section": "E. Puesta a tierra y seguridad de contacto",
@@ -1631,7 +1631,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.34",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.34",
     "section": "E. Puesta a tierra y seguridad de contacto",
@@ -1682,7 +1682,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.35",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.35",
     "section": "E. Puesta a tierra y seguridad de contacto",
@@ -1730,7 +1730,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.36",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.36",
     "section": "F. Iluminación, ubicación y condiciones del emplazamiento",
@@ -1781,7 +1781,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.37",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.37",
     "section": "F. Iluminación, ubicación y condiciones del emplazamiento",
@@ -1829,7 +1829,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.38",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.38",
     "section": "F. Iluminación, ubicación y condiciones del emplazamiento",
@@ -1877,7 +1877,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.39",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.39",
     "section": "F. Iluminación, ubicación y condiciones del emplazamiento",
@@ -1927,7 +1927,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.40",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.40",
     "section": "F. Iluminación, ubicación y condiciones del emplazamiento",
@@ -1975,7 +1975,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.41",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.41",
     "section": "G. Mediciones y validación final",
@@ -2026,7 +2026,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.42",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.42",
     "section": "G. Mediciones y validación final",
@@ -2078,7 +2078,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.43",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.43",
     "section": "G. Mediciones y validación final",
@@ -2128,7 +2128,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.44",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.44",
     "section": "G. Mediciones y validación final",
@@ -2178,7 +2178,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.45",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.45",
     "section": "G. Mediciones y validación final",
@@ -2226,7 +2226,7 @@ export const checklistIrve = [
   },
   {
     "id": "13.01.46",
-    "blockId": "rebt2002_block_13",
+    "blockId": "rebt2002_block_04",
     "blockName": "IRVE / Recarga de Vehículo Eléctrico",
     "code": "13.01.46",
     "section": "G. Mediciones y validación final",

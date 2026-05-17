@@ -4,7 +4,7 @@
 export const checklistPublicaConcurrencia = [
   {
     "id": "04.01.01",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.01",
     "section": "A. Clasificación y documentación",
     "title": "Clasificación como local de pública concurrencia",
@@ -54,7 +54,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.02",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.02",
     "section": "A. Clasificación y documentación",
     "title": "Aforo / ocupación prevista",
@@ -101,7 +101,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.03",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.03",
     "section": "A. Clasificación y documentación",
     "title": "Proyecto técnico",
@@ -149,7 +149,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.04",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.04",
     "section": "A. Clasificación y documentación",
     "title": "Esquema unifilar actualizado",
@@ -198,7 +198,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.05",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.05",
     "section": "A. Clasificación y documentación",
     "title": "Documentación de alumbrado de emergencia",
@@ -228,7 +228,7 @@ export const checklistPublicaConcurrencia = [
         "Mantenimiento no justificado"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -248,7 +248,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.06",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.06",
     "section": "B. Suministro complementario / seguridad",
     "title": "Necesidad de suministro complementario",
@@ -302,7 +302,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.07",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.07",
     "section": "B. Suministro complementario / seguridad",
     "title": "Suministro de socorro",
@@ -350,7 +350,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.08",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.08",
     "section": "B. Suministro complementario / seguridad",
     "title": "Suministro de reserva",
@@ -397,7 +397,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.09",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.09",
     "section": "B. Suministro complementario / seguridad",
     "title": "Conmutación / entrada del suministro de seguridad",
@@ -446,7 +446,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.10",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.10",
     "section": "B. Suministro complementario / seguridad",
     "title": "Servicios de seguridad alimentados",
@@ -498,7 +498,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.11",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.11",
     "section": "C. Alumbrado de emergencia",
     "title": "Existencia de alumbrado de emergencia",
@@ -533,7 +533,7 @@ export const checklistPublicaConcurrencia = [
         "Cobertura inexistente en zonas principales"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -552,7 +552,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.12",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.12",
     "section": "C. Alumbrado de emergencia",
     "title": "Funcionamiento de luminarias de emergencia",
@@ -586,7 +586,7 @@ export const checklistPublicaConcurrencia = [
         "Carcasa rota"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -603,7 +603,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.13",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.13",
     "section": "C. Alumbrado de emergencia",
     "title": "Autonomía mínima",
@@ -639,7 +639,7 @@ export const checklistPublicaConcurrencia = [
         "Sin datos de autonomía"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -658,7 +658,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.14",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.14",
     "section": "C. Alumbrado de emergencia",
     "title": "Iluminancia en rutas de evacuación",
@@ -695,7 +695,7 @@ export const checklistPublicaConcurrencia = [
         "Luminaria averiada"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -715,7 +715,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.15",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.15",
     "section": "C. Alumbrado de emergencia",
     "title": "Iluminancia en cuadros y equipos contra incendios",
@@ -752,7 +752,7 @@ export const checklistPublicaConcurrencia = [
         "Luminaria mal ubicada"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -773,7 +773,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.16",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.16",
     "section": "C. Alumbrado de emergencia",
     "title": "Alumbrado antipánico / ambiente",
@@ -816,7 +816,7 @@ export const checklistPublicaConcurrencia = [
         "Equipos averiados"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -837,7 +837,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.17",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.17",
     "section": "C. Alumbrado de emergencia",
     "title": "Ubicación de emergencias en puntos críticos",
@@ -868,7 +868,7 @@ export const checklistPublicaConcurrencia = [
         "Luminaria no funciona"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -886,7 +886,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.18",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.18",
     "section": "C. Alumbrado de emergencia",
     "title": "Emergencia junto a cuadros eléctricos",
@@ -941,7 +941,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.19",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.19",
     "section": "C. Alumbrado de emergencia",
     "title": "Señalización de salidas",
@@ -972,7 +972,7 @@ export const checklistPublicaConcurrencia = [
         "Señal no visible"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -990,7 +990,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.20",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.20",
     "section": "C. Alumbrado de emergencia",
     "title": "Estado físico de luminarias",
@@ -1024,7 +1024,7 @@ export const checklistPublicaConcurrencia = [
         "Equipo suelto"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1041,7 +1041,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.21",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.21",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "Ubicación de cuadros fuera del acceso público",
@@ -1089,7 +1089,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.22",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.22",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "Cuadros protegidos y cerrados",
@@ -1138,7 +1138,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.23",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.23",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "Identificación de circuitos",
@@ -1168,7 +1168,7 @@ export const checklistPublicaConcurrencia = [
         "Rotulación ilegible"
       ],
       "images": [
-        "/help/02_01_01_identificación.png"
+        "/help/02_01_01_identificacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1186,7 +1186,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.24",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.24",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "División del alumbrado por circuitos",
@@ -1232,7 +1232,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.25",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.25",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "Protección diferencial y magnetotérmica",
@@ -1283,7 +1283,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.26",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.26",
     "section": "D. Cuadros, circuitos y distribución",
     "title": "Selectividad / continuidad de servicios de seguridad",
@@ -1337,7 +1337,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.27",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.27",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Cables tipo AS en pública concurrencia",
@@ -1385,7 +1385,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.28",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.28",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Cables resistentes al fuego en servicios de seguridad",
@@ -1432,7 +1432,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.29",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.29",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Canalizaciones adecuadas",
@@ -1481,7 +1481,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.30",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.30",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Sin conductores expuestos al público",
@@ -1529,7 +1529,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.31",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.31",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Cajas y empalmes cerrados",
@@ -1578,7 +1578,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.32",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.32",
     "section": "E. Cables, canalizaciones y reacción al fuego",
     "title": "Separación respecto a otras instalaciones",
@@ -1627,7 +1627,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.33",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.33",
     "section": "F. Balizamiento y zonas especiales",
     "title": "Balizamiento en escaleras",
@@ -1663,7 +1663,7 @@ export const checklistPublicaConcurrencia = [
         "Desnivel sin sealizar"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1680,7 +1680,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.34",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.34",
     "section": "F. Balizamiento y zonas especiales",
     "title": "Balizamiento en rampas",
@@ -1710,7 +1710,7 @@ export const checklistPublicaConcurrencia = [
         "Señalización insuficiente"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1727,7 +1727,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.35",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.35",
     "section": "F. Balizamiento y zonas especiales",
     "title": "Zonas de alto riesgo",
@@ -1764,7 +1764,7 @@ export const checklistPublicaConcurrencia = [
         "Equipo averiado"
       ],
       "images": [
-        "/help/04_01_07_ubicación_luminarias_emergencia.png"
+        "/help/04_01_07_ubicacion_luminarias_emergencia.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1784,7 +1784,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.36",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.36",
     "section": "F. Balizamiento y zonas especiales",
     "title": "Locales sanitarios o asistenciales",
@@ -1814,7 +1814,7 @@ export const checklistPublicaConcurrencia = [
         "Servicio esencial sin alimentación"
       ],
       "images": [
-        "/help/04_01_03_señalización_salidas_evacuacion.png"
+        "/help/04_01_03_senalizacion_salidas_evacuacion.png"
       ]
     },
     "itc": "ITC-BT-28",
@@ -1831,7 +1831,7 @@ export const checklistPublicaConcurrencia = [
   },
   {
     "id": "04.01.37",
-    "blockId": "rebt2002_block_04",
+    "blockId": "rebt2002_block_03",
     "code": "04.01.37",
     "section": "F. Balizamiento y zonas especiales",
     "title": "Compatibilidad con otros bloques",

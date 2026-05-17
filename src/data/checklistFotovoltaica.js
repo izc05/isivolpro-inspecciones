@@ -4,7 +4,7 @@
 export const checklistFotovoltaica = [
   {
     "id": "08.01.01",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.01",
     "section": "A. Documentación y clasificación",
@@ -35,7 +35,7 @@ export const checklistFotovoltaica = [
         "Registrar evidencia y observación si existe defecto."
       ],
       "images": [
-        "/help/08_01_01_documentación_fv.png"
+        "/help/08_01_01_documentacion_fv.png"
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-04",
@@ -53,7 +53,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.02",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.02",
     "section": "A. Documentación y clasificación",
@@ -104,7 +104,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.03",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.03",
     "section": "A. Documentación y clasificación",
@@ -153,7 +153,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.04",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.04",
     "section": "A. Documentación y clasificación",
@@ -203,7 +203,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.05",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.05",
     "section": "A. Documentación y clasificación",
@@ -251,7 +251,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.06",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.06",
     "section": "B. Seccionamiento y protecciones",
@@ -301,7 +301,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.07",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.07",
     "section": "B. Seccionamiento y protecciones",
@@ -352,7 +352,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.08",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.08",
     "section": "B. Seccionamiento y protecciones",
@@ -402,7 +402,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.09",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.09",
     "section": "B. Seccionamiento y protecciones",
@@ -451,7 +451,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.10",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.10",
     "section": "B. Seccionamiento y protecciones",
@@ -501,7 +501,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.11",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.11",
     "section": "B. Seccionamiento y protecciones",
@@ -553,7 +553,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.12",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.12",
     "section": "B. Seccionamiento y protecciones",
@@ -602,7 +602,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.13",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.13",
     "section": "B. Seccionamiento y protecciones",
@@ -650,7 +650,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.14",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.14",
     "section": "C. Puesta a tierra y seguridad",
@@ -700,7 +700,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.15",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.15",
     "section": "C. Puesta a tierra y seguridad",
@@ -751,7 +751,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.16",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.16",
     "section": "C. Puesta a tierra y seguridad",
@@ -802,7 +802,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.17",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.17",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -850,7 +850,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.18",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.18",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -901,7 +901,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.19",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.19",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -949,7 +949,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.20",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.20",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -999,7 +999,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.21",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.21",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -1050,7 +1050,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.22",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.22",
     "section": "E. Inversor, conexión a red y medida",
@@ -1081,7 +1081,7 @@ export const checklistFotovoltaica = [
         "Registrar evidencia y observación si existe defecto."
       ],
       "images": [
-        "/help/08_01_22_ubicación_inversor.png"
+        "/help/08_01_22_ubicacion_inversor.png"
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-30",
@@ -1098,7 +1098,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.23",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.23",
     "section": "E. Inversor, conexión a red y medida",
@@ -1146,7 +1146,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.24",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.24",
     "section": "E. Inversor, conexión a red y medida",
@@ -1194,7 +1194,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.25",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.25",
     "section": "E. Inversor, conexión a red y medida",
@@ -1242,7 +1242,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.26",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.26",
     "section": "E. Inversor, conexión a red y medida",
@@ -1291,7 +1291,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.27",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.27",
     "section": "F. Mediciones",
@@ -1342,7 +1342,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.28",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.28",
     "section": "F. Mediciones",
@@ -1393,7 +1393,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.29",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.29",
     "section": "F. Mediciones",
@@ -1444,7 +1444,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.30",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.30",
     "section": "F. Mediciones",
@@ -1495,7 +1495,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.31",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.31",
     "section": "G. Módulos, estructura y cubierta",
@@ -1543,7 +1543,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.32",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.32",
     "section": "G. Módulos, estructura y cubierta",
@@ -1592,7 +1592,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.33",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.33",
     "section": "G. Módulos, estructura y cubierta",
@@ -1641,7 +1641,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.34",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.34",
     "section": "G. Módulos, estructura y cubierta",
@@ -1691,7 +1691,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.35",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.35",
     "section": "G. Módulos, estructura y cubierta",
@@ -1739,7 +1739,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.36",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.36",
     "section": "G. Módulos, estructura y cubierta",
@@ -1787,7 +1787,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.37",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.37",
     "section": "G. Módulos, estructura y cubierta",
@@ -1835,7 +1835,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.38",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.38",
     "section": "G. Módulos, estructura y cubierta",

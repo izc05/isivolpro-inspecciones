@@ -23,7 +23,7 @@ export const checklistInterior = [
         "Etiquetas legibles e indelebles en cuadro y circuitos"
       ],
       "images": [
-        "/help/02_01_01_identificación.png"
+        "/help/02_01_01_identificacion.png"
       ]
     },
     "itc": "ITC-BT-17 / ITC-BT-19",
@@ -747,7 +747,7 @@ export const checklistInterior = [
       ],
       "images": [
         "/help/02_01_31.png",
-        "/help/02_01_31_tensión_contacto.png"
+        "/help/02_01_31_tension_contacto.png"
       ]
     },
     "itc": "ITC-BT-18 / ITC-BT-24",

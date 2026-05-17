@@ -4,7 +4,7 @@
 export const checklistAlumbradoExterior = [
   {
     "id": "03.01.01",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Documentación, proyecto y clasificación",
     "title": "Documentación técnica de la instalación",
     "question": "¿Existe proyecto o memoria técnica cuando proceda?",
@@ -25,7 +25,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.02",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Documentación, proyecto y clasificación",
     "title": "Correspondencia con la instalación real",
     "question": "¿Coincide la instalación ejecutada con la documentación?",
@@ -46,7 +46,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.03",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Documentación, proyecto y clasificación",
     "title": "Clasificación como alumbrado exterior",
     "question": "¿Corresponde la instalación a alumbrado exterior?",
@@ -67,7 +67,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.04",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Cuadros de mando, protección y control",
     "title": "Ubicación y accesibilidad del cuadro",
     "question": "¿Es el cuadro accesible y está protegido frente a manipulación?",
@@ -93,7 +93,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.05",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Cuadros de mando, protección y control",
     "title": "Envolvente del cuadro",
     "question": "¿Es la envolvente adecuada para intemperie e íntegra?",
@@ -119,7 +119,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.06",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Cuadros de mando, protección y control",
     "title": "Protecciones generales y por circuitos",
     "question": "¿Existen protecciones contra sobreintensidades y contactos indirectos?",
@@ -140,7 +140,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.07",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Cuadros de mando, protección y control",
     "title": "Control, maniobra y encendido",
     "question": "¿Funciona correctamente el sistema de encendido (reloj, fotocélula)?",
@@ -166,7 +166,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.08",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Líneas y canalizaciones de alimentación",
     "title": "Canalizaciones subterráneas",
     "question": "¿Tienen las líneas subterráneas profundidad (mín. 0,40m) y protección?",
@@ -175,7 +175,7 @@ export const checklistAlumbradoExterior = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/03_01_08_canalización_subterranea.png"
+        "/help/03_01_08_canalizacion_subterranea.png"
       ]
     },
     "itc": "ITC-BT-09",
@@ -192,7 +192,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.09",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Líneas y canalizaciones de alimentación",
     "title": "Sección mínima de conductores",
     "question": "¿Es la sección mínima de conductores adecuada (mín. 6mm² Cu)?",
@@ -213,7 +213,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.10",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Líneas y canalizaciones de alimentación",
     "title": "Canalizaciones aéreas o sobre fachada",
     "question": "¿Cumplen las líneas aéreas con fijaciones y distancias?",
@@ -234,7 +234,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.11",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Líneas y canalizaciones de alimentación",
     "title": "Identificación de conductores",
     "question": "¿Están los conductores correctamente identificados por colores?",
@@ -255,7 +255,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.12",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Líneas y canalizaciones de alimentación",
     "title": "Estado general de líneas",
     "question": "¿Están los cables y canalizaciones en buen estado?",
@@ -276,7 +276,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.13",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Soportes, columnas y baculos",
     "title": "Estado mecánico de soportes",
     "question": "¿Están los soportes sin corrosión y bien fijados?",
@@ -302,7 +302,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.14",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Soportes, columnas y baculos",
     "title": "Puerta de registro del soporte",
     "question": "¿Están las puertas de registro cerradas y sin partes activas accesibles?",
@@ -328,7 +328,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.15",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Soportes, columnas y baculos",
     "title": "Conexiones internas del soporte",
     "question": "¿Están las conexiones protegidas y sin conductores sueltos?",
@@ -349,7 +349,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.16",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Soportes, columnas y baculos",
     "title": "Protección individual del punto de luz",
     "question": "¿Dispone cada punto de luz de protección contra sobreintensidades?",
@@ -358,7 +358,7 @@ export const checklistAlumbradoExterior = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/03_01_16_protección_punto_luz.png"
+        "/help/03_01_16_proteccion_punto_luz.png"
       ]
     },
     "itc": "ITC-BT-09",
@@ -375,7 +375,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.17",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Soportes, columnas y baculos",
     "title": "Puesta a tierra de soportes metálicos",
     "question": "¿Están conectados a tierra todos los soportes metálicos?",
@@ -403,7 +403,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.18",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Luminarias y proyectores",
     "title": "Estado de luminarias",
     "question": "¿Están las luminarias cerradas y correctamente fijadas?",
@@ -424,7 +424,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.19",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Luminarias y proyectores",
     "title": "Grado IP/IK de luminarias",
     "question": "¿Es el grado IP/IK adecuado a la ubicación?",
@@ -445,7 +445,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.20",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Luminarias y proyectores",
     "title": "Luminarias suspendidas",
     "question": "¿Tienen las luminarias suspendidas sujeción independiente?",
@@ -466,7 +466,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.21",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Luminarias y proyectores",
     "title": "Proyectores exteriores",
     "question": "¿Están los proyectores correctamente orientados y protegidos?",
@@ -487,7 +487,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.22",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Puesta a tierra y tensión de contacto",
     "title": "Red de tierra común",
     "question": "¿Existe red de tierra común para soportes y masas?",
@@ -508,7 +508,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.23",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Puesta a tierra y tensión de contacto",
     "title": "Electrodos de tierra",
     "question": "¿Existen electrodos en el primer y último soporte?",
@@ -529,7 +529,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.24",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Puesta a tierra y tensión de contacto",
     "title": "Continuidad de tierra",
     "question": "¿Existe continuidad entre todos los soportes y masas?",
@@ -552,7 +552,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.25",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Puesta a tierra y tensión de contacto",
     "title": "Tensión de contacto máxima",
     "question": "¿Se cumple Uc = 24 V en exterior?",
@@ -561,7 +561,7 @@ export const checklistAlumbradoExterior = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/03_01_25_tensión_contacto_24v.png"
+        "/help/03_01_25_tension_contacto_24v.png"
       ]
     },
     "itc": "ITC-BT-09 / ITC-BT-24",
@@ -580,7 +580,7 @@ export const checklistAlumbradoExterior = [
   },
   {
     "id": "03.01.26",
-    "blockId": "rebt2002_block_03",
+    "blockId": "rebt2002_block_07",
     "section": "Puesta a tierra y tensión de contacto",
     "title": "Cálculo RA x IDn",
     "question": "¿Es Uc (RA x IDn) inferior a 24 V?",

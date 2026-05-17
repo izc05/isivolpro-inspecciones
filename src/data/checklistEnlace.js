@@ -65,7 +65,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_03_altura_instalación_cgp_cgpm.png"
+        "/help/01_01_03_altura_instalacion_cgp_cgpm.png"
       ]
     },
     "itc": "ITC-BT-13",
@@ -143,7 +143,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_06_tipo_canalización_lga.png"
+        "/help/01_01_06_tipo_canalizacion_lga.png"
       ]
     },
     "itc": "ITC-BT-14",
@@ -243,7 +243,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_10_sección_minima_lga.png"
+        "/help/01_01_10_seccion_minima_lga.png"
       ]
     },
     "itc": "ITC-BT-14",
@@ -426,7 +426,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_18_derivación_individual.png"
+        "/help/01_01_18_derivacion_individual.png"
       ]
     },
     "itc": "ITC-BT-15",

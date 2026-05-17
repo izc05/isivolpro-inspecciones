@@ -4,7 +4,7 @@
 export const checklistAtex = [
   {
     "id": "05.01.01",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.01",
     "section": "1. Documentación",
     "title": "Documento de clasificación de zonas",
@@ -54,7 +54,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.02",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.02",
     "section": "1. Documentación",
     "title": "Coherencia de la clasificación de zonas",
@@ -103,7 +103,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.03",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.03",
     "section": "2. Equipos y material ATEX",
     "title": "Categoría del material según zona",
@@ -134,7 +134,7 @@ export const checklistAtex = [
         "Equipo no apto"
       ],
       "images": [
-        "/help/05_01_03_categoría_equipos.png"
+        "/help/05_01_03_categoria_equipos.png"
       ]
     },
     "itc": "ITC-BT-29",
@@ -151,7 +151,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.04",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.04",
     "section": "2. Equipos y material ATEX",
     "title": "Entradas de cables selladas",
@@ -200,7 +200,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.05",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.05",
     "section": "3. Canalizaciones, sellados y seguridad global",
     "title": "Sellado entre zonas distintas",
@@ -249,7 +249,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.06",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.06",
     "section": "3. Canalizaciones, sellados y seguridad global",
     "title": "Canalizaciones y cables adecuados",
@@ -298,7 +298,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.07",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.07",
     "section": "2. Equipos y material ATEX",
     "title": "Modo de protección y marcado reglamentario",
@@ -331,7 +331,7 @@ export const checklistAtex = [
         "Protección invalidada"
       ],
       "images": [
-        "/help/05_01_03_categoría_equipos.png"
+        "/help/05_01_03_categoria_equipos.png"
       ]
     },
     "itc": "ITC-BT-29",
@@ -348,7 +348,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.08",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.08",
     "section": "3. Canalizaciones, sellados y seguridad global",
     "title": "Protección física de cables",
@@ -398,7 +398,7 @@ export const checklistAtex = [
   },
   {
     "id": "05.01.09",
-    "blockId": "rebt2002_block_05",
+    "blockId": "rebt2002_block_06",
     "code": "05.01.09",
     "section": "3. Canalizaciones, sellados y seguridad global",
     "title": "Validación global del cumplimiento ATEX",
@@ -433,7 +433,7 @@ export const checklistAtex = [
       ],
       "images": [
         "/help/05_01_01_clasificacion_zonas.png",
-        "/help/05_01_03_categoría_equipos.png"
+        "/help/05_01_03_categoria_equipos.png"
       ]
     },
     "itc": "ITC-BT-29",

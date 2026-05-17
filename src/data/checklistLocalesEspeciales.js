@@ -4,7 +4,7 @@
 export const checklistLocalesEspeciales = [
   {
     "id": "06.01.01",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.01",
     "section": "A. Clasificación del local",
@@ -57,7 +57,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.02",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.02",
     "section": "B. Locales húmedos",
@@ -107,7 +107,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.03",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.03",
     "section": "B. Locales húmedos",
@@ -159,7 +159,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.04",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.04",
     "section": "C. Locales mojados / exterior",
@@ -210,7 +210,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.05",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.05",
     "section": "C. Locales mojados / exterior",
@@ -260,7 +260,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.06",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.06",
     "section": "C. Locales mojados / exterior",
@@ -293,8 +293,7 @@ export const checklistLocalesEspeciales = [
         "Diferencial inadecuado"
       ],
       "images": [
-        "06_01_06_tensión_contacto_24v.png",
-        "/help/03_01_25_tensión_contacto_24v.png"
+        "/help/03_01_25_tension_contacto_24v.png"
       ]
     },
     "itc": "ITC-BT-30 / ITC-BT-24",
@@ -314,7 +313,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.07",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.07",
     "section": "D. Locales con riesgo de corrosión",
@@ -364,7 +363,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.08",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.08",
     "section": "D. Locales con riesgo de corrosión",
@@ -414,7 +413,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.09",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.09",
     "section": "E. Locales polvorientos",
@@ -464,7 +463,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.10",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.10",
     "section": "E. Locales polvorientos",
@@ -516,7 +515,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.11",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.11",
     "section": "F. Locales con temperaturas extremas",
@@ -568,7 +567,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.12",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.12",
     "section": "F. Locales con temperaturas extremas",
@@ -620,7 +619,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.13",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.13",
     "section": "G. Locales con baterías de acumuladores",
@@ -670,7 +669,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.14",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.14",
     "section": "G. Locales con baterías de acumuladores",
@@ -720,7 +719,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.15",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.15",
     "section": "G. Locales con baterías de acumuladores",
@@ -770,7 +769,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.16",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.16",
     "section": "H. Validación final",
@@ -820,7 +819,7 @@ export const checklistLocalesEspeciales = [
   },
   {
     "id": "06.01.17",
-    "blockId": "rebt2002_block_06",
+    "blockId": "rebt2002_block_05",
     "blockName": "Locales de características especiales",
     "code": "06.01.17",
     "section": "H. Validación final",

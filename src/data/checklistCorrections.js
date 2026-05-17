@@ -179,6 +179,64 @@ const POINT_OVERRIDES = {
   },
 };
 
+function enrichHelp(item) {
+  const help = item.help || {};
+
+  // Rellenar 'purpose' desde question si está vacío
+  const purpose = help.purpose || item.question || item.title || "";
+
+  // Rellenar 'whatToCheck' desde criterioInspeccion y evidenciasRequeridas si está vacío
+  let whatToCheck = help.whatToCheck;
+  if (!Array.isArray(whatToCheck) || whatToCheck.length === 0) {
+    whatToCheck = [];
+    if (item.criterioInspeccion) {
+      // Extraer frases útiles del criterio de inspección (quitar el prefijo genérico)
+      const criterio = item.criterioInspeccion
+        .replace(/^Comprobar en campo y con la documentación disponible que se cumple:\s*/i, "")
+        .trim();
+      if (criterio) whatToCheck.push(criterio);
+    }
+    if (Array.isArray(item.evidenciasRequeridas)) {
+      item.evidenciasRequeridas.forEach((ev) => {
+        if (ev && !whatToCheck.includes(ev)) whatToCheck.push(ev);
+      });
+    }
+  }
+
+  // Rellenar 'criteria' desde favorable/favorableCriteria si está vacío
+  let criteria = help.criteria;
+  if (!Array.isArray(criteria) || criteria.length === 0) {
+    criteria = [];
+    const fav = item.favorableCriteria || item.favorable;
+    if (fav) criteria.push(fav);
+  }
+
+  // Rellenar 'defects' desde defectoSiNoCumple si está vacío
+  let defects = help.defects;
+  if (!Array.isArray(defects) || defects.length === 0) {
+    defects = [];
+    if (item.defectoSiNoCumple) {
+      const defecto = item.defectoSiNoCumple
+        .replace(/^Si no se cumple, registrar defecto \w+ por incumplimiento, falta de justificación o condición no conforme en:\s*/i, "")
+        .trim();
+      if (defecto) defects.push(defecto);
+      else defects.push(item.defectoSiNoCumple);
+    }
+  }
+
+  return {
+    ...item,
+    help: {
+      ...help,
+      purpose,
+      whatToCheck,
+      criteria,
+      defects,
+      images: help.images || [],
+    },
+  };
+}
+
 function applyOverride(item) {
   const cleaned = deepClean(item);
   const override = POINT_OVERRIDES[cleaned.id] || {};
@@ -192,13 +250,13 @@ function applyOverride(item) {
   if (Array.isArray(merged.medicionesRequeridas)) {
     merged.medicionesRequeridas = merged.medicionesRequeridas.filter((entry) => {
       const text = String(entry).toLowerCase();
-      if (merged.blockId !== "rebt2002_block_08" && text.includes("string")) return false;
-      if (merged.blockId === "rebt2002_block_10" && text.includes("diferencial")) return false;
+      if (merged.blockId !== "rebt2002_block_04" && text.includes("string")) return false;
       return true;
     });
   }
 
-  return merged;
+  // Enriquecer campos de help automáticamente
+  return enrichHelp(merged);
 }
 
 export function applyChecklistCorrections(checklist) {
