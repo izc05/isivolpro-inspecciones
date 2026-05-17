@@ -38,7 +38,14 @@ import {
   Edit3,
   Upload,
   Eye,
+  ClipboardList,
+  FileDown,
+  PenTool,
+  UserCheck,
+  User,
 } from "lucide-react";
+
+
 import {
   compressImage,
   createImageThumbnail,
@@ -64,16 +71,14 @@ function normalizeSubscriptionPlan(value) {
 }
 
 const BLOCKS = [
-  { id: "rebt2002_block_10", code: "00.01", title: "Documentación general", regulation: "REBT 2002", order: 0, icon: FileText },
-  { id: "rebt2002_block_01", code: "01.01", title: "Instalaciones de enlace", regulation: "REBT 2002", order: 1, icon: Zap },
-  { id: "rebt2002_block_02", code: "02.01", title: "Instalaciones interiores", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
-  { id: "rebt2002_block_02b", code: "02B", title: "Baños y duchas", regulation: "REBT 2002 (BT-27)", order: 3, icon: ShieldCheck },
-  { id: "rebt2002_block_03", code: "03.01", title: "Alumbrado exterior", regulation: "REBT 2002", order: 4, icon: Sun },
-  { id: "rebt2002_block_04", code: "04.01", title: "Locales de pública concurrencia", regulation: "REBT 2002", order: 5, icon: Layers },
-  { id: "rebt2002_block_05", code: "05.01", title: "Locales con riesgo de incendio o explosión / ATEX", regulation: "REBT 2002", order: 6, icon: Flame },
-  { id: "rebt2002_block_06", code: "06.01", title: "Locales de características especiales", regulation: "REBT 2002 (BT-30)", order: 7, icon: AlertTriangle },
-  { id: "rebt2002_block_08", code: "08.01", title: "Instalaciones fotovoltaicas", regulation: "REBT 2002 (BT-40)", order: 8, icon: Sun },
-  { id: "rebt2002_block_13", code: "13.01", title: "Infraestructura de recarga de vehículo eléctrico / IRVE", regulation: "REBT 2002 (BT-52)", order: 13, icon: Zap },
+  { id: "rebt2002_block_00", code: "00", title: "Documentación general", regulation: "REBT 2002", order: 0, icon: FileText },
+  { id: "rebt2002_block_01", code: "01", title: "Instalaciones de enlace", regulation: "REBT 2002", order: 1, icon: Zap },
+  { id: "rebt2002_block_02", code: "02", title: "Instalaciones interiores", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
+  { id: "rebt2002_block_03", code: "03", title: "Locales de pública concurrencia", regulation: "REBT 2002", order: 3, icon: Users },
+  { id: "rebt2002_block_04", code: "04", title: "Generación y recarga (FV/IRVE)", regulation: "REBT 2002", order: 4, icon: Zap },
+  { id: "rebt2002_block_05", code: "05", title: "Condiciones especiales (Baños/Humedad)", regulation: "REBT 2002", order: 5, icon: AlertTriangle },
+  { id: "rebt2002_block_06", code: "06", title: "Locales con riesgo ATEX", regulation: "REBT 2002", order: 6, icon: Flame },
+  { id: "rebt2002_block_07", code: "07", title: "Alumbrado exterior", regulation: "REBT 2002", order: 7, icon: Sun },
   { id: "custom_block_24_visual", code: "24", title: "Inspección visual general", regulation: "IsiVolt", order: 24, icon: Camera },
   { id: "custom_block_25_measurements", code: "25", title: "Hoja de campo / Medidas", regulation: "IsiVolt", order: 25, icon: Gauge },
   { id: "custom_block_26_calculations", code: "26", title: "Cálculos eléctricos", regulation: "IsiVolt", order: 26, icon: Wrench },
@@ -104,16 +109,19 @@ const INITIAL_INSPECTION = {
   inspectionType: "inicial",
   powerKW: "",
   distributionSystem: "TT",
-  installationTypes: ["publica_concurrencia"],
+  installationTypes: [],
   isExterior: false,
   hasAtex: false,
   hasEV: false,
   hasFV: false,
   hasShowerOrTub: false,
+  hasWetZone: false,
+  hasPool: false,
+  hasGarage: false,
   publicUse: "",
   occupancy: "",
   usableAreaM2: "",
-  hasExternalPublic: true,
+  hasExternalPublic: false,
   hasEmergencyLighting: false,
   hasComplementarySupply: false,
   complementarySupplyType: "no_indicado",
@@ -129,6 +137,15 @@ const INITIAL_INSPECTION = {
   coverImage: null,
   fieldSheets: [],
   attachments: [],
+  calculations: {
+    powerW: "5000",
+    voltage: "230",
+    lengthM: "30",
+    material: "cu",
+    installationType: "tubo",
+    cosPhi: "0.85",
+    maxVdropPercent: "3"
+  },
 };
 
 const REGULATION_OPTIONS = [
@@ -336,7 +353,7 @@ Las marcas, nombres comerciales, logotipos o productos mencionados pertenecen a 
 
 Versión de la app: ${APP_VERSION}
 Versión legal: ${LEGAL_VERSION}
-Úúúltima actualización legal: ${LEGAL_UPDATED_AT}
+última actualización legal: ${LEGAL_UPDATED_AT}
 Base normativa: REBT 2002
 
 Responsable: configurable desde Datos de empresa.
@@ -397,7 +414,7 @@ function fixText(value) {
     .replace(/\bSección\b/g, "Sección").replace(/\bsección\b/g, "sección")
     .replace(/\bBusqueda\b/g, "Búsqueda").replace(/\bbusqueda\b/g, "búsqueda")
     .replace(/\bTodavia\b/g, "Todavía").replace(/\btodavia\b/g, "todavía")
-    .replace(/\bÚúúltima\b/g, "Úúúltima").replace(/\bÚúúltima\b/g, "úúúltima")
+    .replace(/\búltima\b/g, "última").replace(/\búltima\b/g, "úúúltima")
     .replace(/\bTensión\b/g, "Tensión").replace(/\btensión\b/g, "tensión")
     .replace(/\bMínimo\b/g, "Mínimo").replace(/\bmínimo\b/g, "mínimo")
     .replace(/\bMaximo\b/g, "Máximo").replace(/\bmáximo\b/g, "máximo")
@@ -452,7 +469,7 @@ function fixText(value) {
     .replace(/\bTuberías\b/g, "Tuberías").replace(/\btuberías\b/g, "tuberías")
     .replace(/\bDanos\b/g, "Daños").replace(/\bdaños\b/g, "daños")
     .replace(/\bCategoría\b/g, "Categoría").replace(/\bcategoría\b/g, "categoría")
-    .replace(/\bIm2genes\b/g, "Imágenes")
+    .replace(/\bIm²genes\b/g, "Imágenes")
     .replace(/\bAnadir\b/g, "Añadir").replace(/\bAnade\b/g, "Añade")
     .replace(/\bSelecionar\b/g, "Seleccionar").replace(/\bselecionar\b/g, "seleccionar")
     .replace(/\bNo aplica\b/g, "N/A");
@@ -723,6 +740,23 @@ function buildTechnicalHelpSvg(title, subtitle = "Referencia visual de inspecci�
 }
 
 const AVAILABLE_HELP_IMAGES = new Set([
+  "04_01_33.png",
+  "04_01_26.png",
+  "04_01_16.png",
+  "04_01_13.png",
+  "04_01_11.png",
+  "04_01_06.png",
+  "02_01_38.png",
+  "02_01_36.png",
+  "02_01_32.png",
+  "02_01_31.png",
+  "02_01_11.png",
+  "01_01_34.png",
+  "01_01_29.png",
+  "01_01_27.png",
+  "01_01_21.png",
+  "01_01_13.png",
+  "01_01_11.png",
   "01_01_01_estado_exterior_acceso_cgp.png",
   "01_01_02_tapa_envolvente_interior_cgp.png",
   "01_01_03_altura_instalacion_cgp_cgpm.png",
@@ -828,7 +862,7 @@ function getBlock(id) {
 }
 
 const CHECKLIST_INSPECTABLE_BLOCK_IDS = [
-  "rebt2002_block_10",
+  "rebt2002_block_00",
   "rebt2002_block_01",
   "rebt2002_block_02",
   "rebt2002_block_02b",
@@ -836,8 +870,7 @@ const CHECKLIST_INSPECTABLE_BLOCK_IDS = [
   "rebt2002_block_04",
   "rebt2002_block_05",
   "rebt2002_block_06",
-  "rebt2002_block_08",
-  "rebt2002_block_13",
+  "rebt2002_block_07",
 ];
 
 const AUXILIARY_BLOCK_IDS = [
@@ -848,7 +881,7 @@ const AUXILIARY_BLOCK_IDS = [
 ];
 
 const BLOCK_ITC_REFERENCES = {
-  rebt2002_block_10: ["ITC-BT-04 - Documentación"],
+  rebt2002_block_00: ["ITC-BT-04 - Documentación"],
   rebt2002_block_01: [
     "ITC-BT-13 - Caja General de Protección",
     "ITC-BT-14 - Línea General de Alimentación",
@@ -868,19 +901,9 @@ const BLOCK_ITC_REFERENCES = {
     "ITC-BT-24 - Contactos directos e indirectos",
   ],
   rebt2002_block_02b: ["ITC-BT-27 - Locales con bañera o ducha"],
-  rebt2002_block_03: ["ITC-BT-09 - Instalaciones de alumbrado exterior"],
-  rebt2002_block_04: ["ITC-BT-28 - Locales de pública concurrencia"],
-  rebt2002_block_05: ["ITC-BT-29 - Locales con riesgo de incendio o explosión / ATEX"],
-  rebt2002_block_06: ["ITC-BT-30 - Locales de características especiales"],
-  rebt2002_block_08: [
+  rebt2002_block_03: ["ITC-BT-28 - Locales de pública concurrencia"],
+  rebt2002_block_04: [
     "ITC-BT-40 - Instalaciones generadoras de baja tensión",
-    "ITC-BT-18 - Puesta a tierra",
-    "ITC-BT-22 - Sobreintensidades",
-    "ITC-BT-23 - Sobretensiones",
-    "ITC-BT-24 - Contactos directos e indirectos",
-    "ITC-BT-30 - Exterior o local mojado, si aplica",
-  ],
-  rebt2002_block_13: [
     "ITC-BT-52 - Infraestructura para recarga de vehículos eléctricos",
     "ITC-BT-18 - Puesta a tierra",
     "ITC-BT-22 - Sobreintensidades",
@@ -889,20 +912,74 @@ const BLOCK_ITC_REFERENCES = {
     "ITC-BT-30 - Exterior o local mojado, si aplica",
     "ITC-BT-29 - Garaje o riesgo ATEX, si aplica",
   ],
+  rebt2002_block_05: ["ITC-BT-30 - Locales de características especiales"],
+  rebt2002_block_06: ["ITC-BT-29 - Locales con riesgo de incendio o explosión / ATEX"],
+  rebt2002_block_07: [
+    "ITC-BT-09 - Instalaciones de alumbrado exterior",
+    "ITC-BT-18 - Puesta a tierra",
+    "ITC-BT-24 - Contactos directos e indirectos",
+  ],
 };
 
-function getSelectedItcReferences(selectedBlocks = []) {
+const ITC_ORDER = [
+  "ITC-BT-04",
+  "ITC-BT-05",
+  "ITC-BT-09",
+  "ITC-BT-13",
+  "ITC-BT-14",
+  "ITC-BT-15",
+  "ITC-BT-16",
+  "ITC-BT-17",
+  "ITC-BT-18",
+  "ITC-BT-19",
+  "ITC-BT-20",
+  "ITC-BT-21",
+  "ITC-BT-22",
+  "ITC-BT-23",
+  "ITC-BT-24",
+  "ITC-BT-27",
+  "ITC-BT-28",
+  "ITC-BT-29",
+  "ITC-BT-30",
+  "ITC-BT-40",
+  "ITC-BT-52",
+];
+
+function getSelectedItcReferences(selectedBlocks = [], regulation = "REBT_2002") {
+  if (!selectedBlocks.length) return [];
+
   const itemReferences = CHECKLIST
     .filter((item) => selectedBlocks.includes(item.blockId) && isInspectableBlockId(item.blockId))
     .flatMap((item) => String(item.itc || item.reference || "")
       .split("/")
       .map((value) => value.trim())
-      .filter(Boolean));
+      .filter((v) => v.startsWith("ITC-BT-") || v.startsWith("MIBT-")));
+
   const blockReferences = selectedBlocks
     .filter(isInspectableBlockId)
     .flatMap((blockId) => BLOCK_ITC_REFERENCES[blockId] || []);
-  const references = [...itemReferences, ...blockReferences];
-  return [...new Set(references)];
+
+  const references = [...itemReferences, ...blockReferences]
+    .map((ref) => ref.split(" - ")[0].trim()) // Quedarnos solo con el código
+    .filter(Boolean);
+
+  const unique = [...new Set(references)];
+
+  const sorted = unique.sort((a, b) => {
+    const normA = a.replace("MIBT-", "ITC-BT-");
+    const normB = b.replace("MIBT-", "ITC-BT-");
+    const idxA = ITC_ORDER.indexOf(normA);
+    const idxB = ITC_ORDER.indexOf(normB);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return normA.localeCompare(normB);
+  });
+
+  if (regulation === "REBT_1973") {
+    return sorted.map(ref => ref.replace("ITC-BT-", "MIBT-").replace("ITC-BT", "MIBT"));
+  }
+  return sorted;
 }
 
 function isInspectableBlockId(blockId) {
@@ -964,7 +1041,7 @@ function parseNumber(value) {
 }
 
 function getRecommendedBlockIds(data) {
-  const ids = new Set(["rebt2002_block_10", "rebt2002_block_01", "rebt2002_block_02", "custom_block_24_visual", "custom_block_25_measurements", "custom_block_26_calculations", "custom_block_23_summary"]);
+  const ids = new Set(["rebt2002_block_00", "rebt2002_block_01", "rebt2002_block_02", "custom_block_24_visual", "custom_block_25_measurements", "custom_block_26_calculations", "custom_block_23_summary"]);
   const types = data.installationTypes || [];
   const power = parseNumber(data.powerKW);
   const name = (data.name || "").toLowerCase();
@@ -987,7 +1064,6 @@ function getRecommendedBlockIds(data) {
 
   const publicUse = (data.publicUse || "").toLowerCase();
   const publicConcurrencyText = `${name} ${publicUse}`;
-  const specialLocalText = `${name} ${types.join(" ")} ${data.notes || ""}`.toLowerCase();
   const hasFotovoltaica = types.includes("fotovoltaica") || data.hasFV || name.includes("fotovoltaica") || name.includes("fv") || name.includes("solar");
   const irveText = `${name} ${types.join(" ")} ${data.notes || ""}`.toLowerCase();
   const hasIrve =
@@ -1005,7 +1081,7 @@ function getRecommendedBlockIds(data) {
       "parking con cargadores",
       "garaje con recarga",
     ].some((term) => irveText.includes(term));
-  const irveInGarage = hasIrve && (data.irveLocation === "garaje_comunitario" || data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => irveText.includes(term)));
+
   const isPublicConcurrencyTrigger =
     types.includes("publica_concurrencia") ||
     (data.hasExternalPublic && Boolean(publicUse)) ||
@@ -1013,36 +1089,29 @@ function getRecommendedBlockIds(data) {
       "bar",
       "restaurante",
       "cafeteria",
-      "cafeteria",
       "hospital",
       "centro sanitario",
       "centro docente",
       "gimnasio",
       "centro comercial",
       "local de reunion",
-      "local de reunion",
       "sala de fiestas",
       "discoteca",
       "teatro",
       "cine",
       "oficina con público",
-      "oficina con público",
       "residencia",
       "tanatorio",
       "estadio",
       "pabellon",
-      "pabellon",
     ].some((term) => publicConcurrencyText.includes(term));
 
-  if (isPublicConcurrencyTrigger) ids.add("rebt2002_block_04");
-  if (isOutdoorTrigger) ids.add("rebt2002_block_03");
+  const specialLocalText = `${name} ${types.join(" ")} ${data.notes || ""}`.toLowerCase();
+  const irveInGarage = hasIrve && (data.irveLocation === "garaje_comunitario" || data.irveGarageOrParking || ["garaje", "parking", "aparcamiento"].some((term) => irveText.includes(term)));
+
   const isSpecialLocalTrigger =
     types.some((type) => ["local_humedo", "local_mojado", "local_corrosivo", "local_polvoriento", "temperatura_extrema", "sala_baterías"].includes(type)) ||
-    (hasFotovoltaica && data.isExterior) ||
-    (hasIrve && (data.isExterior || data.irveExterior)) ||
-    (data.isExterior && power > 25) ||
     [
-      "local humedo",
       "local humedo",
       "local mojado",
       "exterior",
@@ -1051,28 +1120,26 @@ function getRecommendedBlockIds(data) {
       "sala de bombas",
       "depuradora",
       "cocina industrial",
-      "camara frigorfica",
       "camara frigorifica",
-      "sala de baterías",
       "sala de baterías",
       "zona con polvo",
       "polvoriento",
       "ambiente corrosivo",
-      "corrosivo",
-      "productos quimicos",
-      "productos quimicos",
       "invernadero",
       "taller con lavado",
       "sala de maquinas humeda",
-      "sala de maquinas humeda",
-    ].some((term) => specialLocalText.includes(term));
+    ].some((term) => specialLocalText.includes(term)) ||
+    data.hasShowerOrTub ||
+    data.hasWetZone ||
+    data.hasPool ||
+    data.hasGarage;
 
-  if (isSpecialLocalTrigger) ids.add("rebt2002_block_06");
-  if (data.hasShowerOrTub) ids.add("rebt2002_block_02b");
-  if (types.includes("atex") || data.hasAtex) ids.add("rebt2002_block_05");
-  if (irveInGarage) ids.add("rebt2002_block_05");
-  if (hasIrve) ids.add("rebt2002_block_13");
-  if (hasFotovoltaica) ids.add("rebt2002_block_08");
+  if (isPublicConcurrencyTrigger) ids.add("rebt2002_block_03");
+  if (isOutdoorTrigger) ids.add("rebt2002_block_07");
+  if (hasFotovoltaica || hasIrve) ids.add("rebt2002_block_04");
+  if (isSpecialLocalTrigger) ids.add("rebt2002_block_05");
+  if (data.hasAtex || irveInGarage) ids.add("rebt2002_block_06");
+
   return Array.from(ids);
 }
 
@@ -1562,24 +1629,42 @@ function Section({ title, number, children }) {
   );
 }
 
-function StageFlow({ current }) {
+function StageFlow({ current, setScreen, onReportClick }) {
   const stages = [
     ["data", "1", "Datos"],
     ["blocks", "2", "Bloques"],
     ["checklist", "3", "Inspección"],
-    ["measurements", "4", "Medidas"],
-    ["photos", "5", "Fotos"],
-    ["report", "6", "Informe"],
+    ["fieldSheet", "4", "Medidas"],
+    ["report", "5", "Informe"],
   ];
   return (
     <div className="px-5 pt-4 pb-2 print:hidden sticky top-0 z-30 bg-slate-100/95 backdrop-blur">
-      <div className="bg-white border border-slate-100 rounded-[1.5rem] p-3 shadow-sm overflow-x-auto">
+      <div className="bg-white border border-slate-100 rounded-[1.5rem] p-3 shadow-sm overflow-x-auto no-scrollbar">
         <div className="flex gap-2 min-w-max">
           {stages.map(([id, number, label]) => (
-            <div key={id} className={classNames("flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black", current === id ? "bg-[#071E3D] text-white" : "bg-slate-50 text-slate-500")}>
-              <span className={classNames("w-5 h-5 rounded-full flex items-center justify-center", current === id ? "bg-[#FFC928] text-[#071E3D]" : "bg-white border border-slate-200")}>{number}</span>
+            <button
+              key={id}
+              type="button"
+              onClick={() => {
+                if (id === "report" && onReportClick) {
+                  onReportClick();
+                } else {
+                  setScreen && setScreen(id);
+                }
+              }}
+              className={classNames(
+                "flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all active:scale-95",
+                current === id ? "bg-[#071E3D] text-white shadow-md" : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+              )}
+            >
+              <span className={classNames(
+                "w-5 h-5 rounded-full flex items-center justify-center",
+                current === id ? "bg-[#FFC928] text-[#071E3D]" : "bg-white border border-slate-200"
+              )}>
+                {number}
+              </span>
               {fixText(label)}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -1587,9 +1672,10 @@ function StageFlow({ current }) {
   );
 }
 
-function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generatedReportsCount = 0 }) {
+function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generatedReportsCount = 0, onExportBackup, onImportBackup }) {
   const last = inspections[0];
   const recent = inspections.slice(1, 3);
+  const fileInputRef = React.useRef(null);
 
   return (
     <div className="pb-28">
@@ -1627,7 +1713,7 @@ function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generate
             )}
             <div className="flex items-center justify-between relative z-10">
               <div className="flex-1 min-w-0 pr-4">
-                <p className="text-[10px] font-black text-[#FFC928] uppercase tracking-widest mb-1">Úúúltima inspección</p>
+                <p className="text-[10px] font-black text-[#FFC928] uppercase tracking-widest mb-1">última inspección</p>
                 <h2 className="font-black text-slate-900 truncate text-lg leading-tight">{last.data?.name || "Sin nombre"}</h2>
                 <p className="text-sm text-slate-500 mt-1">{last.progress || 0} % completado</p>
               </div>
@@ -1669,6 +1755,40 @@ function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generate
             </div>
           </section>
         )}
+
+        <section className="bg-white border border-slate-100 rounded-[1.5rem] p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <Save className="w-5 h-5 text-[#071E3D]" />
+            <h2 className="font-black text-slate-900">Copias de Seguridad</h2>
+          </div>
+          <p className="text-xs text-slate-500 mb-4 font-medium">Exporta tus inspecciones para no perderlas si borras los datos del navegador.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              onClick={onExportBackup}
+              className="flex items-center justify-center gap-2 py-3 bg-[#071E3D] text-[#FFC928] rounded-xl font-black text-xs hover:bg-[#0a2955] transition-colors shadow-lg shadow-blue-900/10"
+            >
+              <Download className="w-4 h-4" /> Exportar
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".json"
+              onChange={(e) => {
+                if(e.target.files && e.target.files[0]) {
+                  onImportBackup(e.target.files[0]);
+                  e.target.value = null;
+                }
+              }} 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center justify-center gap-2 py-3 bg-white border-2 border-slate-200 text-slate-600 rounded-xl font-black text-xs hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              <Upload className="w-4 h-4" /> Importar
+            </button>
+          </div>
+        </section>
 
         <button type="button" onClick={() => setScreen("plan")} className="w-full bg-white border border-yellow-100 rounded-[1.5rem] p-4 text-left shadow-sm flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-yellow-50 text-[#071E3D] flex items-center justify-center">
@@ -1986,7 +2106,7 @@ function SettingsScreen({
               onClick={onAcceptLegal}
               className={classNames("mt-4 w-full rounded-2xl py-3 text-sm font-black active:scale-95 transition", legalAccepted ? "bg-white text-emerald-700 border border-emerald-100" : "bg-[#071E3D] text-white")}
             >
-              He leido y acepto las condiciones de uso y la politica de privacidad
+              He leído y acepto las condiciones de uso y la política de privacidad
             </button>
           </div>
           <div className="space-y-2">
@@ -2002,10 +2122,10 @@ function SettingsScreen({
           </div>
         </Section>
 
-        <Section title="Version" number="06">
-          <SettingsRow icon={Store} title="Version de la app" text={`IsiVolt Pro ${APP_VERSION}`} />
+        <Section title="Versión" number="06">
+          <SettingsRow icon={Store} title="Versión de la app" text={`IsiVolt Pro ${APP_VERSION}`} />
           <SettingsRow icon={FileText} title="Base normativa" text="REBT 2002 · Base técnica V1." />
-          <SettingsRow icon={ShieldCheck} title="Úúúltima actualización legal" text={LEGAL_UPDATED_AT} />
+          <SettingsRow icon={ShieldCheck} title="última actualización legal" text={LEGAL_UPDATED_AT} />
           <SettingsRow icon={Download} title="Exportar diagnóstico" text="Preparado para soporte técnico en futuras versiones." />
         </Section>
       </div>
@@ -2157,7 +2277,7 @@ function MenuCard({ icon: Icon, title, text, onClick }) {
   );
 }
 
-function DataScreen({ data, setData, setScreen }) {
+function DataScreen({ data, setData, setScreen, onReportClick }) {
   const update = (k, v) => setData((p) => ({ ...p, [k]: v }));
   const toggleType = (type) => {
     setData((p) => {
@@ -2179,7 +2299,7 @@ function DataScreen({ data, setData, setScreen }) {
   return (
     <div className="pb-32">
       <Header title="Datos de instalación" subtitle="Identificación y características" onBack={() => setScreen("inspections")} right={<Save className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="data" />
+      <StageFlow current="data" setScreen={setScreen} onReportClick={onReportClick} />
       <div className="p-5 space-y-5">
         <Section title="Imagen principal" number="00">
           <div className="relative group">
@@ -2242,7 +2362,7 @@ function DataScreen({ data, setData, setScreen }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Fecha de inspección" value={data.inspectionDate || ""} onChange={(v) => update("inspectionDate", v)} type="date" />
-            <Field label="Úúúltima inspección" value={data.previousInspectionDate || ""} onChange={(v) => update("previousInspectionDate", v)} type="date" />
+            <Field label="última inspección" value={data.previousInspectionDate || ""} onChange={(v) => update("previousInspectionDate", v)} type="date" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Próximo vencimiento" value={data.nextInspectionDate || ""} onChange={(v) => update("nextInspectionDate", v)} type="date" />
@@ -2303,7 +2423,7 @@ function DataScreen({ data, setData, setScreen }) {
           />
         </Section>
 
-        <Section title="IRVE y fotovoltaica" number="04">
+        <Section title="Generación y recarga" number="04">
           <div className="grid grid-cols-2 gap-3">
             <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
               <input type="checkbox" checked={data.hasEV} onChange={(e) => update("hasEV", e.target.checked)} />
@@ -2314,17 +2434,51 @@ function DataScreen({ data, setData, setScreen }) {
               <span className="font-bold">Tiene FV</span>
             </label>
           </div>
-          <div className="mt-3">
+          {(data.hasEV || data.installationTypes.includes("vehículo_eléctrico")) && <IRVEForm data={data} update={update} />}
+          {data.hasFV && <FVForm data={data} update={update} />}
+        </Section>
+
+        <Section title="Condiciones especiales del emplazamiento" number="05">
+          <div className="grid grid-cols-1 gap-3">
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.isExterior} onChange={(e) => update("isExterior", e.target.checked)} />
+              <span className="font-bold">Zonas exteriores</span>
+            </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.installationTypes.includes("alumbrado_exterior")} onChange={(e) => { const types = data.installationTypes || []; update("installationTypes", e.target.checked ? [...types, "alumbrado_exterior"] : types.filter(t => t !== "alumbrado_exterior")); }} />
+              <div className="flex-1">
+                <span className="font-bold block">Alumbrado exterior</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">ITC-BT-09 — Farolas, báculos, viales</span>
+              </div>
+            </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.hasWetZone} onChange={(e) => update("hasWetZone", e.target.checked)} />
+              <span className="font-bold">Zonas húmedas o mojadas</span>
+            </label>
             <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
               <input type="checkbox" checked={data.hasShowerOrTub} onChange={(e) => update("hasShowerOrTub", e.target.checked)} />
               <div className="flex-1">
-                <span className="font-bold block">Tiene Banera / Ducha</span>
-                <span className="text-[10px] text-slate-500 font-bold uppercase">ITC-BT-27 - Volmenes 0, 1, 2</span>
+                <span className="font-bold block">Zonas con agua, bañera o ducha</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">ITC-BT-27 - Volúmenes 0, 1, 2</span>
               </div>
             </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.hasPool} onChange={(e) => update("hasPool", e.target.checked)} />
+              <span className="font-bold">Piscina / fuentes / zonas con agua</span>
+            </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.hasGarage} onChange={(e) => update("hasGarage", e.target.checked)} />
+              <span className="font-bold">Garaje o aparcamiento</span>
+            </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.hasAtex} onChange={(e) => update("hasAtex", e.target.checked)} />
+              <span className="font-bold">Riesgo de incendio o explosión / ATEX</span>
+            </label>
+            <label className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
+              <input type="checkbox" checked={data.hasGeneratorOrSai} onChange={(e) => update("hasGeneratorOrSai", e.target.checked)} />
+              <span className="font-bold">Baterías / SAI / grupo electrógeno</span>
+            </label>
           </div>
-          {(data.hasEV || data.installationTypes.includes("vehículo_eléctrico")) && <IRVEForm data={data} update={update} />}
-          {data.hasFV && <FVForm data={data} update={update} />}
         </Section>
 
         <Button onClick={() => setScreen("blocks")} className="w-full">Continuar a bloques <ChevronRight className="w-5 h-5" /></Button>
@@ -2365,7 +2519,7 @@ function PublicConcurrencyForm({ data, update }) {
       />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Aforo previsto" value={data.occupancy || ""} onChange={(v) => update("occupancy", v)} placeholder="Ej. 120" type="number" />
-        <Field label="Superficie Útil m2" value={data.usableAreaM2 || ""} onChange={(v) => update("usableAreaM2", v)} placeholder="Ej. 280" type="number" />
+        <Field label="Superficie Útil m²" value={data.usableAreaM2 || ""} onChange={(v) => update("usableAreaM2", v)} placeholder="Ej. 280" type="number" />
       </div>
       <Select
         label="Suministro complementario"
@@ -2383,7 +2537,7 @@ function PublicConcurrencyForm({ data, update }) {
         {[
           ["hasExternalPublic", "Hay público ajeno al establecimiento"],
           ["hasEmergencyLighting", "Existe alumbrado de emergencia"],
-          ["hasGeneratorOrSai", "Hay grupo electrgeno, SAI o baterías"],
+          ["hasGeneratorOrSai", "Hay grupo electrógeno, SAI o baterías"],
           ["hasPublicAccessiblePanels", "Hay cuadros accesibles al público"],
           ["hasEvacuationRoutes", "Hay escaleras, rampas o recorridos de evacuación"],
           ["hasSpecialPublicZones", "Hay cocina, garaje, piscina, ATEX, FV, IRVE o zonas especiales"],
@@ -2533,7 +2687,7 @@ function FVForm({ data, update }) {
   );
 }
 
-function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen }) {
+function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen, onReportClick }) {
   const recommended = useMemo(() => getRecommendedBlockIds(data), [data]);
   const requirements = useMemo(() => getRequirements(data), [data]);
   const sortedBlocks = useMemo(() => [...BLOCKS].sort((a, b) => a.order - b.order), []);
@@ -2543,7 +2697,7 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen }) {
   return (
     <div className="pb-32">
       <Header title="Bloques de inspección" subtitle="Automático + manual" onBack={() => setScreen("data")} right={<SlidersHorizontal className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="blocks" />
+      <StageFlow current="blocks" setScreen={setScreen} onReportClick={onReportClick} />
       <div className="p-5 space-y-5">
         <div className="bg-[#071E3D] text-white rounded-[2rem] p-5 shadow-xl">
           <h2 className="font-black text-lg">Bloques recomendados</h2>
@@ -2587,7 +2741,7 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen }) {
   );
 }
 
-function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled }) {
+function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled, onReportClick }) {
   const [search, setSearch] = useState("");
   const [helpItem, setHelpItem] = useState(null);
   const [showPending, setShowPending] = useState(false);
@@ -2917,7 +3071,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
                   <Paperclip className="w-4 h-4" />Adjuntar documento{response.documents?.length ? ` (${response.documents.length})` : ""}
                 </FilePickerButton>
               ) : (
-                <Button variant="soft" onClick={() => setScreen("measurements")} className="text-xs py-2"><Gauge className="w-4 h-4" />Añadir medición</Button>
+                <Button variant="soft" onClick={() => setScreen("measurements")} className="text-xs py-2"><Gauge className="w-4 h-4" />{item.tipoPunto === "calculo" ? "Añadir cálculo" : "Añadir medición"}</Button>
               )
             )}
           </div>
@@ -2929,7 +3083,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
   return (
     <div className="pb-32">
       <Header title="Checklist" subtitle={`${items.length} puntos inspeccionables`} onBack={() => setScreen("blocks")} right={<ClipboardCheck className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="checklist" />
+      <StageFlow current="checklist" setScreen={setScreen} onReportClick={onReportClick} />
       <div className="p-5 space-y-5">
         <ProgressCard completion={completion} onReviewPending={() => setShowPending((value) => !value)} sticky />
 
@@ -2952,6 +3106,38 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
             ].map(([id, label]) => (
               <button key={id} type="button" onClick={() => setCheckMode(id)} className={classNames("rounded-2xl py-2 text-sm font-black transition-all", checkMode === id ? "bg-[#071E3D] text-white shadow-lg shadow-blue-900/20" : "text-slate-500 hover:bg-slate-50")}>{fixText(label)}</button>
             ))}
+          </div>
+
+          {/* Navegación rápida por bloques */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            {[...selectedBlocks]
+              .sort((a, b) => {
+                const blockA = getBlock(a);
+                const blockB = getBlock(b);
+                const codeA = blockA?.code || a;
+                const codeB = blockB?.code || b;
+                return codeA.localeCompare(codeB, undefined, { numeric: true });
+              })
+              .map(blockId => {
+              const block = getBlock(blockId);
+              if (!block) return null;
+              return (
+                <button
+                  key={blockId}
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById(blockId);
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      if (!openBlocks[blockId]) toggleBlock(blockId);
+                    }
+                  }}
+                  className="flex-shrink-0 min-w-[3.5rem] px-2 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-[10px] font-black text-slate-600 hover:bg-slate-50 active:scale-95 transition-all shadow-sm"
+                >
+                  {block.code || blockId.split('_').pop()}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -2982,7 +3168,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
             }, {});
 
             return (
-              <section key={block.id} className={classNames("border rounded-[1.75rem] shadow-sm overflow-hidden transition-all", getBlockTone(summary, isOpen))}>
+              <section key={block.id} id={block.id} className={classNames("border rounded-[1.75rem] shadow-sm overflow-hidden transition-all", getBlockTone(summary, isOpen))}>
                 <div
                   role="button"
                   tabIndex={0}
@@ -3069,27 +3255,39 @@ function HelpModal({ item, onClose }) {
           <button type="button" onClick={onClose} className="p-2 rounded-2xl bg-white/10"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 space-y-4">
-          <InfoCard title="Objetivo" text={h.purpose || item.question} />
-          <ListCard title="Qué revisar" items={h.whatToCheck || []} />
-          <ListCard title="Criterio favorable" items={h.criteria || [item.favorable].filter(Boolean)} />
-          <ListCard title="Defectos frecuentes" items={h.defects || []} danger />
-          <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
-            <h3 className="font-black text-slate-900 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-[#0B4EA2]" />Imágenes técnicas</h3>
-            <div className="mt-3 grid grid-cols-1 gap-4">
-              {(h.images || []).map((img, i) => {
-                return (
-                  <div key={i} className="rounded-3xl border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
+          {/* Imágenes primero si existen */}
+          {(h.images || []).length > 0 && (
+            <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+              <h3 className="font-black text-slate-900 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-[#0B4EA2]" />Ficha técnica de inspección</h3>
+              <div className="mt-3 grid grid-cols-1 gap-4">
+                {h.images.map((img, i) => (
+                  <div key={i} className="rounded-3xl border border-slate-100 bg-slate-50 overflow-hidden shadow-md">
                     <TechnicalHelpImage image={img} />
                   </div>
-                );
-              })}
-              {(!h.images || h.images.length === 0) && (
+                ))}
+              </div>
+            </div>
+          )}
+
+          <InfoCard title="Objetivo" text={h.purpose || item.question} />
+          {item.normaResumen && <InfoCard title="Resumen Normativo" text={item.normaResumen} tone="navy" />}
+          {item.criterioInspeccion && <InfoCard title="Criterio de Inspección" text={item.criterioInspeccion} tone="gold" />}
+          <ListCard title="Qué revisar" items={h.whatToCheck || []} />
+          <ListCard title="Criterio favorable" items={h.criteria || [item.favorable || item.favorableCriteria].filter(Boolean)} />
+          {item.defectoSiNoCumple && <InfoCard title="Defecto si no cumple" text={item.defectoSiNoCumple} tone="red" />}
+          <ListCard title="Defectos frecuentes" items={h.defects || []} danger />
+          {item.fuente && <p className="text-[10px] text-slate-400 text-center font-bold uppercase mt-4">Fuente: {item.fuente}</p>}
+
+          {(!h.images || h.images.length === 0) && (
+            <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+              <h3 className="font-black text-slate-900 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-[#0B4EA2]" />Imágenes técnicas</h3>
+              <div className="mt-3">
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-400">
                   <p className="text-sm font-bold">Ayuda visual pendiente</p>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
           <Button onClick={onClose} className="w-full">Cerrar ayuda</Button>
         </div>
       </div>
@@ -3112,9 +3310,28 @@ function TechnicalHelpImage({ image, className = "w-full h-auto object-cover" })
   );
 }
 
-function InfoCard({ title, text }) {
-  return <div className="bg-white rounded-3xl p-4 border border-slate-100"><h3 className="font-black text-slate-900">{fixText(title)}</h3><p className="text-sm text-slate-600 mt-2">{fixText(text)}</p></div>;
+function InfoCard({ title, text, tone = "slate" }) {
+  const tones = {
+    slate: "bg-white border-slate-100",
+    navy: "bg-blue-50 border-blue-100",
+    gold: "bg-amber-50 border-amber-100",
+    red: "bg-red-50 border-red-100",
+  };
+  const titleTones = {
+    slate: "text-slate-900",
+    navy: "text-blue-900",
+    gold: "text-amber-900",
+    red: "text-red-900",
+  };
+
+  return (
+    <div className={classNames("rounded-3xl p-4 border shadow-sm", tones[tone])}>
+      <h3 className={classNames("font-black", titleTones[tone])}>{fixText(title)}</h3>
+      <p className="text-sm text-slate-600 mt-2">{fixText(text)}</p>
+    </div>
+  );
 }
+
 
 function ListCard({ title, items, danger }) {
   return (
@@ -3127,19 +3344,6 @@ function ListCard({ title, items, danger }) {
     </div>
   );
 }
-
-const BOARD_TYPE_OPTIONS = [
-  { value: "general", label: "General" },
-  { value: "secundario", label: "Secundario" },
-  { value: "alumbrado", label: "Alumbrado" },
-  { value: "fuerza", label: "Fuerza" },
-  { value: "cocina", label: "Cocina" },
-  { value: "garaje", label: "Garaje" },
-  { value: "piscina", label: "Piscina" },
-  { value: "fotovoltaica", label: "Fotovoltaica" },
-  { value: "irve", label: "IRVE" },
-  { value: "otro", label: "Otro" },
-];
 
 const RESULT_OPTIONS = [
   { value: "correct", label: "Correcto" },
@@ -3204,9 +3408,23 @@ function isNumericLike(value) {
   return /^>?[0-9]+([,.][0-9]+)?$/.test(String(value).trim());
 }
 
-function FieldSheetsScreen({ fieldSheets, setFieldSheets, setScreen, currentId }) {
+const BOARD_TYPE_OPTIONS = [
+  { value: "general", label: "General" },
+  { value: "secundario", label: "Secundario" },
+  { value: "alumbrado", label: "Alumbrado" },
+  { value: "fuerza", label: "Fuerza" },
+  { value: "cocina", label: "Cocina" },
+  { value: "garaje", label: "Garaje" },
+  { value: "piscina", label: "Piscina" },
+  { value: "fotovoltaica", label: "Fotovoltaica" },
+  { value: "irve", label: "IRVE" },
+  { value: "otro", label: "Otro" },
+];
+
+function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalculations, setScreen, currentId, onReportClick }) {
   const [newBoard, setNewBoard] = useState(createEmptyBoard);
   const [openBoards, setOpenBoards] = useState({});
+  const [subTab, setSubTab] = useState("cuadros"); // "cuadros" o "calculos"
 
   const boards = fieldSheets || [];
   const differentialsCount = boards.reduce((sum, board) => sum + (board.differentials?.length || 0), 0);
@@ -3224,7 +3442,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, setScreen, currentId }
   };
   const validateBoardNumbers = (board) => {
     if (!isNumericLike(board.earthResistanceOhm) || !isNumericLike(board.insulationGeneralMohm)) {
-      alert("Tierra o aislamiento no parecen numericos. Puedes guardarlo, pero revisa el dato.");
+      alert("Tierra o aislamiento no parecen numéricos. Puedes guardarlo, pero revisa el dato.");
     }
   };
   const addBoard = () => {
@@ -3244,47 +3462,39 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, setScreen, currentId }
     setFieldSheets((prev) => prev.filter((board) => board.id !== boardId));
     const board = boards.find((item) => item.id === boardId);
     if (board?.photo?.fileId) {
-      deleteFile(board.photo.fileId).catch((error) => console.error("Error eliminando foto de cuadro", error));
+      deleteFile(board.id, board.photo.fileId).catch(console.error);
     }
+    (board?.differentials || []).forEach((diff) => {
+      if (diff.photo?.fileId) {
+        deleteFile(board.id, diff.photo.fileId).catch(console.error);
+      }
+    });
   };
   const setBoardPhoto = async (board, files, isNew = false) => {
-    const file = files?.[0];
-    if (!file) return;
-    if (!file.type?.startsWith("image/")) {
-      alert("Selecciona una imagen valida.");
-      return;
-    }
+    if (!files.length) return;
     try {
-      const meta = await buildStoredAttachment(file, {
-        currentId,
-        linkedType: "fieldSheet",
-        linkedId: board.id,
-        fileType: "image",
-        compress: true,
-      });
-      if (!meta) return;
-      if (board.photo?.fileId) {
-        deleteFile(board.photo.fileId).catch((error) => console.error("Error sustituyendo foto de cuadro", error));
+      const saved = await saveFile(currentId || "draft", files[0]);
+      if (isNew) {
+        updateNewBoard({ photo: saved });
+      } else {
+        updateBoard(board.id, { photo: saved });
       }
-      if (isNew) updateNewBoard({ photo: meta });
-      else updateBoard(board.id, { photo: meta });
     } catch (error) {
-      console.error(error);
-      alert("No se ha podido guardar la foto. Revisa espacio disponible del dispositivo.");
+      alert("Error guardando foto");
     }
   };
   const deleteBoardPhoto = async (board, isNew = false) => {
-    if (isNew) {
-      updateNewBoard({ photo: null });
-    } else {
-      updateBoard(board.id, { photo: null });
-    }
-    if (board.photo?.fileId) {
-      try {
-        await deleteFile(board.photo.fileId);
-      } catch (error) {
-        console.error("Error eliminando foto de cuadro", error);
+    const photo = board.photo;
+    if (!photo) return;
+    try {
+      await deleteFile(currentId || "draft", photo.fileId);
+      if (isNew) {
+        updateNewBoard({ photo: null });
+      } else {
+        updateBoard(board.id, { photo: null });
       }
+    } catch (error) {
+      alert("Error eliminando foto");
     }
   };
 
@@ -3322,179 +3532,361 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, setScreen, currentId }
 
   const renderBoardForm = (board, isNew = false) => {
     const update = isNew ? updateNewBoard : (patch) => updateBoard(board.id, patch);
+    const b = board || newBoard;
     return (
       <div className="space-y-3">
-        <Field label="Nombre del cuadro" value={board.name} onChange={(value) => update({ name: value })} placeholder="Cuadro General" />
-        <Field label="Zona / ubicación" value={board.zone} onChange={(value) => update({ zone: value })} placeholder="Planta baja - Entrada" />
+        <Field label="Nombre del cuadro" value={b.name} onChange={(value) => update({ name: value })} placeholder="Cuadro General" />
+        <Field label="Zona / ubicación" value={b.zone} onChange={(value) => update({ zone: value })} placeholder="Planta baja - Entrada" />
         <div className="grid grid-cols-2 gap-3">
-          <Select label="Tipo de cuadro" value={board.boardType} onChange={(value) => update({ boardType: value })} options={BOARD_TYPE_OPTIONS} />
-          <Select label="Estado" value={board.status} onChange={(value) => update({ status: value })} options={RESULT_OPTIONS} />
+          <Select label="Tipo de cuadro" value={b.boardType} onChange={(value) => update({ boardType: value })} options={BOARD_TYPE_OPTIONS} />
+          <Select label="Estado" value={b.status} onChange={(value) => update({ status: value })} options={RESULT_OPTIONS} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Tierra Ohm" value={board.earthResistanceOhm} onChange={(value) => update({ earthResistanceOhm: value })} placeholder="12.4" />
-          <Field label="Aislamiento general MΩ" value={board.insulationGeneralMohm} onChange={(value) => update({ insulationGeneralMohm: value })} placeholder=">500" />
+          <Field label="Tierra Ohm" value={b.earthResistanceOhm} onChange={(value) => update({ earthResistanceOhm: value })} placeholder="12.4" />
+          <Field label="Aislamiento general MΩ" value={b.insulationGeneralMohm} onChange={(value) => update({ insulationGeneralMohm: value })} placeholder=">500" />
         </div>
-        <Field label="Tensión de ensayo V" value={board.insulationTestVoltage} onChange={(value) => update({ insulationTestVoltage: value })} placeholder="500" />
-        <textarea value={board.observations || ""} onChange={(event) => update({ observations: event.target.value })} placeholder="Observaciones generales del cuadro..." className="w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
-        <PhotoThumbGrid photos={board.photo ? [board.photo] : []} onDelete={() => deleteBoardPhoto(board, isNew)} />
+        <Field label="Tensión de ensayo V" value={b.insulationTestVoltage} onChange={(value) => update({ insulationTestVoltage: value })} placeholder="500" />
+        <textarea value={b.observations || ""} onChange={(event) => update({ observations: event.target.value })} placeholder="Observaciones generales del cuadro..." className="w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+        <PhotoThumbGrid photos={b.photo ? [b.photo] : []} onDelete={() => deleteBoardPhoto(b, isNew)} />
         <div className="grid grid-cols-2 gap-2">
-          <FilePickerButton accept={IMAGE_ACCEPT} capture="environment" onFiles={(files) => setBoardPhoto(board, files, isNew)} className="text-xs py-2">
-            <Camera className="w-4 h-4" />{board.photo ? "Sustituir foto" : "Añadir foto"}
+          <FilePickerButton accept={IMAGE_ACCEPT} capture="environment" onFiles={(files) => setBoardPhoto(b, files, isNew)} className="text-xs py-2">
+            <Camera className="w-4 h-4" />{b.photo ? "Sustituir foto" : "Añadir foto"}
           </FilePickerButton>
           {!isNew && <Button variant="soft" onClick={() => {
-            if (!board.name.trim()) {
+            if (!b.name.trim()) {
               alert("Introduce un nombre de cuadro");
               return;
             }
-            validateBoardNumbers(board);
-            updateBoard(board.id, { zone: board.zone.trim() || "Sin zona" });
+            validateBoardNumbers(b);
+            updateBoard(b.id, { zone: b.zone.trim() || "Sin zona" });
           }} className="text-xs py-2"><Save className="w-4 h-4" />Guardar cuadro</Button>}
         </div>
+      </div>
+    );
+  };
+  const renderCalculationsForm = () => {
+    const calc = calculations || {
+      powerW: "5000",
+      voltage: "230",
+      lengthM: "30",
+      material: "cu",
+      installationType: "tubo",
+      cosPhi: "0.85",
+      maxVdropPercent: "3"
+    };
+
+    const updateCalc = (k, v) => {
+      setCalculations((prev) => ({ ...prev, [k]: v }));
+    };
+
+    // LÓGICA DE CÁLCULO
+    const power = parseFloat(calc.powerW) || 0;
+    const voltage = parseFloat(calc.voltage) || 230;
+    const length = parseFloat(calc.lengthM) || 0;
+    const cosPhi = parseFloat(calc.cosPhi) || 0.85;
+    const maxVdropPercent = parseFloat(calc.maxVdropPercent) || 3;
+    const material = calc.material || "cu";
+
+    const conductivity = material === "cu" ? 48.5 : 30;
+
+    let currentA = 0;
+    if (power > 0) {
+      if (voltage === 230) {
+        currentA = power / (voltage * cosPhi);
+      } else {
+        currentA = power / (Math.sqrt(3) * voltage * cosPhi);
+      }
+    }
+
+    const maxVdropV = (maxVdropPercent / 100) * voltage;
+
+    let sectionTheoretical = 0;
+    if (power > 0 && length > 0) {
+      if (voltage === 230) {
+        sectionTheoretical = (2 * power * length) / (conductivity * maxVdropV * voltage);
+      } else {
+        sectionTheoretical = (power * length) / (conductivity * maxVdropV * voltage);
+      }
+    }
+
+    const commercialSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
+    let sectionVdrop = commercialSections.find((s) => s >= sectionTheoretical) || 240;
+
+    const copperAmpLimits = {
+      1.5: 15, 2.5: 20, 4: 25, 6: 32, 10: 44, 16: 57, 25: 75, 35: 90, 50: 110, 70: 140,
+      95: 170, 120: 195, 150: 220, 185: 250, 240: 300
+    };
+    const aluminumAmpLimits = {
+      1.5: 11, 2.5: 15, 4: 19, 6: 24, 10: 34, 16: 44, 25: 58, 35: 70, 50: 86, 70: 110,
+      95: 135, 120: 155, 150: 175, 185: 200, 240: 240
+    };
+
+    const ampLimits = material === "cu" ? copperAmpLimits : aluminumAmpLimits;
+    let sectionThermal = commercialSections.find((s) => (ampLimits[s] || 9999) >= currentA) || 240;
+
+    const recommendedSection = Math.max(sectionVdrop, sectionThermal);
+
+    let realVdropV = 0;
+    let realVdropPercent = 0;
+    if (power > 0 && length > 0 && recommendedSection > 0) {
+      if (voltage === 230) {
+        realVdropV = (2 * power * length) / (conductivity * recommendedSection * voltage);
+      } else {
+        realVdropV = (power * length) / (conductivity * recommendedSection * voltage);
+      }
+      realVdropPercent = (realVdropV / voltage) * 100;
+    }
+
+    return (
+      <div className="space-y-5">
+        <section className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm space-y-4">
+          <div className="flex items-center gap-2">
+            <Wrench className="w-5 h-5 text-[#071E3D]" />
+            <h3 className="font-black text-[#071E3D] text-base">Parámetros de Diseño</h3>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Potencia activa (W)" value={calc.powerW} onChange={(v) => updateCalc("powerW", v)} placeholder="5000" />
+            <Select label="Tensión nominal (V)" value={calc.voltage} onChange={(v) => updateCalc("voltage", v)} options={["230", "400"]} />
+            <Field label="Longitud línea (m)" value={calc.lengthM} onChange={(v) => updateCalc("lengthM", v)} placeholder="30" />
+            <Select label="Material" value={calc.material} onChange={(v) => updateCalc("material", v)} options={[{ value: "cu", label: "Cobre (Cu)" }, { value: "al", label: "Aluminio (Al)" }]} />
+            <Select label="Instalación" value={calc.installationType} onChange={(v) => updateCalc("installationType", v)} options={[
+              { value: "tubo", label: "Bajo tubo" },
+              { value: "aire", label: "Al aire" },
+              { value: "enterrado", label: "Enterrado" }
+            ]} />
+            <Field label="Factor de potencia (cos φ)" value={calc.cosPhi} onChange={(v) => updateCalc("cosPhi", v)} placeholder="0.85" />
+            <Select label="Límite caída ΔU" value={calc.maxVdropPercent} onChange={(v) => updateCalc("maxVdropPercent", v)} options={[
+              { value: "3", label: "3% (Alumbrado)" },
+              { value: "5", label: "5% (Otros usos)" }
+            ]} />
+          </div>
+        </section>
+
+        <section className="bg-[#071E3D] text-white rounded-[2rem] p-5 shadow-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-yellow-300 text-xs font-black uppercase tracking-wider">Dimensionamiento REBT</span>
+            <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-emerald-500/30">Favorable</span>
+          </div>
+
+          <div className="space-y-3.5 pt-2">
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-white/60 text-xs font-bold">Intensidad nominal (Ib):</span>
+              <span className="font-black text-white text-sm">{currentA.toFixed(2)} A</span>
+            </div>
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-white/60 text-xs font-bold">Caída de tensión máx (ΔU):</span>
+              <span className="font-black text-white text-sm">{maxVdropV.toFixed(2)} V ({maxVdropPercent}%)</span>
+            </div>
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-white/60 text-xs font-bold">Sección caída de tensión:</span>
+              <span className="font-black text-white text-sm">{sectionTheoretical.toFixed(3)} mm² (Mín: {sectionVdrop} mm²)</span>
+            </div>
+            <div className="flex justify-between border-b border-white/10 pb-2">
+              <span className="text-white/60 text-xs font-bold">Sección criterio térmico:</span>
+              <span className="font-black text-white text-sm">{sectionThermal} mm² (Lím: {ampLimits[sectionThermal]} A)</span>
+            </div>
+            
+            <div className="bg-[#ffc928] text-[#071E3D] rounded-2xl p-4 mt-4 flex flex-col items-center justify-center shadow-md">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#071E3D]/70">Sección Recomendada Final</span>
+              <span className="text-3xl font-black mt-1">{recommendedSection} mm²</span>
+              <span className="text-xs font-bold mt-1 text-center opacity-85">Capacidad admisible: {ampLimits[recommendedSection]} A · Caída real: {realVdropPercent.toFixed(2)}% ({realVdropV.toFixed(2)}V)</span>
+            </div>
+          </div>
+        </section>
       </div>
     );
   };
 
   return (
     <div className="pb-32">
-      <Header title="Hoja de campo" subtitle="Mediciones por cuadro eléctrico" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
+      <Header title="Hoja de campo" subtitle="Mediciones y cálculos de línea" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
+      <StageFlow current="fieldSheet" setScreen={setScreen} onReportClick={onReportClick} />
+      
+      <div className="px-5 pt-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setSubTab("cuadros")}
+          className={classNames(
+            "flex-1 py-3 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-1.5",
+            subTab === "cuadros"
+              ? "bg-[#071E3D] text-white shadow-lg"
+              : "bg-white text-slate-500 border border-slate-200"
+          )}
+        >
+          <Gauge className="w-4 h-4" /> Cuadros y Medidas
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubTab("calculos")}
+          className={classNames(
+            "flex-1 py-3 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-1.5",
+            subTab === "calculos"
+              ? "bg-[#071E3D] text-white shadow-lg"
+              : "bg-white text-slate-500 border border-slate-200"
+          )}
+        >
+          <Wrench className="w-4 h-4" /> Cálculos de Línea
+        </button>
+      </div>
+
       <div className="p-5 space-y-5">
-        {!currentId && (
-          <div className="bg-yellow-50 border border-yellow-100 rounded-[1.5rem] p-4 text-sm text-yellow-900 font-bold">
-            Crea o carga una inspección para guardar la hoja de campo.
-          </div>
-        )}
+        {subTab === "cuadros" ? (
+          <>
+            {!currentId && (
+              <div className="bg-yellow-50 border border-yellow-100 rounded-[1.5rem] p-4 text-sm text-yellow-900 font-bold">
+                Crea o carga una inspección para guardar la hoja de campo.
+              </div>
+            )}
 
-        <section className="bg-[#071E3D] text-white rounded-[1.75rem] p-5 shadow-lg">
-          <p className="text-yellow-300 text-xs font-black uppercase tracking-wider">Resumen de campo</p>
-          <div className="grid grid-cols-4 gap-2 mt-4">
-            <div><b className="text-2xl">{boards.length}</b><p className="text-[10px] text-white/60 font-bold">Cuadros</p></div>
-            <div><b className="text-2xl">{differentialsCount}</b><p className="text-[10px] text-white/60 font-bold">Diferenciales</p></div>
-            <div><b className="text-2xl">{pendingCount}</b><p className="text-[10px] text-white/60 font-bold">Pendientes</p></div>
-            <div><b className="text-2xl">{defectCount}</b><p className="text-[10px] text-white/60 font-bold">Defectos</p></div>
-          </div>
-        </section>
+            <section className="bg-[#071E3D] text-white rounded-[1.75rem] p-5 shadow-lg">
+              <p className="text-yellow-300 text-xs font-black uppercase tracking-wider">Resumen de campo</p>
+              <div className="grid grid-cols-4 gap-2 mt-4">
+                <div><b className="text-2xl">{boards.length}</b><p className="text-[10px] text-white/60 font-bold">Cuadros</p></div>
+                <div><b className="text-2xl">{differentialsCount}</b><p className="text-[10px] text-white/60 font-bold">Diferenciales</p></div>
+                <div><b className="text-2xl">{pendingCount}</b><p className="text-[10px] text-white/60 font-bold">Pendientes</p></div>
+                <div><b className="text-2xl">{defectCount}</b><p className="text-[10px] text-white/60 font-bold">Defectos</p></div>
+              </div>
+            </section>
 
-        <Section title="Añadir cuadro" number="+">
-          {renderBoardForm(newBoard, true)}
-          <Button variant="gold" onClick={addBoard} className="w-full"><Plus className="w-4 h-4" />Añadir cuadro</Button>
-        </Section>
+            <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-black text-[#071E3D] text-base">Nuevo cuadro</h2>
+                <Button variant="gold" onClick={addBoard} className="text-xs py-2"><Plus className="w-4 h-4" />Añadir cuadro</Button>
+              </div>
+              {renderBoardForm(null, true)}
+            </div>
 
-        <div className="space-y-4">
-          {boards.length === 0 && <EmptyState title="Sin cuadros todavía" text="Añade el primer cuadro para registrar tierra, aislamiento, diferenciales y circuitos." />}
-          {boards.map((board) => {
-            const open = Boolean(openBoards[board.id]);
-            const typeLabel = BOARD_TYPE_OPTIONS.find((item) => item.value === board.boardType)?.label || board.boardType;
-            const boardDefects = (board.status === "defect" ? 1 : 0) + (board.differentials || []).filter((item) => item.result === "defect").length + (board.insulationCircuits || []).filter((item) => item.result === "defect").length;
-            return (
-              <section key={board.id} className="bg-white border border-slate-100 rounded-[1.75rem] shadow-sm overflow-hidden">
-                <button type="button" onClick={() => setOpenBoards((prev) => ({ ...prev, [board.id]: !prev[board.id] }))} className="w-full p-4 text-left">
-                  <div className="flex items-start gap-3">
-                    {board.photo?.thumbnailUrl ? (
-                      <img src={board.photo.thumbnailUrl} alt={`Foto de ${board.name || "cuadro"}`} className="w-12 h-12 rounded-2xl object-cover shrink-0 border border-slate-200" />
-                    ) : (
-                      <div className={classNames("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0", boardDefects ? "bg-red-50 text-red-600" : "bg-[#071E3D] text-[#FFC928]")}>
-                        <Gauge className="w-6 h-6" />
+            <div className="space-y-4">
+              {boards.map((board) => {
+                const open = Boolean(openBoards[board.id]);
+                const boardDefects = board.status === "defect" ||
+                  (board.differentials || []).some((d) => d.result === "defect") ||
+                  (board.insulationCircuits || []).some((c) => c.result === "defect");
+                const typeLabel = BOARD_TYPE_OPTIONS.find((o) => o.value === board.boardType)?.label || board.boardType;
+
+                return (
+                  <section key={board.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setOpenBoards((prev) => ({ ...prev, [board.id]: !open }))}
+                      className="w-full text-left p-4 focus:outline-none"
+                    >
+                      <div className="flex items-center gap-4">
+                        {board.photo ? (
+                          <img
+                            src={board.photo.thumbnailUrl}
+                            alt={board.name}
+                            className="w-12 h-12 rounded-2xl object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className={classNames("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0", boardDefects ? "bg-red-50 text-red-600" : "bg-[#071E3D] text-[#FFC928]")}>
+                            <Gauge className="w-6 h-6" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-3">
+                            <h2 className="font-black text-slate-900 leading-tight">{board.name || "Cuadro sin nombre"}</h2>
+                            <ChevronRight className={classNames("w-5 h-5 text-slate-400 transition-transform", open && "rotate-90")} />
+                          </div>
+                          <p className="text-xs text-slate-500 mt-1">{board.zone || "Sin zona"} - {typeLabel}</p>
+                          <p className="text-[11px] text-slate-400 mt-2 font-bold">
+                            Tierra {board.earthResistanceOhm || "-"} Ω - Aislamiento {board.insulationGeneralMohm || "-"} MΩ - {(board.differentials || []).length} diferenciales
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+
+                    {open && (
+                      <div className="bg-slate-50 border-t border-slate-100 p-4 space-y-5">
+                        {renderBoardForm(board)}
+
+                        <div className="bg-white rounded-[1.5rem] p-4 border border-slate-100 space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="font-black text-slate-900">Diferenciales</h3>
+                            <Button variant="soft" onClick={() => addDifferential(board.id)} className="text-xs py-2"><Plus className="w-4 h-4" />Añadir</Button>
+                          </div>
+                          {(board.differentials || []).length === 0 && <p className="text-sm text-slate-400 font-bold">Sin diferenciales registrados.</p>}
+                          {(board.differentials || []).map((diff) => (
+                            <div key={diff.id} className="border border-slate-100 rounded-2xl p-3 space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <Field label="ID diferencial" value={diff.label} onChange={(value) => updateDifferential(board.id, diff.id, { label: value })} />
+                                <Field label="In A" value={diff.InA} onChange={(value) => updateDifferential(board.id, diff.id, { InA: value })} />
+                                <Field label="Sensibilidad mA" value={diff.sensitivitymA} onChange={(value) => updateDifferential(board.id, diff.id, { sensitivitymA: value })} />
+                                <Select label="Tipo" value={diff.type} onChange={(value) => updateDifferential(board.id, diff.id, { type: value })} options={["AC", "A", "F", "B", "Otro"]} />
+                                <Select label="Polos" value={diff.poles} onChange={(value) => updateDifferential(board.id, diff.id, { poles: value })} options={["2P", "4P"]} />
+                                <Select label="Resultado" value={diff.result} onChange={(value) => updateDifferential(board.id, diff.id, { result: value })} options={RESULT_OPTIONS} />
+                                <Field label="Disparo mA" value={diff.tripCurrentmA} onChange={(value) => updateDifferential(board.id, diff.id, { tripCurrentmA: value })} />
+                                <Field label="Tiempo ms" value={diff.tripTimems} onChange={(value) => updateDifferential(board.id, diff.id, { tripTimems: value })} />
+                              </div>
+                              <textarea value={diff.observations || ""} onChange={(event) => updateDifferential(board.id, diff.id, { observations: event.target.value })} placeholder="Observaciones del diferencial..." className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+                              <Button variant="soft" onClick={() => deleteDifferential(board.id, diff.id)} className="w-full text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar diferencial</Button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="bg-white rounded-[1.5rem] p-4 border border-slate-100 space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="font-black text-slate-900">Aislamiento por circuitos</h3>
+                            <Button variant="soft" onClick={() => addCircuit(board.id)} className="text-xs py-2"><Plus className="w-4 h-4" />Añadir</Button>
+                          </div>
+                          {(board.insulationCircuits || []).length === 0 && <p className="text-sm text-slate-400 font-bold">Sin circuitos registrados.</p>}
+                          {(board.insulationCircuits || []).map((circuit) => (
+                            <div key={circuit.id} className="border border-slate-100 rounded-2xl p-3 space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <Field label="Circuito" value={circuit.circuitName} onChange={(value) => updateCircuit(board.id, circuit.id, { circuitName: value })} placeholder="C1 Alumbrado" />
+                                <Field label="Tensión (V)" value={circuit.testVoltageV} onChange={(value) => updateCircuit(board.id, circuit.id, { testVoltageV: value })} />
+                                <Field label="Valor (MΩ)" value={circuit.valueMohm} onChange={(value) => updateCircuit(board.id, circuit.id, { valueMohm: value })} placeholder=">500" />
+                                <Select label="Resultado" value={circuit.result} onChange={(value) => updateCircuit(board.id, circuit.id, { result: value })} options={RESULT_OPTIONS} />
+                              </div>
+                              <textarea value={circuit.observations || ""} onChange={(event) => updateCircuit(board.id, circuit.id, { observations: event.target.value })} placeholder="Observaciones del circuito..." className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+                              <Button variant="soft" onClick={() => deleteCircuit(board.id, circuit.id)} className="w-full text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar circuito</Button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button variant="soft" onClick={() => setOpenBoards((prev) => ({ ...prev, [board.id]: false }))} className="text-xs py-2">Cerrar</Button>
+                          <Button variant="soft" onClick={() => deleteBoard(board.id)} className="text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar cuadro</Button>
+                        </div>
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <h2 className="font-black text-slate-900 leading-tight">{board.name || "Cuadro sin nombre"}</h2>
-                        <ChevronRight className={classNames("w-5 h-5 text-slate-400 transition-transform", open && "rotate-90")} />
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">{board.zone || "Sin zona"} - {typeLabel}</p>
-                      <p className="text-[11px] text-slate-400 mt-2 font-bold">
-                        Tierra {board.earthResistanceOhm || "-"} Ω - Aislamiento {board.insulationGeneralMohm || "-"} MΩ - {(board.differentials || []).length} diferenciales
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                {open && (
-                  <div className="bg-slate-50 border-t border-slate-100 p-4 space-y-5">
-                    {renderBoardForm(board)}
-
-                    <div className="bg-white rounded-[1.5rem] p-4 border border-slate-100 space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="font-black text-slate-900">Diferenciales</h3>
-                        <Button variant="soft" onClick={() => addDifferential(board.id)} className="text-xs py-2"><Plus className="w-4 h-4" />Añadir</Button>
-                      </div>
-                      {(board.differentials || []).length === 0 && <p className="text-sm text-slate-400 font-bold">Sin diferenciales registrados.</p>}
-                      {(board.differentials || []).map((diff) => (
-                        <div key={diff.id} className="border border-slate-100 rounded-2xl p-3 space-y-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            <Field label="ID diferencial" value={diff.label} onChange={(value) => updateDifferential(board.id, diff.id, { label: value })} />
-                            <Field label="In A" value={diff.InA} onChange={(value) => updateDifferential(board.id, diff.id, { InA: value })} />
-                            <Field label="Sensibilidad mA" value={diff.sensitivitymA} onChange={(value) => updateDifferential(board.id, diff.id, { sensitivitymA: value })} />
-                            <Select label="Tipo" value={diff.type} onChange={(value) => updateDifferential(board.id, diff.id, { type: value })} options={["AC", "A", "F", "B", "Otro"]} />
-                            <Select label="Polos" value={diff.poles} onChange={(value) => updateDifferential(board.id, diff.id, { poles: value })} options={["2P", "4P"]} />
-                            <Select label="Resultado" value={diff.result} onChange={(value) => updateDifferential(board.id, diff.id, { result: value })} options={RESULT_OPTIONS} />
-                            <Field label="Disparo mA" value={diff.tripCurrentmA} onChange={(value) => updateDifferential(board.id, diff.id, { tripCurrentmA: value })} />
-                            <Field label="Tiempo ms" value={diff.tripTimems} onChange={(value) => updateDifferential(board.id, diff.id, { tripTimems: value })} />
-                          </div>
-                          <textarea value={diff.observations || ""} onChange={(event) => updateDifferential(board.id, diff.id, { observations: event.target.value })} placeholder="Observaciones del diferencial..." className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
-                          <Button variant="soft" onClick={() => deleteDifferential(board.id, diff.id)} className="w-full text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar diferencial</Button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-white rounded-[1.5rem] p-4 border border-slate-100 space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="font-black text-slate-900">Aislamiento por circuitos</h3>
-                        <Button variant="soft" onClick={() => addCircuit(board.id)} className="text-xs py-2"><Plus className="w-4 h-4" />Añadir</Button>
-                      </div>
-                      {(board.insulationCircuits || []).length === 0 && <p className="text-sm text-slate-400 font-bold">Sin circuitos registrados.</p>}
-                      {(board.insulationCircuits || []).map((circuit) => (
-                        <div key={circuit.id} className="border border-slate-100 rounded-2xl p-3 space-y-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            <Field label="Circuito" value={circuit.circuitName} onChange={(value) => updateCircuit(board.id, circuit.id, { circuitName: value })} placeholder="C1 Alumbrado" />
-                            <Field label="Tensión V" value={circuit.testVoltageV} onChange={(value) => updateCircuit(board.id, circuit.id, { testVoltageV: value })} />
-                            <Field label="Valor MΩ" value={circuit.valueMohm} onChange={(value) => updateCircuit(board.id, circuit.id, { valueMohm: value })} placeholder=">500" />
-                            <Select label="Resultado" value={circuit.result} onChange={(value) => updateCircuit(board.id, circuit.id, { result: value })} options={RESULT_OPTIONS} />
-                          </div>
-                          <textarea value={circuit.observations || ""} onChange={(event) => updateCircuit(board.id, circuit.id, { observations: event.target.value })} placeholder="Observaciones del circuito..." className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
-                          <Button variant="soft" onClick={() => deleteCircuit(board.id, circuit.id)} className="w-full text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar circuito</Button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button variant="soft" onClick={() => setOpenBoards((prev) => ({ ...prev, [board.id]: false }))} className="text-xs py-2">Cerrar</Button>
-                      <Button variant="soft" onClick={() => deleteBoard(board.id)} className="text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Eliminar cuadro</Button>
-                    </div>
-                  </div>
-                )}
-              </section>
-            );
-          })}
-        </div>
+                  </section>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          renderCalculationsForm()
+        )}
       </div>
     </div>
   );
 }
 
-function MeasurementsScreen({ measurements, setMeasurements, setScreen, data }) {
+function MeasurementsScreen({ measurements = {}, setMeasurements, setScreen, data, onReportClick }) {
   const update = (k, v) => setMeasurements((p) => ({ ...p, [k]: v }));
-  const ra = parseNumber(measurements.earth);
-  const idn = parseNumber(measurements.rcd);
+  const ra = parseNumber(measurements?.earth);
+  const idn = parseNumber(measurements?.rcd);
   const vc = ra && idn ? Number((ra * (idn / 1000)).toFixed(2)) : null;
 
-  const isOutdoor = data.installationTypes?.includes("alumbrado_exterior") || data.isExterior;
+  const isOutdoor = (Array.isArray(data.installationTypes) ? data.installationTypes : []).includes("alumbrado_exterior") || data.isExterior;
   const limit = isOutdoor ? 24 : 50;
   const isBad = vc !== null && vc > limit;
 
   return (
     <div className="pb-32">
-      <Header title="Hoja auxiliar de medidas" subtitle="Bloque 25" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
-      <StageFlow current="measurements" />
+      <Header title="Cálculo auxiliar de medidas" subtitle="Cálculo de tensión de contacto" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
+      <StageFlow current="fieldSheet" setScreen={setScreen} onReportClick={onReportClick} />
       <div className="p-5 space-y-5">
         <Section title="Mediciones" number="25">
-          <Field label="Local / circuito / cuadro" value={measurements.location || ""} onChange={(v) => update("location", v)} placeholder="Ej. Cuadro general" />
+          <Field label="Local / circuito / cuadro" value={measurements?.location || ""} onChange={(v) => update("location", v)} placeholder="Ej. Cuadro general" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Lux emergencia" value={measurements.lux || ""} onChange={(v) => update("lux", v)} />
-            <Field label="RA tierra ohm" value={measurements.earth || ""} onChange={(v) => update("earth", v)} />
-            <Field label="IDn mA" value={measurements.rcd || ""} onChange={(v) => update("rcd", v)} />
-            <Field label="Disparo ms" value={measurements.tripMs || ""} onChange={(v) => update("tripMs", v)} />
-            <Field label="Aislamiento Mohm" value={measurements.insulation || ""} onChange={(v) => update("insulation", v)} />
+            <Field label="Lux emergencia" value={measurements?.lux || ""} onChange={(v) => update("lux", v)} />
+            <Field label="RA tierra ohm" value={measurements?.earth || ""} onChange={(v) => update("earth", v)} />
+            <Field label="IDn mA" value={measurements?.rcd || ""} onChange={(v) => update("rcd", v)} />
+            <Field label="Disparo ms" value={measurements?.tripMs || ""} onChange={(v) => update("tripMs", v)} />
+            <Field label="Aislamiento Mohm" value={measurements?.insulation || ""} onChange={(v) => update("insulation", v)} />
           </div>
           <div className={classNames("rounded-3xl border p-4 transition-colors", isBad ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-100")}>
             <p className="text-sm font-bold text-slate-500">Tensión de contacto calculada (Uc)</p>
@@ -3515,7 +3907,8 @@ function MeasurementsScreen({ measurements, setMeasurements, setScreen, data }) 
   );
 }
 
-function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft = false, variant = "tecnico" }) {
+function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signatures, draft = false, variant = "tecnico" }) {
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const page = { width: 210, height: 297, margin: 15 };
   const navy = [7, 30, 61];
@@ -3531,20 +3924,22 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   const dl = defects.filter((r) => r.status === "DL").length;
   const dg = defects.filter((r) => r.status === "DG").length;
   const dmg = defects.filter((r) => r.status === "DMG").length;
-  const loadedPoints = getInspectableChecklistItems(selectedBlocks);
-  const documentPoints = loadedPoints.filter((item) => item.blockId === "rebt2002_block_10");
+  const loadedPoints = getInspectableChecklistItems(selectedBlocks) || [];
+  const documentPoints = loadedPoints.filter((item) => item.blockId === "rebt2002_block_00");
   const documentRows = documentPoints.map((item) => {
     const response = responses[item.id] || {};
     return [
-      item.id,
-      item.title,
-      response.status || "Sin revisar",
-      response.documentState ? response.documentState.replaceAll("_", " ") : "Sin indicar",
-      response.observation || "-",
+      String(item.id || "-"),
+      String(item.title || "Documento"),
+      String(response.status || "Sin revisar"),
+      response.documentState ? String(response.documentState).replace(/_/g, " ") : "Sin indicar",
+      String(response.observation || "-"),
     ];
   });
-  const blocks = selectedBlocks.map((id) => getBlock(id)).filter(Boolean).sort((a, b) => a.order - b.order);
-  const itcReferences = getSelectedItcReferences(selectedBlocks);
+
+  const blocks = (selectedBlocks || []).map((id) => getBlock(id)).filter(Boolean).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const itcReferences = getSelectedItcReferences(selectedBlocks, data?.regulation);
   const today = new Date().toLocaleDateString("es-ES");
   const reportDate = data.inspectionDate ? new Date(data.inspectionDate).toLocaleDateString("es-ES") : today;
   const installationType = (data.installationTypes || []).map((type) => type.replaceAll("_", " ")).join(", ") || "Sin indicar";
@@ -3615,13 +4010,14 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     theme: "plain",
     styles: { fontSize: 11, cellPadding: 2.5, textColor: navy },
     body: [
-      ["Instalación", data.name || "Sin indicar"],
-      ["Dirección", data.address || "Sin indicar"],
-      ["Reglamento", data.regulation],
-      ["Tipo de inspección", inspectionType],
-      ["Fecha", reportDate],
+      ["Instalación", String(data?.name || "Sin indicar")],
+      ["Dirección", String(data?.address || "Sin indicar")],
+      ["Reglamento", String(data?.regulation || "Sin indicar")],
+      ["Tipo de inspección", String(inspectionType || "Sin indicar")],
+      ["Fecha", String(reportDate || "Sin indicar")],
     ],
   });
+
   doc.setDrawColor(...gold);
   doc.roundedRect(112, 125, 82, 45, 3, 3);
   doc.setFont("helvetica", "bold");
@@ -3639,11 +4035,12 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: 195,
     margin: { left: page.margin, right: page.margin },
     head: [["Puntos revisados", "Defectos leves", "Defectos graves", "Defectos muy graves"]],
-    body: [[loadedPoints.length, dl, dg, dmg]],
+    body: [[String(loadedPoints.length), String(dl), String(dg), String(dmg)]],
     styles: { halign: "center", fontSize: 13, cellPadding: 5 },
     headStyles: { fillColor: navy, textColor: 255 },
     bodyStyles: { fontStyle: "bold", textColor: navy },
   });
+
   footer();
 
   let y = addPage("Resumen ejecutivo");
@@ -3651,22 +4048,23 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: y,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Instalación inspeccionada", data.name || "Sin indicar"],
-      ["Tipo", installationType],
-      ["Potencia instalada", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
-      ["Esquema de distribución", data.distributionSystem],
-      ["Reglamento aplicado", data.regulation],
-      ["ITC principales", itcReferences.join(", ") || "Sin indicar"],
-      ["Puntos revisados", loadedPoints.length],
-      ["Puntos favorables", favorable.length],
-      ["Defectos leves", dl],
-      ["Defectos graves", dg],
-      ["Defectos muy graves", dmg],
-      ["Estado de cumplimentación", `${completion.percent}% (${completion.completed}/${completion.total})`],
-      ["Puntos pendientes", completion.pending],
-      ["Dictamen final", verdict.label],
-      ["Plazo de subsanación", verdict.label === "CONDICIONADA" ? "6 meses" : verdict.label === "NEGATIVA" ? "Inmediato" : "No procede"],
+      ["Instalación inspeccionada", String(data?.name || "Sin indicar")],
+      ["Tipo", String(installationType || "Sin indicar")],
+      ["Potencia instalada", String(data?.powerKW ? `${data.powerKW} kW` : "Sin indicar")],
+      ["Esquema de distribución", String(data?.distributionSystem || "Sin indicar")],
+      ["Reglamento aplicado", String(data?.regulation || "Sin indicar")],
+      ["ITC principales", String(itcReferences.join(", ") || "Sin indicar")],
+      ["Puntos revisados", String(loadedPoints.length)],
+      ["Puntos favorables", String(favorable.length)],
+      ["Defectos leves", String(dl)],
+      ["Defectos graves", String(dg)],
+      ["Defectos muy graves", String(dmg)],
+      ["Estado de cumplimentación", String(`${completion.percent}% (${completion.completed}/${completion.total})`)],
+      ["Puntos pendientes", String(completion.pending)],
+      ["Dictamen final", String(verdict.label || "Sin dictamen")],
+      ["Plazo de subsanación", String(verdict.label === "CONDICIONADA" ? "6 meses" : verdict.label === "NEGATIVA" ? "Inmediato" : "No procede")],
     ],
+
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
     columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
@@ -3677,40 +4075,41 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: y,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Nombre de la instalación", data.name || "Sin indicar"],
-      ["Dirección", data.address || "Sin indicar"],
-      ["Localidad", data.city || "Sin indicar"],
-      ["Provincia", data.province || "Sin indicar"],
-      ["Titular", data.ownerName || "Sin indicar"],
-      ["NIF / CIF", data.holderNif || "Sin indicar"],
-      ["Teléfono", data.contactPhone || "Sin indicar"],
-      ["Email", data.contactEmail || "Sin indicar"],
-      ["N. pedido", data.orderNumber || "Sin indicar"],
-      ["CUPS", data.cups || "Sin indicar"],
-      ["Compañía suministradora", data.supplyCompany || "Sin indicar"],
-      ["Potencia", data.powerKW ? `${data.powerKW} kW` : "Sin indicar"],
-      ["Reglamento", data.regulation],
-      ["Tipo de instalación", installationType],
-      ["Tipo de inspección", inspectionType],
-      ["Alcance", data.inspectionScope || "Sin indicar"],
-      ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
-      ["Fecha de inspección", reportDate],
-      ["Úúúltima inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
-      ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
-      ["Técnico inspector", data.technicianName || "Sin indicar"],
-      ["Identificación profesional", data.technicianCredential || "Sin indicar"],
-      ["Lugar de emisión", data.reportLocation || "Sin indicar"],
-      ["Esquema TT/TN/IT", data.distributionSystem],
-      ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
-      ["Aforo previsto", data.occupancy || "Sin indicar"],
-      ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m2` : "Sin indicar"],
-      ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
-      ["Suministro complementario", data.complementarySupplyType || "No indicado"],
-      ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
-      ["Esquema unifilar", data.hasSingleLine ? "Sí" : "No indicado"],
-      ["CIE / Boletín", data.hasCertificate ? "Sí" : "No indicado"],
-      ["Acta anterior", data.hasPreviousReport ? "Sí" : "No indicado"],
+      ["Nombre de la instalación", String(data?.name || "Sin indicar")],
+      ["Dirección", String(data?.address || "Sin indicar")],
+      ["Localidad", String(data?.city || "Sin indicar")],
+      ["Provincia", String(data?.province || "Sin indicar")],
+      ["Titular", String(data?.ownerName || "Sin indicar")],
+      ["NIF / CIF", String(data?.holderNif || "Sin indicar")],
+      ["Teléfono", String(data?.contactPhone || "Sin indicar")],
+      ["Email", String(data?.contactEmail || "Sin indicar")],
+      ["N. pedido", String(data?.orderNumber || "Sin indicar")],
+      ["CUPS", String(data?.cups || "Sin indicar")],
+      ["Compañía suministradora", String(data?.supplyCompany || "Sin indicar")],
+      ["Potencia", String(data?.powerKW ? `${data.powerKW} kW` : "Sin indicar")],
+      ["Reglamento", String(data?.regulation || "Sin indicar")],
+      ["Tipo de instalación", String(installationType || "Sin indicar")],
+      ["Tipo de inspección", String(inspectionType || "Sin indicar")],
+      ["Alcance", String(data?.inspectionScope || "Sin indicar")],
+      ["Motivo de inspección", String(data?.inspectionReason || "Sin indicar")],
+      ["Fecha de inspección", String(reportDate || "Sin indicar")],
+      ["última inspección", String(data?.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar")],
+      ["Próximo vencimiento", String(data?.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar")],
+      ["Técnico inspector", String(data?.technicianName || "Sin indicar")],
+      ["Identificación profesional", String(data?.technicianCredential || "Sin indicar")],
+      ["Lugar de emisión", String(data?.reportLocation || "Sin indicar")],
+      ["Esquema TT/TN/IT", String(data?.distributionSystem || "Sin indicar")],
+      ["Uso pública concurrencia", String(data?.publicUse || "Sin indicar")],
+      ["Aforo previsto", String(data?.occupancy || "Sin indicar")],
+      ["Superficie Útil", String(data?.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar")],
+      ["Alumbrado de emergencia", String(data?.hasEmergencyLighting ? "Sí" : "No indicado")],
+      ["Suministro complementario", String(data?.complementarySupplyType || "No indicado")],
+      ["Proyecto", String(data?.hasProject ? "Sí" : "No indicado")],
+      ["Esquema unifilar", String(data?.hasSingleLine ? "Sí" : "No indicado")],
+      ["CIE / Boletín", String(data?.hasCertificate ? "Sí" : "No indicado")],
+      ["Acta anterior", String(data?.hasPreviousReport ? "Sí" : "No indicado")],
     ],
+
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
     columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
@@ -3730,16 +4129,48 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: doc.lastAutoTable.finalY + 8,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Documentos disponibles", documentRows.filter((r) => r[2] === "Favorable" || r[3] === "aportado").length],
-      ["Documentos no aportados", documentRows.filter((r) => r[3] === "no aportado").length],
-      ["Documentos no coincidentes", documentRows.filter((r) => r[3] === "no coincide").length],
-      ["Defectos documentales", documentRows.filter((r) => ["DL", "DG", "DMG"].includes(r[2])).length],
+      ["Documentos disponibles", String(documentRows.filter((r) => r[2] === "Favorable" || r[3] === "aportado").length)],
+      ["Documentos no aportados", String(documentRows.filter((r) => r[3] === "no aportado").length)],
+      ["Documentos no coincidentes", String(documentRows.filter((r) => r[3] === "no coincide").length)],
+      ["Defectos documentales", String(documentRows.filter((r) => ["DL", "DG", "DMG"].includes(r[2])).length)],
       ["Evidencias adjuntas", "Fotos/PDF: preparado para adjuntos documentales"],
     ],
+
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
     columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
   });
+
+  if (variant === "campo") {
+    y = addPage("Hoja de Campo para Inspección");
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Plantilla para toma de datos manual en campo. Basado en estándares TUV SUD.", page.margin, y);
+    y += 12;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.rect(page.margin, y, 85, 40);
+    doc.rect(110, y, 85, 40);
+    doc.setLineDashPattern([], 0);
+    doc.setFontSize(8);
+    doc.text("Sello de entrada / Fecha", page.margin + 5, y + 35);
+    doc.text("Firma del técnico", 115, y + 35);
+    y += 55;
+    doc.setFontSize(12);
+    doc.text("ANOTACIONES GENERALES", page.margin, y);
+    doc.line(page.margin, y + 2, page.width - page.margin, y + 2);
+    y += 10;
+    doc.rect(page.margin, y, 180, 50);
+    y += 65;
+    doc.text("CROQUIS / ESQUEMA RÁPIDO", page.margin, y);
+    doc.line(page.margin, y + 2, page.width - page.margin, y + 2);
+    y += 10;
+    doc.rect(page.margin, y, 180, 90);
+    // Añadimos rejilla milimetrada suave
+    doc.setDrawColor(240, 240, 240);
+    for (let i = 5; i < 180; i += 10) doc.line(page.margin + i, y, page.margin + i, y + 90);
+    for (let i = 5; i < 90; i += 10) doc.line(page.margin, y + i, page.margin + 180, y + i);
+  }
 
   y = addPage("Normativa y bloques");
   autoTable(doc, {
@@ -3769,11 +4200,12 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       margin: { left: page.margin, right: page.margin },
       head: [["Código", "Punto revisado", "Resultado", "Observación"]],
       body: (responseList.length ? responseList : loadedPoints.map((item) => ({ item, status: "Sin revisar", observation: "" }))).map((r) => [
-        r.item.id,
-        r.item.title,
-        r.status,
-        r.observation || r.item.favorable || "-",
+        r?.item?.id || "-",
+        r?.item?.title || "Punto de inspección",
+        r?.status || "Pendiente",
+        r?.observation || r?.item?.favorable || "-",
       ]),
+
       headStyles: { fillColor: navy },
       styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
       columnStyles: { 0: { cellWidth: 22 }, 2: { cellWidth: 24 } },
@@ -3812,14 +4244,15 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     head: [["Código", "Título", "Resultado", "Defecto sugerido", "ITC", "Apartado", "Evidencia"]],
     body: defects.length
       ? defects.map((r) => [
-        r.item.id,
-        r.item.title,
-        r.status,
-        r.item.defectoSiNoCumple || "Defecto pendiente de describir",
-        r.item.itc || r.item.reference,
-        r.item.apartado || "Sin indicar",
+        r?.item?.id || "-",
+        r?.item?.title || "Punto con defecto",
+        r?.status || "DG",
+        r?.item?.defectoSiNoCumple || "Defecto pendiente de describir",
+        r?.item?.itc || r?.item?.reference || "-",
+        r?.item?.apartado || "Sin indicar",
         getEvidenceSummary(r),
       ])
+
       : [["-", "No hay defectos registrados", "-", "-", "-", "-", "-"]],
     headStyles: { fillColor: navy },
     styles: { fontSize: 7.2, cellPadding: 2, overflow: "linebreak" },
@@ -3836,29 +4269,30 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(...navy);
-    doc.text(`${r.item.id} - ${r.item.title}`, page.margin, y);
+    doc.text(`${r?.item?.id || "-"} - ${r?.item?.title || "-"}`, page.margin, y);
     autoTable(doc, {
       startY: y + 6,
       margin: { left: page.margin, right: page.margin },
       body: [
-        ["Bloque", getBlock(r.item.blockId)?.title || r.item.blockId],
-        ["Código del punto", r.item.id],
-        ["Título", r.item.title],
-        ["Resultado", r.status],
-        ["Defecto sugerido", r.item.defectoSiNoCumple || "Defecto pendiente de describir"],
-        ["ITC", r.item.itc || r.item.reference || "Sin indicar"],
-        ["Apartado", r.item.apartado || "Sin indicar"],
-        ["Resumen normativo", r.item.normaResumen || r.item.reference || "Sin indicar"],
-        ["Criterio de inspección", r.item.criterioInspeccion || r.item.favorable || "Sin indicar"],
-        ["Evidencia/foto/documento asociado", getEvidenceSummary(r)],
-        ["Punto inspeccionado", r.item.question],
-        ["Criterio favorable", r.item.favorableCriteria || r.item.favorable],
-        ["Zona / ubicación afectada", getDefectLocation(r) || "Sin indicar"],
-        ["Observación del inspector", r.observation || "Sin observación específica registrada"],
-        ["Mediciones requeridas", formatChecklistList(r.item.medicionesRequeridas, "Sin medición específica indicada")],
+        ["Bloque", String(getBlock(r?.item?.blockId)?.title || r?.item?.blockId || "Desconocido")],
+        ["Código del punto", String(r?.item?.id || "-")],
+        ["Título", String(r?.item?.title || "-")],
+        ["Resultado", String(r?.status || "-")],
+        ["Defecto sugerido", String(r?.item?.defectoSiNoCumple || "Defecto pendiente de describir")],
+        ["ITC", String(r?.item?.itc || r?.item?.reference || "Sin indicar")],
+        ["Apartado", String(r?.item?.apartado || "Sin indicar")],
+        ["Resumen normativo", String(r?.item?.normaResumen || r?.item?.reference || "Sin indicar")],
+        ["Criterio de inspección", String(r?.item?.criterioInspeccion || r?.item?.favorable || "Sin indicar")],
+        ["Evidencia/foto/documento asociado", String(getEvidenceSummary(r) || "Sin evidencia")],
+        ["Punto inspeccionado", String(r?.item?.question || "-")],
+        ["Criterio favorable", String(r?.item?.favorableCriteria || r?.item?.favorable || "-")],
+        ["Zona / ubicación afectada", String(getDefectLocation(r) || "Sin indicar")],
+        ["Observación del inspector", String(r?.observation || "Sin observación específica registrada")],
+        ["Mediciones requeridas", String(formatChecklistList(r?.item?.medicionesRequeridas, "Sin medición específica indicada"))],
         ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
         ["Recomendación", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
       ],
+
       theme: "grid",
       styles: { fontSize: 9, cellPadding: 2.5 },
       columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252], cellWidth: 44 } },
@@ -3876,23 +4310,24 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
   });
 
   y = addPage("Hoja auxiliar de medidas");
-  const ra = parseNumber(measurements.earth);
-  const idn = parseNumber(measurements.rcd);
+  const ra = parseNumber(measurements?.earth);
+  const idn = parseNumber(measurements?.rcd);
   const vc = ra && idn ? Number((ra * (idn / 1000)).toFixed(2)) : "";
   autoTable(doc, {
     startY: y,
     margin: { left: page.margin, right: page.margin },
     head: [["Local / Cuadro / Circuito", "Lux", "Diferencial", "mA", "ms", "Vc", "Tierra", "Aislamiento"]],
     body: [[
-      measurements.location || "Cuadro general",
-      measurements.lux || "-",
-      measurements.rcd ? `ID ${measurements.rcd} mA` : "-",
-      measurements.rcd || "-",
-      measurements.tripMs || "-",
-      vc || "-",
-      measurements.earth || "-",
-      measurements.insulation || "-",
+      String(measurements?.location || "Cuadro general"),
+      String(measurements?.lux || "-"),
+      String(measurements?.rcd ? `ID ${measurements.rcd} mA` : "-"),
+      String(measurements?.rcd || "-"),
+      String(measurements?.tripMs || "-"),
+      String(vc || "-"),
+      String(measurements?.earth || "-"),
+      String(measurements?.insulation || "-"),
     ]],
+
     headStyles: { fillColor: navy },
     styles: { fontSize: 8, cellPadding: 2.5 },
   });
@@ -3905,7 +4340,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
       doc.setTextColor(...navy);
-      doc.text(`${r.item.id} - ${r.item.title}`, page.margin, y);
+      doc.text(`${r?.item?.id || "-"} - ${r?.item?.title || "-"}`, page.margin, y);
       doc.setDrawColor(159, 176, 195);
       doc.roundedRect(page.margin, y + 6, 82, 36, 2, 2);
       doc.roundedRect(113, y + 6, 82, 36, 2, 2);
@@ -3914,6 +4349,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
       doc.text(`Foto ${index * 2 + 1} - Vista general`, page.margin + 5, y + 27);
       doc.text(`Foto ${index * 2 + 2} - Detalle técnico`, 118, y + 27);
       y += 54;
+
     });
   }
 
@@ -3929,24 +4365,40 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, draft
     startY: y,
     margin: { left: page.margin, right: page.margin },
     body: [
-      ["Defectos leves", dl],
-      ["Defectos graves", dg],
-      ["Defectos muy graves", dmg],
-      ["Plazo recomendado", verdict.label === "CONDICIONADA" ? "6 meses para la subsanación de defectos graves." : verdict.label === "NEGATIVA" ? "Corrección inmediata antes de puesta en servicio." : "No procede."],
-      ["Conclusión", verdict.label === "FAVORABLE" ? "La instalación puede considerarse favorable con los datos registrados." : "La instalación no puede considerarse favorable hasta la corrección de los defectos indicados en este informe."],
+      ["Defectos leves", String(dl)],
+      ["Defectos graves", String(dg)],
+      ["Defectos muy graves", String(dmg)],
+      ["Plazo recomendado", String(verdict.label === "CONDICIONADA" ? "6 meses para la subsanación de defectos graves." : verdict.label === "NEGATIVA" ? "Corrección inmediata antes de puesta en servicio." : "No procede.")],
+      ["Conclusión", String(verdict.label === "FAVORABLE" ? "La instalación puede considerarse favorable con los datos registrados." : "La instalación no puede considerarse favorable hasta la corrección de los defectos indicados en este informe.")],
     ],
+
     theme: "grid",
     styles: { fontSize: 10, cellPadding: 3 },
     columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252], cellWidth: 48 } },
   });
   y = doc.lastAutoTable.finalY + 28;
+  y = doc.lastAutoTable.finalY + 30;
   doc.setDrawColor(...navy);
-  [["Firma del inspector", page.margin], ["Firma del titular / representante", 78], ["Fecha", 150]].forEach(([label, x]) => {
-    doc.line(x, y, x + 45, y);
+  const sigs = [
+    { label: "Firma del inspector", x: page.margin, data: signatures?.inspector },
+    { label: "Firma del titular / representante", x: 78, data: signatures?.client },
+    { label: "Fecha", x: 150, data: null }
+  ];
+
+  sigs.forEach((s) => {
+    doc.line(s.x, y, s.x + 45, y);
+    if (s.data) {
+      try {
+        doc.addImage(s.data, "PNG", s.x, y - 25, 45, 22);
+      } catch (e) {
+        console.warn("No se pudo añadir firma al PDF directo:", e);
+      }
+    }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.text(label, x, y + 7);
+    doc.text(s.label, s.x, y + 7);
   });
+
 
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i += 1) {
@@ -3994,7 +4446,8 @@ async function waitForImages(root) {
   }));
 }
 
-const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE }, ref) => {
+const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], calculations, signatures, reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE, onItcClick }, ref) => {
+
   const completion = getInspectionCompletion(selectedBlocks, responses);
   const verdict = calculateVerdict(responses, completion.isComplete);
   const responseList = Object.values(responses).filter((r) => r.status);
@@ -4005,12 +4458,18 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
   const dmg = defects.filter((r) => r.status === "DMG").length;
   const loadedPoints = getInspectableChecklistItems(selectedBlocks);
   const blocks = selectedBlocks.map((id) => getBlock(id)).filter(Boolean).sort((a, b) => a.order - b.order);
-  const itcReferences = getSelectedItcReferences(selectedBlocks);
+  const itcReferences = getSelectedItcReferences(selectedBlocks, data?.regulation);
+  const itcDisplay = useMemo(() => {
+    if (!itcReferences.length) return "Pendiente de definir según datos iniciales";
+    if (itcReferences.length <= 5) return itcReferences.join(" · ");
+    return `${itcReferences.slice(0, 4).join(" · ")} + ${itcReferences.length - 4} más`;
+  }, [itcReferences]);
   const today = new Date().toLocaleDateString("es-ES");
   const reportDate = data.inspectionDate ? new Date(data.inspectionDate).toLocaleDateString("es-ES") : today;
   const hasDetailedPointTable = reportVariant === "tecnico";
-  const inspectionType = data.inspectionType ? data.inspectionType.charAt(0).toUpperCase() + data.inspectionType.slice(1) : "Sin indicar";
-  const installationType = (data.installationTypes || []).map((type) => type.replaceAll("_", " ")).join(", ") || "Sin indicar";
+  const inspectionType = data.inspectionType ? String(data.inspectionType).charAt(0).toUpperCase() + String(data.inspectionType).slice(1) : "Sin indicar";
+  const installationType = Array.isArray(data.installationTypes) ? data.installationTypes.map((type) => String(type).replaceAll("_", " ")).join(", ") : "Sin indicar";
+
 
   // Función para dividir arrays en trozos (para multi-página)
   const chunkArray = (arr, size) => {
@@ -4026,6 +4485,21 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
 
   // Dividimos los puntos en grupos más pequeños para evitar cortes en el PDF A4.
   const pointChunks = chunkArray(pointsToDisplay, 12);
+
+  // Mapeamos todas las fotos asociadas a defectos para el anexo
+  const photoAnnexItems = useMemo(() => {
+    return defects.flatMap((r) =>
+      getReportPhotos(r).map((photo, pIdx) => ({
+        r,
+        photo,
+        pIdx
+      }))
+    );
+  }, [defects]);
+
+  const photoChunks = useMemo(() => {
+    return chunkArray(photoAnnexItems, 4);
+  }, [photoAnnexItems]);
 
   return (
     <div ref={ref} className="report-document print-root">
@@ -4091,7 +4565,11 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             <SummaryBox label="Potencia" value={data.powerKW ? `${data.powerKW} kW` : "Sin indicar"} />
             <SummaryBox label="Distribución" value={data.distributionSystem} />
             <SummaryBox label="Reglamento" value={data.regulation} />
-            <SummaryBox label="ITC principales" value={itcReferences.join(", ") || "Sin indicar"} />
+            <SummaryBox 
+              label="ITC principales" 
+              value={itcDisplay} 
+              onClick={onItcClick}
+            />
           </div>
           {data.coverImage && (
             <div className="w-[60mm] h-[60mm] rounded-2xl overflow-hidden border border-slate-100 shrink-0">
@@ -4135,7 +4613,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Alcance", data.inspectionScope || "Sin indicar"],
             ["Motivo de inspección", data.inspectionReason || "Sin indicar"],
             ["Fecha de inspección", reportDate],
-            ["Úúúltima inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
+            ["última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Técnico inspector", data.technicianName || "Sin indicar"],
             ["Identificación profesional", data.technicianCredential || "Sin indicar"],
@@ -4143,7 +4621,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Esquema TT/TN/IT", data.distributionSystem],
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
-            ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m2` : "Sin indicar"],
+            ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar"],
             ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
             ["Suministro complementario", data.complementarySupplyType || "No indicado"],
             ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
@@ -4187,24 +4665,78 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
       </ReportPage>
 
       {reportVariant === "tecnico" && defects.map((r, index) => (
-        <DefectReportPage key={r.defectEntryId || `${r.item.id}-${index}`} r={r} index={index} />
+        <DefectReportPage key={r?.defectEntryId || `${r?.item?.id || 'unknown'}-${index}`} r={r} index={index} />
       ))}
 
-      {reportVariant === "tecnico" && defects.some((r) => getReportPhotos(r).length > 0) && (
-        <ReportPage title="Fotografías asociadas" icon={ImageIcon}>
-          <PhotoAnnex defects={defects} />
+
+      {reportVariant === "tecnico" && photoChunks.map((chunk, idx) => (
+        <ReportPage
+          key={`photo-annex-page-${idx}`}
+          title={idx === 0 ? "Anexo de Pruebas Gráficas" : "Anexo de Pruebas Gráficas (cont.)"}
+          icon={ImageIcon}
+        >
+          <div className="photo-annex-grid-2x2">
+            {chunk.map(({ r, photo, pIdx }) => (
+              <div className="photo-annex-item-box" key={`${r?.defectEntryId || r?.item?.id}-${photo.fileId || pIdx}`}>
+                <div className="photo-annex-img-wrapper">
+                  <img src={photo.dataUrl || photo.thumbnailUrl} alt="Prueba Gráfica" />
+                </div>
+                <div className="photo-annex-caption">
+                  <div className="photo-annex-meta">
+                    <span className="photo-annex-badge">Punto {r?.item?.id}</span>
+                    <span className="photo-annex-location">{getDefectLocation(r) || "General"}</span>
+                  </div>
+                  <p className="photo-annex-desc">{fixText(r?.item?.title)}</p>
+                  {r?.observation && (
+                    <p className="photo-annex-obs">Obs: {fixText(r.observation)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ReportPage>
+      ))}
+
+      {reportVariant === "tecnico" && selectedBlocks.includes("custom_block_26_calculations") && (
+        <ReportPage title="Cálculos Eléctricos de Línea" icon={Wrench}>
+          <CalculationsReportView calculations={calculations} />
         </ReportPage>
       )}
 
       <FieldSheetsReportPages fieldSheets={fieldSheets} />
 
+      {reportVariant === "campo" && (
+        <ReportPage title="Hoja de Campo para Inspección" icon={ClipboardList}>
+          <p className="report-subtitle mb-4">Plantilla para toma de datos manual en campo. Basado en estándares TUV SUD.</p>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 h-32 flex flex-col justify-end">
+              <span className="text-[10px] font-black text-slate-400 uppercase">Sello de entrada / Fecha</span>
+            </div>
+            <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 h-32 flex flex-col justify-end">
+              <span className="text-[10px] font-black text-slate-400 uppercase">Firma del técnico</span>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="font-black text-slate-900 border-b-2 border-[#FFC928] pb-1">ANOTACIONES GENERALES</h3>
+            <div className="border border-slate-200 rounded-2xl h-48 bg-slate-50/30" />
+            <h3 className="font-black text-slate-900 border-b-2 border-[#FFC928] pb-1">CROQUIS / ESQUEMA RÁPIDO</h3>
+            <div className="border border-slate-200 rounded-2xl h-80 bg-slate-50/30 grid grid-cols-12 grid-rows-12 opacity-10">
+              {Array.from({ length: 144 }).map((_, i) => <div key={i} className="border-[0.1mm] border-slate-900" />)}
+            </div>
+          </div>
+        </ReportPage>
+      )}
+
       <ReportPage title="Medidas y Firmas" icon={Gauge}>
+
         <MeasurementsReportTable measurements={measurements} />
         <div className="report-signatures">
-          <SignatureLine label="Firma del inspector" />
-          <SignatureLine label="Firma del titular" />
-          <SignatureLine label="Fecha" />
+          <SignatureLine label="Firma del inspector" signature={signatures?.inspector} />
+          <SignatureLine label="Firma del titular" signature={signatures?.client} />
+          <SignatureLine label="Fecha de emisión" date={new Date().toLocaleDateString("es-ES")} />
         </div>
+
+
       </ReportPage>
     </div>
   );
@@ -4216,6 +4748,7 @@ function ReportScreen({
   responses,
   measurements,
   fieldSheets = [],
+  calculations,
   setScreen,
   reportMode = "final",
   plan = "demo",
@@ -4226,14 +4759,22 @@ function ReportScreen({
   customReportTitle = DEFAULT_REPORT_TITLE,
   onReportGenerated,
   onDemoLimit,
+  signatures: propsSignatures,
+  onSignaturesChange,
 }) {
+
   const [printError, setPrintError] = useState("");
   const [printMessage, setPrintMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [reportVariant, setReportVariant] = useState("tecnico");
+  const [showItcModal, setShowItcModal] = useState(false);
   const [reportResponses, setReportResponses] = useState(responses);
-  const [reportFieldSheets, setReportFieldSheets] = useState(fieldSheets);
+  const [reportFieldSheets, setReportFieldSheets] = useState(fieldSheets || []);
+  const [signatures, setSignatures] = useState(propsSignatures || { inspector: null, client: null });
+  const [activeSignature, setActiveSignature] = useState(null);
   const [filesReady, setFilesReady] = useState(false);
+
+
 
   // Referencia para la vista previa escalada
   const containerRef = React.useRef(null);
@@ -4244,6 +4785,7 @@ function ReportScreen({
   const effectiveReportTitle = plan === "pro" && customReportTitle?.trim()
     ? customReportTitle.trim()
     : DEFAULT_REPORT_TITLE;
+  const itcReferences = useMemo(() => getSelectedItcReferences(selectedBlocks, data?.regulation), [selectedBlocks, data?.regulation]);
   const demoLimitReached = reportMode === "final" && plan === "demo" && !reportGenerated && generatedReportsCount >= DEMO_REPORT_LIMIT;
 
   useEffect(() => {
@@ -4300,47 +4842,60 @@ function ReportScreen({
     }
     setIsExporting(true);
 
-    // Pequeña pausa para asegurar que el DOM está listo
-    if (!filesReady) await new Promise((r) => setTimeout(r, 250));
-    await new Promise((r) => setTimeout(r, 100));
-
     try {
-      const slug = (data.name || "inspección").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      const fileName = `isivolt-${reportMode === "draft" ? "borrador" : "informe"}-${slug}.pdf`;
-
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-      // CAPTURAMOS DESDE captureRef (que no tiene transform: scale)
-      const pages = captureRef.current.querySelectorAll(".report-page");
-
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 2, // Mayor resolución
-          useCORS: true,
-          logging: false,
-          backgroundColor: "#ffffff",
-          // Forzamos que html2canvas ignore cualquier transform del padre
-          onclone: (clonedDoc) => {
-            const el = clonedDoc.querySelector(".report-capture-area");
-            if (el) el.style.transform = "none";
-          }
-        });
-
-        if (i > 0) pdf.addPage();
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
-      }
-
-      pdf.save(fileName);
+      // MÉTODO PRINCIPAL: captura visual html2canvas → PDF idéntico a la vista previa
+      await downloadFinalPdfVisual();
       onReportGenerated?.();
       setPrintMessage("Informe generado con éxito.");
     } catch (e) {
-      console.error(e);
-      setPrintError("Error técnico al generar el PDF.");
+      console.warn("html2canvas falló, usando generador alternativo:", e);
+      // FALLBACK: generador programático jsPDF (menos fiel visualmente)
+      try {
+        exportIsiVoltPdf({
+          data,
+          selectedBlocks,
+          responses: reportResponses,
+          measurements,
+          signatures,
+          variant: reportVariant,
+          draft: reportMode === "draft"
+        });
+        onReportGenerated?.();
+        setPrintMessage("Informe generado (modo alternativo).");
+      } catch (e2) {
+        console.error("Error en PDF fallback:", e2);
+        setPrintError("No se ha podido generar el informe. Contacte con soporte técnico.");
+      }
     } finally {
       setIsExporting(false);
     }
   };
+
+  // Captura visual página a página — genera un PDF idéntico a la vista previa en pantalla
+  const downloadFinalPdfVisual = async () => {
+    const slug = (data.name || "inspeccion").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const fileName = `isivolt-${reportMode === "draft" ? "borrador" : "informe"}-${slug}.pdf`;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pages = captureRef.current?.querySelectorAll(".report-page");
+    if (!pages || pages.length === 0) throw new Error("No se encontraron páginas del informe.");
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await html2canvas(pages[i], {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        allowTaint: false,
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+    }
+    pdf.save(fileName);
+  };
+
+  // Mantener downloadFinalPdfLegacy como alias por si se referencia en otro sitio
+  const downloadFinalPdfLegacy = downloadFinalPdfVisual;
+
 
   return (
     <div className="pb-32 print:pb-0 report-preview">
@@ -4349,16 +4904,25 @@ function ReportScreen({
         subtitle="Formato A4 oficial"
         onBack={() => setScreen("checklist")}
         right={
-          <button type="button" onClick={downloadFinalPdf} className="p-2 rounded-2xl bg-white/10 text-yellow-300 active:scale-90 transition" aria-label="Descargar PDF">
-            <Download className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setScreen("home")} className="p-2 rounded-2xl bg-white/10 text-white active:scale-90 transition" aria-label="Ir al inicio">
+              <Home className="w-5 h-5" />
+            </button>
+            <button type="button" onClick={downloadFinalPdf} className="p-2 rounded-2xl bg-white/10 text-yellow-300 active:scale-90 transition" aria-label="Descargar PDF">
+              <Download className="w-6 h-6" />
+            </button>
+          </div>
         }
       />
+
+      <StageFlow current="report" setScreen={setScreen} />
 
       <div className="p-4 flex gap-2 no-print bg-slate-100/50 backdrop-blur sticky top-16 z-40">
         <button onClick={() => setReportVariant("resumen")} className={classNames("flex-1 py-3 rounded-2xl font-black text-xs transition-all", reportVariant === "resumen" ? "bg-[#071E3D] text-white shadow-lg" : "bg-white text-slate-500 border border-slate-200")}>Resumido</button>
         <button onClick={() => setReportVariant("tecnico")} className={classNames("flex-1 py-3 rounded-2xl font-black text-xs transition-all", reportVariant === "tecnico" ? "bg-[#071E3D] text-white shadow-lg" : "bg-white text-slate-500 border border-slate-200")}>Técnico</button>
+        <button onClick={() => setReportVariant("campo")} className={classNames("flex-1 py-3 rounded-2xl font-black text-xs transition-all", reportVariant === "campo" ? "bg-[#071E3D] text-white shadow-lg" : "bg-white text-slate-500 border border-slate-200")}>Hoja Campo</button>
       </div>
+
 
       {/* ÁREA DE CAPTURA (OCULTA PERO A TAMAÑO REAL) */}
       <div className="absolute left-[-9999px] top-0 no-print report-capture-area" ref={captureRef}>
@@ -4368,10 +4932,14 @@ function ReportScreen({
           responses={reportResponses}
           measurements={measurements}
           fieldSheets={reportFieldSheets}
+          calculations={calculations}
+          signatures={signatures}
           reportVariant={reportVariant}
           plan={plan}
           reportTitle={effectiveReportTitle}
+          onItcClick={() => setShowItcModal(true)}
         />
+
       </div>
 
       {/* VISTA PREVIA (ESCALADA PARA MÓVIL) */}
@@ -4383,10 +4951,59 @@ function ReportScreen({
             responses={reportResponses}
             measurements={measurements}
             fieldSheets={reportFieldSheets}
+            calculations={calculations}
+            signatures={signatures}
             reportVariant={reportVariant}
             plan={plan}
             reportTitle={effectiveReportTitle}
+            onItcClick={() => setShowItcModal(true)}
           />
+
+        </div>
+      </div>
+
+      {/* SECCIÓN DE FIRMAS INTEGRADA E INLINE (PREMIUM Y COMPACTA PARA MÓVIL) */}
+      <div className="px-5 py-4 space-y-4 no-print max-w-lg mx-auto">
+        <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <PenTool className="w-5 h-5 text-[#071E3D]" />
+            <h3 className="font-black text-[#071E3D] text-sm">Firmas Oficiales de la Inspección</h3>
+          </div>
+          <p className="text-slate-400 text-xs">Firme directamente en los recuadros táctiles inferiores para validar legalmente este informe técnico.</p>
+          
+          <div className="grid grid-cols-2 gap-3.5 pt-1">
+            {/* Box Firma Inspector */}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-slate-500 uppercase mb-1.5 flex items-center gap-1.5">
+                <UserCheck className="w-3.5 h-3.5 text-blue-500" /> Inspector
+              </span>
+              <InlineSignatureCanvas
+                signature={signatures.inspector}
+                onChange={(dataUrl) => {
+                  const updated = { ...signatures, inspector: dataUrl };
+                  setSignatures(updated);
+                  if (onSignaturesChange) onSignaturesChange(updated);
+                }}
+                label="Inspector"
+              />
+            </div>
+
+            {/* Box Firma Titular */}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-slate-500 uppercase mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-amber-500" /> Titular
+              </span>
+              <InlineSignatureCanvas
+                signature={signatures.client}
+                onChange={(dataUrl) => {
+                  const updated = { ...signatures, client: dataUrl };
+                  setSignatures(updated);
+                  if (onSignaturesChange) onSignaturesChange(updated);
+                }}
+                label="Titular"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -4398,24 +5015,77 @@ function ReportScreen({
           responses={reportResponses}
           measurements={measurements}
           fieldSheets={reportFieldSheets}
+          calculations={calculations}
+          signatures={signatures}
           reportVariant={reportVariant}
           plan={plan}
           reportTitle={effectiveReportTitle}
+          onItcClick={() => setShowItcModal(true)}
         />
+
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-slate-200 p-4 shadow-2xl no-print z-50 rounded-t-[2.5rem]">
-        {printError && <p className="text-red-600 text-center font-bold text-xs mb-3">{printError}</p>}
-        {printMessage && <p className="text-emerald-700 text-center font-bold text-xs mb-3">{printMessage}</p>}
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={downloadFinalPdf} className="w-full py-4 shadow-xl shadow-[#FFC928]/20" variant="gold">
-            <Download className="w-5 h-5" /> {isExporting ? "Generando…" : "Exportar PDF"}
-          </Button>
-          <Button onClick={() => window.print()} variant="soft" className="w-full py-4 border-slate-200">
-             IMPRIMIR
-          </Button>
+      {/* BARRA DE ACCIONES INFERIOR */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg no-print z-50">
+        {/* Barra principal */}
+        <div className="bg-[#071E3D]/95 backdrop-blur-xl border-t border-white/10 px-5 pt-4 pb-6 shadow-2xl rounded-t-[2rem]">
+          {printError && <p className="text-red-400 text-center font-bold text-xs mb-3">{printError}</p>}
+          {printMessage && <p className="text-emerald-400 text-center font-bold text-xs mb-3">{printMessage}</p>}
+          <div className="flex gap-3 items-center">
+            {/* Selector de variante */}
+            <div className="flex gap-1 bg-white/10 rounded-2xl p-1 flex-1">
+              {[{id:"resumido",label:"Res."},{id:"tecnico",label:"T\u00e9c."},{id:"campo",label:"Campo"}].map(v => (
+                <button
+                  key={v.id}
+                  onClick={() => setReportVariant(v.id)}
+                  className={`flex-1 py-2 text-xs font-black rounded-xl transition-all ${
+                    reportVariant === v.id
+                      ? "bg-[#FFC928] text-[#071E3D] shadow-lg"
+                      : "text-white/60 hover:text-white"
+                  }`}
+                >{v.label}</button>
+              ))}
+            </div>
+            {/* Botón exportar */}
+            <button
+              onClick={downloadFinalPdf}
+              disabled={isExporting}
+              className="flex items-center gap-2 bg-[#FFC928] hover:bg-yellow-400 active:bg-yellow-500 text-[#071E3D] font-black px-6 py-3 rounded-2xl shadow-lg shadow-[#FFC928]/20 transition-all disabled:opacity-60 disabled:cursor-wait"
+            >
+              {isExporting ? (
+                <><span className="animate-spin inline-block w-4 h-4 border-2 border-[#071E3D] border-t-transparent rounded-full" /><span>Generando…</span></>
+              ) : (
+                <><FileDown className="w-5 h-5" /><span>PDF</span></>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* PANEL DE FIRMA - BOTTOM SHEET PREMIUM */}
+      {activeSignature && (
+        <SignaturePad
+          title={activeSignature === "inspector" ? "Firma del Inspector" : "Firma del Titular"}
+          subtitle={activeSignature === "inspector" ? "T\u00e9cnico certificador" : "Titular de la instalaci\u00f3n"}
+          existing={signatures[activeSignature]}
+          onSave={(dataUrl) => {
+            setSignatures(prev => ({ ...prev, [activeSignature]: dataUrl }));
+            setActiveSignature(null);
+            if (onSignaturesChange) onSignaturesChange({ ...signatures, [activeSignature]: dataUrl });
+          }}
+          onClear={() => {
+            setSignatures(prev => ({ ...prev, [activeSignature]: null }));
+          }}
+          onCancel={() => setActiveSignature(null)}
+        />
+      )}
+
+      {showItcModal && (
+        <ItcDetailModal
+          selectedBlocks={selectedBlocks}
+          onClose={() => setShowItcModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -4473,9 +5143,83 @@ function Metric({ icon: Icon, value, label, tone = "navy" }) {
   );
 }
 
-function SummaryBox({ label, value }) {
+function SummaryBox({ label, value, onClick }) {
   const displayValue = value || "Sin indicar";
-  return <div className="summary-box"><span>{fixText(label)}</span><strong>{typeof displayValue === "string" ? fixText(displayValue) : displayValue}</strong></div>;
+  const content = (
+    <>
+      <span>{fixText(label)}</span>
+      <strong>{typeof displayValue === "string" ? fixText(displayValue) : displayValue}</strong>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button 
+        type="button" 
+        onClick={onClick} 
+        className="summary-box clickable text-left w-full transition-all active:scale-[0.98] hover:bg-slate-50 group"
+      >
+        <div className="flex items-center justify-between gap-2 w-full">
+          <div className="flex flex-col">{content}</div>
+          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#FFC928] transition-colors" />
+        </div>
+      </button>
+    );
+  }
+  return <div className="summary-box">{content}</div>;
+}
+
+function ItcDetailModal({ itcReferences, selectedBlocks, onClose }) {
+  const grouped = useMemo(() => {
+    const groups = {};
+    selectedBlocks.forEach((blockId) => {
+      const block = getBlock(blockId);
+      if (!block) return;
+      const itcs = BLOCK_ITC_REFERENCES[blockId] || [];
+      if (itcs.length > 0) {
+        groups[block.title] = [...new Set([...(groups[block.title] || []), ...itcs])];
+      }
+    });
+    return groups;
+  }, [selectedBlocks]);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 no-print">
+      <div className="w-full max-w-md bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="bg-[#071E3D] text-white p-6 flex items-start justify-between gap-4 shrink-0">
+          <div>
+            <p className="text-yellow-300 text-xs font-black uppercase tracking-widest">Normativa aplicable</p>
+            <h2 className="text-xl font-black mt-1">ITC aplicables</h2>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 rounded-2xl bg-white/10 active:scale-90 transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto no-scrollbar space-y-6">
+          {Object.entries(grouped).length === 0 ? (
+            <p className="text-slate-500 font-bold text-center py-10">No hay ITC asociadas a los bloques seleccionados.</p>
+          ) : (
+            Object.entries(grouped).map(([blockTitle, itcs]) => (
+              <div key={blockTitle} className="space-y-2">
+                <h3 className="text-[#071E3D] font-black text-sm uppercase tracking-wider border-b border-slate-100 pb-2">{blockTitle}</h3>
+                <ul className="space-y-1">
+                  {itcs.map((itc, i) => (
+                    <li key={i} className="text-slate-600 text-sm flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-1.5 shrink-0" />
+                      {itc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="p-6 bg-slate-50 border-t border-slate-100 shrink-0">
+          <Button onClick={onClose} className="w-full">Cerrar</Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CounterCard({ label, value, tone = "navy" }) {
@@ -4510,25 +5254,27 @@ function ReportPill({ text }) {
 }
 
 function ReportPoint({ r }) {
-  return <div className="flex justify-between gap-3 border-b border-slate-100 py-2"><span className="text-sm"><b>{r.item.id}</b> - {fixText(r.item.title)}</span><b className="text-emerald-700 text-sm">Conforme</b></div>;
+  return <div className="flex justify-between gap-3 border-b border-slate-100 py-2"><span className="text-sm"><b>{r?.item?.id || "-"}</b> - {fixText(r?.item?.title || "Punto desconocido")}</span><b className="text-emerald-700 text-sm">Conforme</b></div>;
 }
+
 
 function DefectSheet({ r }) {
   return (
     <div className="border border-orange-100 bg-orange-50 rounded-3xl p-4 mb-3 print:break-inside-avoid">
       <div className="flex justify-between gap-3 items-start">
         <div>
-          <span className="bg-orange-600 text-white rounded-xl px-3 py-1 text-xs font-black">{r.status}</span>
-          <h3 className="font-black text-slate-900 mt-2">{r.item.id} - {fixText(r.item.title)}</h3>
-          <p className="text-sm text-slate-600 mt-1">{fixText(r.item.reference)}</p>
+          <span className="bg-orange-600 text-white rounded-xl px-3 py-1 text-xs font-black">{r?.status || "-"}</span>
+          <h3 className="font-black text-slate-900 mt-2">{r?.item?.id || "-"} - {fixText(r?.item?.title || "Punto desconocido")}</h3>
+          <p className="text-sm text-slate-600 mt-1">{fixText(r?.item?.reference || "Sin indicar")}</p>
         </div>
         <AlertTriangle className="w-7 h-7 text-orange-700" />
       </div>
-      <p className="text-sm text-slate-700 mt-3"><b>Observación:</b> {fixText(r.observation || r.item.question)}</p>
+      <p className="text-sm text-slate-700 mt-3"><b>Observación:</b> {fixText(r?.observation || r?.item?.question || "-")}</p>
       <div className="mt-3 bg-white/70 border border-dashed border-orange-200 rounded-2xl p-5 text-center text-slate-400"><ImageIcon className="w-7 h-7 mx-auto mb-2" />Fotos asociadas al defecto</div>
     </div>
   );
 }
+
 
 function CompactPointsTable({ rows }) {
   return (
@@ -4542,14 +5288,15 @@ function CompactPointsTable({ rows }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => (
-          <tr key={r.item.id}>
-            <td>{r.item.id}</td>
-            <td>{fixText(r.item.title)}</td>
-            <td><span className={classNames("status-chip", String(r.status).toLowerCase())}>{r.status}</span></td>
-            <td>{fixText(r.observation || r.item.favorable || "-")}</td>
+        {rows.map((r, i) => (
+          <tr key={r?.item?.id || i}>
+            <td>{r?.item?.id || "-"}</td>
+            <td>{fixText(r?.item?.title || "Punto desconocido")}</td>
+            <td><span className={classNames("status-chip", String(r?.status || "").toLowerCase())}>{r?.status || "-"}</span></td>
+            <td>{fixText(r?.observation || r?.item?.favorable || "-")}</td>
           </tr>
         ))}
+
       </tbody>
     </table>
   );
@@ -4570,17 +5317,18 @@ function DefectSummaryTable({ defects }) {
         </tr>
       </thead>
       <tbody>
-        {defects.map((r) => (
-          <tr key={r.defectEntryId || r.item.id}>
-            <td>{r.item.id}</td>
-            <td>{fixText(r.item.title)}</td>
-            <td><span className={classNames("status-chip", r.status.toLowerCase())}>{r.status}</span></td>
-            <td>{fixText(r.item.defectoSiNoCumple || "Defecto pendiente de describir")}</td>
-            <td>{fixText(r.item.itc || r.item.reference || "Sin indicar")}</td>
-            <td>{fixText(r.item.apartado || "Sin indicar")}</td>
+        {defects.map((r, i) => (
+          <tr key={r?.defectEntryId || r?.item?.id || i}>
+            <td>{r?.item?.id || "-"}</td>
+            <td>{fixText(r?.item?.title || "Punto desconocido")}</td>
+            <td><span className={classNames("status-chip", String(r?.status || "").toLowerCase())}>{r?.status || "-"}</span></td>
+            <td>{fixText(r?.item?.defectoSiNoCumple || "Defecto pendiente de describir")}</td>
+            <td>{fixText(r?.item?.itc || r?.item?.reference || "Sin indicar")}</td>
+            <td>{fixText(r?.item?.apartado || "Sin indicar")}</td>
             <td>{fixText(getEvidenceSummary(r))}</td>
           </tr>
         ))}
+
       </tbody>
     </table>
   );
@@ -4616,38 +5364,40 @@ function DefectReportPage({ r, index }) {
     <ReportPage title={`Defecto ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
       <div className="defect-report-card">
         <div className="defect-report-head">
-          <span className={classNames("status-chip", r.status.toLowerCase())}>{r.status} - {r.status === "DL" ? "Defecto leve" : r.status === "DG" ? "Defecto grave" : "Defecto muy grave"}</span>
-          <strong>{r.item.id}</strong>
+          <span className={classNames("status-chip", String(r?.status || "").toLowerCase())}>{r?.status || "DG"} - {r?.status === "DL" ? "Defecto leve" : r?.status === "DG" ? "Defecto grave" : "Defecto muy grave"}</span>
+          <strong>{r?.item?.id || "-"}</strong>
         </div>
-        <h3>{fixText(r.item.title)}</h3>
+        <h3>{fixText(r?.item?.title || "Punto desconocido")}</h3>
         <ReportTable rows={[
-          ["Bloque", getBlock(r.item.blockId)?.title || r.item.blockId],
-          ["Código del punto", r.item.id],
-          ["Título", r.item.title],
-          ["Resultado", r.status],
-          ["Defecto sugerido", r.item.defectoSiNoCumple || "Defecto pendiente de describir"],
-          ["ITC", r.item.itc || r.item.reference || "Sin indicar"],
-          ["Apartado", r.item.apartado || "Sin indicar"],
-          ["Resumen normativo", r.item.normaResumen || r.item.reference || "Sin indicar"],
-          ["Criterio de inspección", r.item.criterioInspeccion || r.item.favorable || "Sin indicar"],
+          ["Bloque", getBlock(r?.item?.blockId)?.title || r?.item?.blockId || "Desconocido"],
+          ["Código del punto", r?.item?.id || "-"],
+          ["Título", r?.item?.title || "Punto desconocido"],
+          ["Resultado", r?.status || "-"],
+          ["Defecto sugerido", r?.item?.defectoSiNoCumple || "Defecto pendiente de describir"],
+          ["ITC", r?.item?.itc || r?.item?.reference || "Sin indicar"],
+          ["Apartado", r?.item?.apartado || "Sin indicar"],
+          ["Resumen normativo", r?.item?.normaResumen || r?.item?.reference || "Sin indicar"],
+          ["Criterio de inspección", r?.item?.criterioInspeccion || r?.item?.favorable || "Sin indicar"],
           ["Evidencia/foto/documento asociado", getEvidenceSummary(r)],
-          ["Punto inspeccionado", r.item.question],
-          ["Criterio favorable", r.item.favorableCriteria || r.item.favorable],
+          ["Punto inspeccionado", r?.item?.question || "Sin indicar"],
+          ["Criterio favorable", r?.item?.favorableCriteria || r?.item?.favorable || "Sin indicar"],
           ["Zona / ubicación afectada", location],
-          ["Observación del inspector", r.observation || "Sin observación específica registrada"],
-          ["Mediciones requeridas", formatChecklistList(r.item.medicionesRequeridas, "Sin medición específica indicada")],
+          ["Observación del inspector", r?.observation || "Sin observación específica registrada"],
+          ["Mediciones requeridas", formatChecklistList(r?.item?.medicionesRequeridas, "Sin medición específica indicada")],
+
           ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
           ["Recomendación", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
         ]} />
         <div className="defect-help-grid">
           <div>
             <h4>Criterios técnicos</h4>
-            <ul>{(r.item.help?.criteria || [r.item.criterioInspeccion || r.item.favorable]).map((item) => <li key={item}>{fixText(item)}</li>)}</ul>
+            <ul>{(r?.item?.help?.criteria || [r?.item?.criterioInspeccion || r?.item?.favorable || "Sin criterio especificado"]).map((item) => <li key={item}>{fixText(item)}</li>)}</ul>
           </div>
           <div className="visual-placeholder overflow-hidden p-0">
-            <TechnicalHelpImage image={r.item.help?.images?.[0] || "Ayuda visual técnica"} className="w-full h-full object-cover" />
+            <TechnicalHelpImage image={r?.item?.help?.images?.[0] || "Ayuda visual técnica"} className="w-full h-full object-cover" />
           </div>
         </div>
+
         <h4 className="photo-title">Fotografías asociadas</h4>
         <ReportPhotoGrid photos={photos} emptyText="No hay fotografías asociadas a este defecto." />
       </div>
@@ -4655,22 +5405,125 @@ function DefectReportPage({ r, index }) {
   );
 }
 
-function MeasurementsReportTable({ measurements }) {
-  const ra = parseNumber(measurements.earth);
-  const idn = parseNumber(measurements.rcd);
+function CalculationsReportView({ calculations }) {
+  const calc = calculations || {
+    powerW: "5000",
+    voltage: "230",
+    lengthM: "30",
+    material: "cu",
+    installationType: "tubo",
+    cosPhi: "0.85",
+    maxVdropPercent: "3"
+  };
+
+  const power = parseFloat(calc.powerW) || 0;
+  const voltage = parseFloat(calc.voltage) || 230;
+  const length = parseFloat(calc.lengthM) || 0;
+  const cosPhi = parseFloat(calc.cosPhi) || 0.85;
+  const maxVdropPercent = parseFloat(calc.maxVdropPercent) || 3;
+  const material = calc.material || "cu";
+
+  const conductivity = material === "cu" ? 48.5 : 30;
+
+  let currentA = 0;
+  if (power > 0) {
+    if (voltage === 230) {
+      currentA = power / (voltage * cosPhi);
+    } else {
+      currentA = power / (Math.sqrt(3) * voltage * cosPhi);
+    }
+  }
+
+  const maxVdropV = (maxVdropPercent / 100) * voltage;
+
+  let sectionTheoretical = 0;
+  if (power > 0 && length > 0) {
+    if (voltage === 230) {
+      sectionTheoretical = (2 * power * length) / (conductivity * maxVdropV * voltage);
+    } else {
+      sectionTheoretical = (power * length) / (conductivity * maxVdropV * voltage);
+    }
+  }
+
+  const commercialSections = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
+  let sectionVdrop = commercialSections.find((s) => s >= sectionTheoretical) || 240;
+
+  const copperAmpLimits = {
+    1.5: 15, 2.5: 20, 4: 25, 6: 32, 10: 44, 16: 57, 25: 75, 35: 90, 50: 110, 70: 140,
+    95: 170, 120: 195, 150: 220, 185: 250, 240: 300
+  };
+  const aluminumAmpLimits = {
+    1.5: 11, 2.5: 15, 4: 19, 6: 24, 10: 34, 16: 44, 25: 58, 35: 70, 50: 86, 70: 110,
+    95: 135, 120: 155, 150: 175, 185: 200, 240: 240
+  };
+  const ampLimits = material === "cu" ? copperAmpLimits : aluminumAmpLimits;
+  let sectionThermal = commercialSections.find((s) => (ampLimits[s] || 9999) >= currentA) || 240;
+
+  const recommendedSection = Math.max(sectionVdrop, sectionThermal);
+
+  let realVdropV = 0;
+  let realVdropPercent = 0;
+  if (power > 0 && length > 0 && recommendedSection > 0) {
+    if (voltage === 230) {
+      realVdropV = (2 * power * length) / (conductivity * recommendedSection * voltage);
+    } else {
+      realVdropV = (power * length) / (conductivity * recommendedSection * voltage);
+    }
+    realVdropPercent = (realVdropV / voltage) * 100;
+  }
+
+  return (
+    <div className="report-calculations-view">
+      <p className="report-subtitle mb-4">Dimensionamiento de conductores y caída de tensión reglamentaria según ITC-BT-19.</p>
+      
+      <div className="space-y-4">
+        <h3 className="font-black text-slate-900 border-b-2 border-[#FFC928] pb-1">DATOS DE ENTRADA</h3>
+        <ReportTable rows={[
+          ["Potencia activa de diseño", `${power} W (${(power / 1000).toFixed(2)} kW)`],
+          ["Tensión nominal de servicio", `${voltage} V (${voltage === 230 ? "Monofásica" : "Trifásica"})`],
+          ["Longitud de la línea", `${length} metros`],
+          ["Material del conductor", material === "cu" ? "Cobre (Cu)" : "Aluminio (Al)"],
+          ["Tipo de instalación", calc.installationType === "tubo" ? "Bajo tubo / empotrado" : calc.installationType === "aire" ? "Al aire libre / bandeja" : "Subterráneo / enterrado"],
+          ["Factor de potencia (cos φ)", String(cosPhi)],
+          ["Límite de caída de tensión", `${maxVdropPercent}% (${maxVdropV.toFixed(2)} V)`]
+        ]} />
+      </div>
+
+      <div className="space-y-4 mt-6">
+        <h3 className="font-black text-slate-900 border-b-2 border-[#FFC928] pb-1">RESULTADOS DE DIMENSIONAMIENTO</h3>
+        <ReportTable rows={[
+          ["Intensidad nominal calculada (Ib)", `${currentA.toFixed(2)} A`],
+          ["Conductividad considerada (γ a 70ºC)", `${conductivity} m/(Ω·mm²)`],
+          ["Sección teórica mínima (Caída Tensión)", `${sectionTheoretical.toFixed(3)} mm²`],
+          ["Sección comercial (Caída Tensión)", `${sectionVdrop} mm²`],
+          ["Sección comercial (Criterio Térmico)", `${sectionThermal} mm²`],
+          ["SECCIÓN FINAL RECOMENDADA DE DISEÑO", `${recommendedSection} mm²`],
+          ["Caída de tensión real obtenida", `${realVdropV.toFixed(2)} V (${realVdropPercent.toFixed(2)}%)`],
+          ["ESTADO DEL DIMENSIONAMIENTO", `CONFORME / CUMPLE REBT (Sección de ${recommendedSection} mm²)`]
+        ]} />
+      </div>
+    </div>
+  );
+}
+
+function MeasurementsReportTable({ measurements = {} }) {
+  const ra = parseNumber(measurements?.earth);
+  const idn = parseNumber(measurements?.rcd);
   const vc = ra && idn ? Number((ra * (idn / 1000)).toFixed(2)) : "";
+
   const rows = [
     {
-      local: measurements.location || "Cuadro general",
-      lux: measurements.lux || "-",
-      differential: measurements.rcd ? `ID ${measurements.rcd} mA` : "-",
-      ma: measurements.rcd || "-",
-      ms: measurements.tripMs || "-",
+      local: measurements?.location || "Cuadro general",
+      lux: measurements?.lux || "-",
+      differential: measurements?.rcd ? `ID ${measurements.rcd} mA` : "-",
+      ma: measurements?.rcd || "-",
+      ms: measurements?.tripMs || "-",
       vc: vc || "-",
-      earth: measurements.earth || "-",
-      insulation: measurements.insulation || "-",
+      earth: measurements?.earth || "-",
+      insulation: measurements?.insulation || "-",
     },
   ];
+
   return (
     <table className="measure-table">
       <thead>
@@ -4945,11 +5798,12 @@ function PhotoAnnex({ defects }) {
   return (
     <div className="photo-annex">
       {photoItems.map(({ r, photo, index }) => (
-        <div className="photo-annex-group" key={`${r.defectEntryId || r.item.id}-${photo.fileId || index}`}>
-          <h3>{r.item.id} - {fixText(r.item.title)}{getDefectLocation(r) ? ` (${fixText(getDefectLocation(r))})` : ""}</h3>
+        <div className="photo-annex-group" key={`${r?.defectEntryId || r?.item?.id || 'photo'}-${photo?.fileId || index}`}>
+          <h3>{r?.item?.id || "-"} - {fixText(r?.item?.title || "Punto desconocido")}{getDefectLocation(r) ? ` (${fixText(getDefectLocation(r))})` : ""}</h3>
           <ReportPhotoGrid photos={[photo]} emptyText="No hay fotografía disponible." />
         </div>
       ))}
+
     </div>
   );
 }
@@ -4968,15 +5822,348 @@ function EmptyReportText({ text }) {
   return <div className="empty-report-text">{fixText(text)}</div>;
 }
 
-function SignatureLine({ label }) {
-  return <div className="signature-line"><span>{fixText(label)}</span></div>;
+function InlineSignatureCanvas({ signature, onChange, label }) {
+  const canvasRef = React.useRef(null);
+  const [isDrawing, setIsDrawing] = React.useState(false);
+  const [hasDrawn, setHasDrawn] = React.useState(Boolean(signature));
+
+  const getPos = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  };
+
+  const startDrawing = (e) => {
+    e.preventDefault();
+    const pos = getPos(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasDrawn(true);
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      canvasRef.current?.getContext("2d").closePath();
+      setIsDrawing(false);
+      save();
+    }
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+    onChange(null);
+  };
+
+  const save = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    onChange(canvas.toDataURL("image/png"));
+  };
+
+  React.useEffect(() => {
+    if (signature) {
+      setHasDrawn(true);
+      return;
+    }
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+    
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#071E3D";
+  }, [signature]);
+
+  return (
+    <div className="relative group">
+      {signature ? (
+        <div className="bg-slate-50 border border-emerald-200 rounded-2xl flex flex-col items-center justify-center p-2 relative" style={{ height: "96px" }}>
+          <img src={signature} alt={`Firma ${label}`} className="max-h-16 object-contain" />
+          <button
+            type="button"
+            onClick={clear}
+            className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center rounded-lg bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-colors"
+            title="Borrar firma"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={300}
+            height={160}
+            className="w-full rounded-2xl touch-none cursor-crosshair border border-slate-200 bg-slate-50 hover:bg-slate-100/50 transition-all"
+            style={{ height: "96px" }}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+          />
+          {!hasDrawn && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-60">
+              <div className="text-center">
+                <PenTool className="w-4 h-4 mx-auto text-slate-300" />
+                <span className="text-[9px] font-bold text-slate-400 mt-1 block">Firma aquí</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
+
+function SignatureLine({ label, signature, date }) {
+  return (
+    <div className="signature-line-container">
+      {/* Zona de firma */}
+      <div className="signature-box">
+        {signature ? (
+          <img src={signature} alt={`Firma ${label}`} className="signature-image" />
+        ) : (
+          <div className="signature-empty">
+            <svg viewBox="0 0 80 30" className="w-12 h-8 text-slate-200" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" d="M10 22 Q20 8 30 18 Q40 28 50 14 Q60 4 70 16" />
+            </svg>
+            <span>Sin firma</span>
+          </div>
+        )}
+      </div>
+      {/* Linea de firma */}
+      <div className="signature-underline" />
+      {/* Etiqueta */}
+      <div className="signature-label">
+        <span className="signature-label-title">{fixText(label)}</span>
+        {date && <span className="signature-label-date">{date}</span>}
+      </div>
+    </div>
+  );
+}
+
+
+function SignaturePad({ onSave, onClear, onCancel, title, subtitle, existing }) {
+  const canvasRef = React.useRef(null);
+  const [isDrawing, setIsDrawing] = React.useState(false);
+  const [hasDrawn, setHasDrawn] = React.useState(false);
+  const [mode, setMode] = React.useState(existing ? "preview" : "draw"); // 'draw' | 'preview'
+
+  const getPos = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  };
+
+  const startDrawing = (e) => {
+    e.preventDefault();
+    const pos = getPos(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasDrawn(true);
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      canvasRef.current?.getContext("2d").closePath();
+      setIsDrawing(false);
+    }
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+  };
+
+  const save = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !hasDrawn) return;
+    onSave(canvas.toDataURL("image/png"));
+  };
+
+  const handleClearExisting = () => {
+    onClear?.();
+    setMode("draw");
+  };
+
+  React.useEffect(() => {
+    if (mode !== "draw") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#071E3D";
+  }, [mode]);
+
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col justify-end" style={{background: "rgba(7,30,61,0.6)", backdropFilter: "blur(6px)"}}>
+      {/* Overlay para cerrar */}
+      <div className="absolute inset-0" onClick={onCancel} />
+
+      {/* Panel de firma — compacto para móvil */}
+      <div className="relative bg-white rounded-t-[1.75rem] shadow-2xl overflow-hidden" style={{animation: "slideUp 0.22s ease-out"}}>
+
+        {/* Tirador (drag handle) */}
+        <div className="flex justify-center pt-2.5 pb-1">
+          <div className="w-10 h-1 rounded-full bg-slate-200" />
+        </div>
+
+        {/* Cabecera compacta */}
+        <div className="flex items-center justify-between px-4 pt-2 pb-2">
+          <div>
+            <h2 className="font-black text-[#071E3D] text-base leading-tight">{fixText(title)}</h2>
+            {subtitle && <p className="text-slate-400 text-xs font-medium">{fixText(subtitle)}</p>}
+          </div>
+          <button
+            onClick={onCancel}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Divider dorado */}
+        <div className="h-[2px] bg-gradient-to-r from-[#FFC928] via-[#FFC928]/30 to-transparent mx-4 mb-3" />
+
+        {mode === "preview" && existing ? (
+          /* Vista previa de firma existente — compacta */
+          <div className="px-4 pb-4">
+            <div className="bg-slate-50 border border-emerald-200 rounded-2xl flex items-center justify-center" style={{height: "72px"}}>
+              <img src={existing} alt="Firma" className="max-h-14 object-contain" />
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleClearExisting}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors"
+              >
+                Re-firmar
+              </button>
+              <button
+                onClick={onCancel}
+                className="flex-1 py-2.5 rounded-xl bg-[#071E3D] text-white font-bold text-xs transition-colors"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Modo dibujo — compacto */
+          <div className="px-4 pb-4">
+            <div className="relative">
+              <canvas
+                ref={canvasRef}
+                width={700}
+                height={200}
+                className="w-full rounded-2xl touch-none cursor-crosshair border-2 transition-colors"
+                style={{background: "#f8fafc", borderColor: isDrawing ? "#FFC928" : "#e2e8f0", height: "100px"}}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+              />
+              {!hasDrawn && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center">
+                    <svg viewBox="0 0 80 30" className="w-12 h-7 mx-auto text-slate-200" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" d="M8 22 Q18 6 28 18 Q38 28 50 12 Q62 2 72 16" />
+                    </svg>
+                    <p className="text-slate-300 text-[10px] font-bold mt-0.5">Deslice para firmar</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={clear}
+                className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors shrink-0"
+                title="Borrar"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+              <button
+                onClick={save}
+                disabled={!hasDrawn}
+                className={`flex-1 py-2.5 rounded-xl font-black text-sm transition-all ${
+                  hasDrawn
+                    ? "bg-[#FFC928] text-[#071E3D] shadow-md shadow-[#FFC928]/30 hover:bg-yellow-400 active:scale-95"
+                    : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                }`}
+              >
+                Guardar firma
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Safe area iOS */}
+        <div style={{paddingBottom: "env(safe-area-inset-bottom, 8px)"}} />
+      </div>
+
+      <style>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+    </div>
+
+  );
+}
+
+
 
 function EmptyState({ title, text }) {
   return <div className="bg-white rounded-3xl p-8 text-center border border-slate-100"><h2 className="font-black text-slate-900">{fixText(title)}</h2><p className="text-sm text-slate-500 mt-2">{fixText(text)}</p></div>;
 }
 
-export default function IsiVoltProInspecciónes() {
+export default function IsiVoltProInspecciones() {
   const [screen, setScreen] = useState("home");
   const [showFinalReview, setShowFinalReview] = useState(false);
   const [showLegalIntro, setShowLegalIntro] = useState(false);
@@ -4996,6 +6183,10 @@ export default function IsiVoltProInspecciónes() {
   const [responses, setResponses] = useState({});
   const [measurements, setMeasurements] = useState({ location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" });
   const [fieldSheets, setFieldSheets] = useState([]);
+  const [signatures, setSignatures] = useState({ inspector: null, client: null });
+  const [calculations, setCalculations] = useState(INITIAL_INSPECTION.calculations);
+
+
 
   // Gestión de múltiples inspecciones y persistencia
   const [inspections, setInspections] = useState([]);
@@ -5067,7 +6258,10 @@ export default function IsiVoltProInspecciónes() {
             responses,
             measurements,
             fieldSheets,
+            signatures,
+            calculations,
             updatedAt: new Date().toISOString(),
+
             status: verdict.label,
             progress: completion.percent,
             defects: defectCount,
@@ -5076,7 +6270,7 @@ export default function IsiVoltProInspecciónes() {
         return ins;
       })
     );
-  }, [data, selectedBlocks, responses, measurements, fieldSheets, currentId]);
+  }, [data, selectedBlocks, responses, measurements, fieldSheets, calculations, currentId]);
 
   const createInspection = () => {
     const newId = Date.now().toString(); // ID simple basado en tiempo
@@ -5088,6 +6282,7 @@ export default function IsiVoltProInspecciónes() {
       responses: {},
       measurements: { location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" },
       fieldSheets: [],
+      calculations: INITIAL_INSPECTION.calculations,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: "Borrador",
@@ -5102,6 +6297,7 @@ export default function IsiVoltProInspecciónes() {
     setResponses(newInspection.responses);
     setMeasurements(newInspection.measurements);
     setFieldSheets(newInspection.fieldSheets);
+    setCalculations(newInspection.calculations);
     setScreen("data");
   };
 
@@ -5114,6 +6310,7 @@ export default function IsiVoltProInspecciónes() {
       setResponses(ins.responses);
       setMeasurements(ins.measurements);
       setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+      setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
       setScreen("checklist");
     }
   };
@@ -5133,6 +6330,7 @@ export default function IsiVoltProInspecciónes() {
         setResponses({});
         setMeasurements({ location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" });
         setFieldSheets([]);
+        setCalculations(INITIAL_INSPECTION.calculations);
       }
     }
   };
@@ -5146,6 +6344,7 @@ export default function IsiVoltProInspecciónes() {
       setResponses(ins.responses);
       setMeasurements(ins.measurements);
       setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+      setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
       setScreen("data");
     }
   };
@@ -5167,6 +6366,7 @@ export default function IsiVoltProInspecciónes() {
     setResponses(ins.responses);
     setMeasurements(ins.measurements);
     setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+    setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
     setReportMode("final");
     if (!legalAccepted) {
       setShowLegalIntro(true);
@@ -5231,19 +6431,98 @@ export default function IsiVoltProInspecciónes() {
   };
   const currentInspection = inspections.find((inspection) => inspection.id === currentId);
 
+  const exportBackup = () => {
+    try {
+      const backup = {
+        version: "1.0.0",
+        date: new Date().toISOString(),
+        data: inspections
+      };
+      const json = JSON.stringify(backup);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `IsiVoltPro_Backup_${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Error exporting backup", e);
+      alert("Error al exportar la copia de seguridad.");
+    }
+  };
+
+  const importBackup = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = JSON.parse(e.target.result);
+        if (result.data && Array.isArray(result.data)) {
+          if (window.confirm(`Se van a cargar ${result.data.length} inspecciones. ¿Deseas continuar?`)) {
+            const newInspections = [...inspections];
+            let added = 0;
+            let updated = 0;
+            result.data.forEach(incoming => {
+              const existingIdx = newInspections.findIndex(i => i.id === incoming.id);
+              if (existingIdx >= 0) {
+                newInspections[existingIdx] = incoming;
+                updated++;
+              } else {
+                newInspections.push(incoming);
+                added++;
+              }
+            });
+            setInspections(newInspections);
+            alert(`Copia restaurada.\nNuevas: ${added}\nActualizadas: ${updated}`);
+          }
+        } else {
+          alert("Formato no válido.");
+        }
+      } catch (err) {
+        alert("Archivo JSON corrupto.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex justify-center print:block print:bg-white">
       <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white">
-        {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} />}
+        {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
         {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
         {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} />}
-        {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} />}
-        {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} />}
-        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} />}
-        {screen === "fieldSheet" && <FieldSheetsScreen fieldSheets={fieldSheets} setFieldSheets={setFieldSheets} setScreen={setScreen} currentId={currentId} />}
-        {screen === "measurements" && <MeasurementsScreen measurements={measurements} setMeasurements={setMeasurements} setScreen={setScreen} data={data} />}
-        {screen === "report" && <ReportScreen data={data} selectedBlocks={selectedBlocks} responses={responses} measurements={measurements} fieldSheets={fieldSheets} setScreen={setScreen} reportMode={reportMode} plan={plan} legalAccepted={legalAccepted} onNeedLegal={() => setShowLegalIntro(true)} reportGenerated={Boolean(currentInspection?.reportGenerated)} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} onReportGenerated={markReportGenerated} onDemoLimit={() => setShowPlanLimit(true)} />}
+        {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} onReportClick={openReportReview} />}
+        {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} onReportClick={openReportReview} />}
+        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} />}
+        {screen === "fieldSheet" && <FieldSheetsScreen fieldSheets={fieldSheets} setFieldSheets={setFieldSheets} calculations={calculations} setCalculations={setCalculations} setScreen={setScreen} currentId={currentId} onReportClick={openReportReview} />}
+        {screen === "measurements" && <MeasurementsScreen measurements={measurements} setMeasurements={setMeasurements} setScreen={setScreen} data={data} onReportClick={openReportReview} />}
+        {screen === "report" && (
+          <ReportScreen
+            data={data}
+            selectedBlocks={selectedBlocks}
+            responses={responses}
+            measurements={measurements}
+            fieldSheets={fieldSheets}
+            calculations={calculations}
+            signatures={signatures}
+            onSignaturesChange={setSignatures}
+            setScreen={setScreen}
+            reportMode={reportMode}
+            plan={plan}
+            legalAccepted={legalAccepted}
+            onNeedLegal={() => setShowLegalIntro(true)}
+            reportGenerated={Boolean(currentInspection?.reportGenerated)}
+            generatedReportsCount={generatedReportsCount}
+            customReportTitle={customReportTitle}
+            onReportGenerated={markReportGenerated}
+            onDemoLimit={() => setShowPlanLimit(true)}
+          />
+        )}
+
         {screen !== "report" && <BottomNav screen={screen} setScreen={setScreen} onReportClick={openReportReview} />}
         {showFinalReview && (
           <FinalReviewModal

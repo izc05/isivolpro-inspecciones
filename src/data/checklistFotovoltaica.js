@@ -4,7 +4,7 @@
 export const checklistFotovoltaica = [
   {
     "id": "08.01.01",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.01",
     "section": "A. Documentación y clasificación",
@@ -35,11 +35,11 @@ export const checklistFotovoltaica = [
         "Registrar evidencia y observación si existe defecto."
       ],
       "images": [
-        "/help/08_01_01_documentación_fv.png"
+        "/help/08_01_01_documentacion_fv.png"
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-04",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Documentación técnica de la instalación FV.",
     "criterioInspeccion": "Revisar proyecto o MTD, esquema unifilar, fichas de módulos e inversor, protecciones, potencia y legalización FV.",
     "defectoSiNoCumple": "Falta documentación técnica esencial o no permite verificar la instalación fotovoltaica.",
@@ -53,7 +53,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.02",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.02",
     "section": "A. Documentación y clasificación",
@@ -88,7 +88,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Correspondencia entre documentación e instalación real.",
     "criterioInspeccion": "Comprobar que potencia, strings, inversores, protecciones, canalizaciones y conexión real coinciden con documentación.",
     "defectoSiNoCumple": "La instalación ejecutada no coincide con proyecto, esquema o documentación aportada.",
@@ -104,7 +104,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.03",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.03",
     "section": "A. Documentación y clasificación",
@@ -139,7 +139,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Tipo de instalación generadora.",
     "criterioInspeccion": "Identificar si la generadora es aislada, asistida o interconectada, con o sin excedentes, y su punto de conexión.",
     "defectoSiNoCumple": "Tipo de instalación generadora no identificado o incoherente con conexión y protecciones.",
@@ -153,7 +153,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.04",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.04",
     "section": "A. Documentación y clasificación",
@@ -188,7 +188,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Potencia instalada y potencia de inversores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La potencia debe estar definida y ser coherente con protecciones, cableado, documentación y legalización.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Potencia instalada y potencia de inversores.",
@@ -203,7 +203,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.05",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.05",
     "section": "A. Documentación y clasificación",
@@ -238,7 +238,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Circuito dedicado e independiente del generador.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: El generador debe conectarse mediante circuito dedicado, sin compartir circuito con otras cargas cuando aplique.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Circuito dedicado e independiente del generador.",
@@ -251,7 +251,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.06",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.06",
     "section": "B. Seccionamiento y protecciones",
@@ -301,7 +301,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.07",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.07",
     "section": "B. Seccionamiento y protecciones",
@@ -352,7 +352,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.08",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.08",
     "section": "B. Seccionamiento y protecciones",
@@ -387,7 +387,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-22 / ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección contra sobreintensidades mediante dispositivos adecuados a sección, corriente admisible y condiciones de cortocircuito. Aplicado al punto: Protección contra sobreintensidades en CC.",
     "criterioInspeccion": "Verificar fusibles o protecciones de strings cuando proceda por paralelos y corriente inversa admisible de módulos.",
     "defectoSiNoCumple": "Protección contra sobreintensidades en CC ausente o no dimensionada.",
@@ -402,7 +402,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.09",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.09",
     "section": "B. Seccionamiento y protecciones",
@@ -437,7 +437,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-22 / ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la protección contra sobreintensidades mediante dispositivos adecuados a sección, corriente admisible y condiciones de cortocircuito. Aplicado al punto: Protección contra sobreintensidades en CA.",
     "criterioInspeccion": "Comprobar magnetotérmico en CA adecuado a sección, potencia, intensidad del inversor y poder de corte.",
     "defectoSiNoCumple": "Protección de salida CA ausente o no adecuada a la sección/potencia.",
@@ -451,7 +451,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.10",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.10",
     "section": "B. Seccionamiento y protecciones",
@@ -501,7 +501,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.11",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.11",
     "section": "B. Seccionamiento y protecciones",
@@ -553,7 +553,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.12",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.12",
     "section": "B. Seccionamiento y protecciones",
@@ -602,7 +602,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.13",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.13",
     "section": "B. Seccionamiento y protecciones",
@@ -650,7 +650,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.14",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.14",
     "section": "C. Puesta a tierra y seguridad",
@@ -700,7 +700,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.15",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.15",
     "section": "C. Puesta a tierra y seguridad",
@@ -735,7 +735,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-18",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Continuidad del conductor de protección.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir continuidad eléctrica entre masas, estructura, inversor y sistema de puesta a tierra.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Continuidad del conductor de protección.",
@@ -751,7 +751,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.16",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.16",
     "section": "C. Puesta a tierra y seguridad",
@@ -786,7 +786,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-18 / ITC-BT-24 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones de puesta a tierra, continuidad de conductores de protección, uniones equipotenciales y valores compatibles con la protección. Aplicado al punto: Tensión de contacto en exterior.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si está en exterior o local mojado, la tensión de contacto debe ser <= 24 V.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Tensión de contacto en exterior.",
@@ -802,7 +802,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.17",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.17",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -850,7 +850,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.18",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.18",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -885,7 +885,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Cableado de corriente continua adecuado.",
     "criterioInspeccion": "Comprobar cable solar adecuado, doble aislamiento, resistencia UV/intemperie y fijación sin tensiones ni rozamientos.",
     "defectoSiNoCumple": "Cableado CC no apto, deteriorado, colgante o expuesto a daño mecánico.",
@@ -901,7 +901,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.19",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.19",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -936,7 +936,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Conectores de CC compatibles y bien crimpados.",
     "criterioInspeccion": "Revisar conectores CC compatibles, sin mezclas indebidas, bien crimpados, bloqueados y sin humedad.",
     "defectoSiNoCumple": "Conectores incompatibles, mal crimpados, sin bloqueo o con entrada de agua.",
@@ -949,7 +949,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.20",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.20",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -984,7 +984,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Cajas de string / cajas de conexión.",
     "criterioInspeccion": "Comprobar cajas de string con IP adecuado, prensaestopas, fusibles/SPD si procede y sin partes activas accesibles.",
     "defectoSiNoCumple": "Caja de string sin IP adecuado, sin prensaestopas o con partes activas accesibles.",
@@ -999,7 +999,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.21",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.21",
     "section": "D. Cableado, canalizaciones y cajas",
@@ -1034,7 +1034,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Identificación y señalización de circuitos FV.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben identificarse circuitos de CC, CA, inversor, strings, seccionadores y riesgo de tensión permanente.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Identificación y señalización de circuitos FV.",
@@ -1050,7 +1050,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.22",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.22",
     "section": "E. Inversor, conexión a red y medida",
@@ -1081,11 +1081,11 @@ export const checklistFotovoltaica = [
         "Registrar evidencia y observación si existe defecto."
       ],
       "images": [
-        "/help/08_01_22_ubicación_inversor.png"
+        "/help/08_01_22_ubicacion_inversor.png"
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Ubicación y protección del inversor.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Inversor instalado en ubicación adecuada, ventilada, accesible, protegido de agua/calor y según fabricante.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ubicación y protección del inversor.",
@@ -1098,7 +1098,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.23",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.23",
     "section": "E. Inversor, conexión a red y medida",
@@ -1133,7 +1133,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Ventilación y disipacion térmica del inversor.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Deben respetarse distancias, ventilación y temperatura de trabajo para evitar sobrecalentamientos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ventilación y disipacion térmica del inversor.",
@@ -1146,7 +1146,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.24",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.24",
     "section": "E. Inversor, conexión a red y medida",
@@ -1181,7 +1181,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Anti-isla / desconexión automática.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: En instalaciones interconectadas debe existir protección anti-isla o función integrada certificada en el inversor.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Anti-isla / desconexión automática.",
@@ -1194,7 +1194,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.25",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.25",
     "section": "E. Inversor, conexión a red y medida",
@@ -1229,7 +1229,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Sistema antivertido, si aplica.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si la instalación es sin excedentes, debe existir dispositivo antivertido correctamente configurado.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Sistema antivertido, si aplica.",
@@ -1242,7 +1242,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.26",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.26",
     "section": "E. Inversor, conexión a red y medida",
@@ -1277,7 +1277,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Equipo de medida / contador bidireccional, si aplica.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La medición debe ser coherente con la modalidad de autoconsumo y esquema de conexión.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Equipo de medida / contador bidireccional, si aplica.",
@@ -1291,7 +1291,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.27",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.27",
     "section": "F. Mediciones",
@@ -1326,7 +1326,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-19 / ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones interiores o receptoras: circuitos, conductores, aislamiento, identificación, conexiones y condiciones generales de ejecución. Aplicado al punto: Ensayo de aislamiento en CC.",
     "criterioInspeccion": "Registrar ensayo de aislamiento en CC respecto a tierra y entre polaridades conforme al método de comprobación aplicado.",
     "defectoSiNoCumple": "No se acredita aislamiento de circuitos CC o el valor registrado es insuficiente.",
@@ -1342,7 +1342,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.28",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.28",
     "section": "F. Mediciones",
@@ -1377,7 +1377,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Polaridad de strings.",
     "criterioInspeccion": "Verificar polaridad correcta de strings en cajas, seccionadores e inversor antes de energizar.",
     "defectoSiNoCumple": "Polaridad invertida o no comprobada en strings o conexión al inversor.",
@@ -1393,7 +1393,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.29",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.29",
     "section": "F. Mediciones",
@@ -1428,7 +1428,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Tensión de circuito abierto / Voc.",
     "criterioInspeccion": "Comprobar Voc máximo corregido por temperatura frente al límite del inversor y protecciones.",
     "defectoSiNoCumple": "Voc no justificado o superior al máximo admisible del inversor/protecciones.",
@@ -1444,7 +1444,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.30",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.30",
     "section": "F. Mediciones",
@@ -1479,7 +1479,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Corriente de strings / Isc o corriente de operación.",
     "criterioInspeccion": "Comparar corriente de strings similares y coherencia con módulos e inversor.",
     "defectoSiNoCumple": "Corrientes de string incoherentes, no medidas o fuera de tolerancia razonable.",
@@ -1495,7 +1495,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.31",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.31",
     "section": "G. Módulos, estructura y cubierta",
@@ -1530,7 +1530,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Estado visual de módulos FV.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Módulos sin roturas, delaminaciones, puntos calientes visibles, marcos dañados o suciedad extrema.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Estado visual de módulos FV.",
@@ -1543,7 +1543,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.32",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.32",
     "section": "G. Módulos, estructura y cubierta",
@@ -1578,7 +1578,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Fijación mecánica de módulos y estructura.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Módulos y estructura correctamente fijados, sin piezas sueltas, corrosión, deformaciones o riesgo de desprendimiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Fijación mecánica de módulos y estructura.",
@@ -1592,7 +1592,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.33",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.33",
     "section": "G. Módulos, estructura y cubierta",
@@ -1627,7 +1627,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Compatibilidad de estructura con cubierta o soporte.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La estructura debe ser adecuada al tipo de cubierta, cargas, inclinación, viento y condiciones del emplazamiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Compatibilidad de estructura con cubierta o soporte.",
@@ -1641,7 +1641,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.34",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.34",
     "section": "G. Módulos, estructura y cubierta",
@@ -1676,7 +1676,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Pasos de cubierta y estanqueidad.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Los pasos de cable o anclajes en cubierta deben estar sellados y no provocar filtraciones.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Pasos de cubierta y estanqueidad.",
@@ -1691,7 +1691,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.35",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.35",
     "section": "G. Módulos, estructura y cubierta",
@@ -1726,7 +1726,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Accesibilidad para mantenimiento.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir acceso seguro a inversor, cuadros, seccionadores, cajas y zonas de mantenimiento.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Accesibilidad para mantenimiento.",
@@ -1739,7 +1739,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.36",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.36",
     "section": "G. Módulos, estructura y cubierta",
@@ -1774,7 +1774,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40 / ITC-BT-30",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Riesgo de incendio por canalizaciones o conectores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin conectores en mal estado, cables sobre aristas, acumulación de calor o materiales no adecuados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Riesgo de incendio por canalizaciones o conectores.",
@@ -1787,7 +1787,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.37",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.37",
     "section": "G. Módulos, estructura y cubierta",
@@ -1822,7 +1822,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Compatibilidad con otros bloques.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Si está en exterior activar Locales Mojados/ITC-BT-30; si está en pública concurrencia, industria, ATEX o IRVE activar bloques correspondientes.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Compatibilidad con otros bloques.",
@@ -1835,7 +1835,7 @@ export const checklistFotovoltaica = [
   },
   {
     "id": "08.01.38",
-    "blockId": "rebt2002_block_08",
+    "blockId": "rebt2002_block_04",
     "blockName": "Instalaciones fotovoltaicas",
     "code": "08.01.38",
     "section": "G. Módulos, estructura y cubierta",
@@ -1870,7 +1870,7 @@ export const checklistFotovoltaica = [
       ]
     },
     "itc": "ITC-BT-40",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula instalaciones generadoras de baja tensión, incluyendo conexión, protecciones, seccionamiento, medida y seguridad de generadores fotovoltaicos. Aplicado al punto: Validación global de la instalación FV.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: La instalación debe ser coherente con proyecto, documentación, protecciones, mediciones, puesta a tierra y estado visual.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Validación global de la instalación FV.",

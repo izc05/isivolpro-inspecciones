@@ -17,7 +17,7 @@ export const checklistEnlace = [
       ]
     },
     "itc": "ITC-BT-13",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula las cajas generales de protección y su adecuación, ubicación, accesibilidad, envolvente, protección y conexión con la red de distribución. Aplicado al punto: Estado exterior y acceso a la CGP / CGPM.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Libre y permanente acceso. Sin obstáculos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Estado exterior y acceso a la CGP / CGPM.",
@@ -35,7 +35,7 @@ export const checklistEnlace = [
     "title": "Tapa, envolvente e interior de la CGP",
     "question": "¿Están la tapa y la envolvente en buen estado y sin partes activas accesibles?",
     "reference": "ITC-BT-13",
-    "favorable": "Tapa instalada, envolvente ííntegra, sin partes activas accesibles.",
+    "favorable": "Tapa instalada, envolvente íntegra, sin partes activas accesibles.",
     "severity": "DG",
     "help": {
       "images": [
@@ -43,9 +43,9 @@ export const checklistEnlace = [
       ]
     },
     "itc": "ITC-BT-13",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula las cajas generales de protección y su adecuación, ubicación, accesibilidad, envolvente, protección y conexión con la red de distribución. Aplicado al punto: Tapa, envolvente e interior de la CGP.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Tapa instalada, envolvente ííntegra, sin partes activas accesibles.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Tapa instalada, envolvente íntegra, sin partes activas accesibles.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Tapa, envolvente e interior de la CGP.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-13. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -61,17 +61,17 @@ export const checklistEnlace = [
     "title": "Altura de instalación de la CGP / CGPM",
     "question": "¿Es la altura de instalación de la CGP / CGPM reglamentaria?",
     "reference": "ITC-BT-13",
-    "favorable": "Aerea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
+    "favorable": "Aérea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_03_altura_instalación_cgp_cgpm.png"
+        "/help/01_01_03_altura_instalacion_cgp_cgpm.png"
       ]
     },
     "itc": "ITC-BT-13",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula las cajas generales de protección y su adecuación, ubicación, accesibilidad, envolvente, protección y conexión con la red de distribución. Aplicado al punto: Altura de instalación de la CGP / CGPM.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Aerea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Aérea 3-4 m; nicho > 0,30 m; CGPM 0,70-1,80 m.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Altura de instalación de la CGP / CGPM.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-13. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -95,7 +95,7 @@ export const checklistEnlace = [
       ]
     },
     "itc": "ITC-BT-13",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula las cajas generales de protección y su adecuación, ubicación, accesibilidad, envolvente, protección y conexión con la red de distribución. Aplicado al punto: Distancia a otras canalizaciones.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Separación respecto a agua, gas, telecomunicaciones u otros servicios.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Distancia a otras canalizaciones.",
@@ -121,7 +121,7 @@ export const checklistEnlace = [
       ]
     },
     "itc": "ITC-BT-13",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula las cajas generales de protección y su adecuación, ubicación, accesibilidad, envolvente, protección y conexión con la red de distribución. Aplicado al punto: Características de la CGP / CGPM.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Caja normalizada, adecuada a compañía, con bases/fusibles correctos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Características de la CGP / CGPM.",
@@ -143,7 +143,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_06_tipo_canalización_lga.png"
+        "/help/01_01_06_tipo_canalizacion_lga.png"
       ]
     },
     "itc": "ITC-BT-14",
@@ -183,8 +183,7 @@ export const checklistEnlace = [
       "Observación técnica del inspector"
     ],
     "medicionesRequeridas": [
-      "Medición de corriente de string cuando proceda"
-    ]
+      ]
   },
   {
     "id": "01.01.08",
@@ -240,17 +239,17 @@ export const checklistEnlace = [
     "title": "Sección mínima de conductores LGA",
     "question": "¿Es la sección mínima de los conductores de la LGA adecuada?",
     "reference": "ITC-BT-14 pto. 3",
-    "favorable": "Mínimo 10 mm2 Cu o 16 mm2 Al.",
+    "favorable": "Mínimo 10 mm² Cu o 16 mm² Al.",
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_10_sección_minima_lga.png"
+        "/help/01_01_10_seccion_minima_lga.png"
       ]
     },
     "itc": "ITC-BT-14",
     "apartado": "Punto 3",
     "normaResumen": "Regula la línea general de alimentación: trazado, canalización, sección, instalación en zonas comunes y protección mecánica. Aplicado al punto: Sección mínima de conductores LGA.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 10 mm2 Cu o 16 mm2 Al.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 10 mm² Cu o 16 mm² Al.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Sección mínima de conductores LGA.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-14. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -268,6 +267,11 @@ export const checklistEnlace = [
     "reference": "ITC-BT-14 pto. 3",
     "favorable": "Cables no propagadores de incendio y baja emisión de humos, tipo AS.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/01_01_11.png"
+      ]
+    },
     "itc": "ITC-BT-14",
     "apartado": "Punto 3",
     "normaResumen": "Regula la línea general de alimentación: trazado, canalización, sección, instalación en zonas comunes y protección mecánica. Aplicado al punto: Cables de seguridad en LGA.",
@@ -290,7 +294,7 @@ export const checklistEnlace = [
     "favorable": "Neutro azul, protección amarillo-verde, fases identificadas.",
     "severity": "DG",
     "itc": "ITC-BT-14 / ITC-BT-19",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la línea general de alimentación: trazado, canalización, sección, instalación en zonas comunes y protección mecánica. Aplicado al punto: Identificación de conductores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Neutro azul, protección amarillo-verde, fases identificadas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Identificación de conductores.",
@@ -306,12 +310,17 @@ export const checklistEnlace = [
     "blockId": "rebt2002_block_01",
     "section": "Línea General de Alimentación",
     "title": "Caída de tensión de la LGA",
-    "question": "Cumple la LGA con los límites de caída de tensión",
+    "question": "¿Está justificada la caída de tensión de la LGA y cumple el límite aplicable según el esquema de instalación?",
     "reference": "ITC-BT-14",
     "favorable": "Debe cumplir límites reglamentarios según esquema.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/01_01_13.png"
+      ]
+    },
     "itc": "ITC-BT-14",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la línea general de alimentación: trazado, canalización, sección, instalación en zonas comunes y protección mecánica. Aplicado al punto: Caída de tensión de la LGA.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe cumplir límites reglamentarios según esquema.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Caída de tensión de la LGA.",
@@ -332,7 +341,7 @@ export const checklistEnlace = [
     "favorable": "Sin empalmes indebidos, deterioros, calentamientos ni modificaciones.",
     "severity": "DG",
     "itc": "ITC-BT-14",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la línea general de alimentación: trazado, canalización, sección, instalación en zonas comunes y protección mecánica. Aplicado al punto: Estado general de la LGA.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin empalmes indebidos, deterioros, calentamientos ni modificaciones.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Estado general de la LGA.",
@@ -395,7 +404,7 @@ export const checklistEnlace = [
     "favorable": "Trazado adecuado, registrable y por zonas permitidas.",
     "severity": "DG",
     "itc": "ITC-BT-15",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Trazado de la DI.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Trazado adecuado, registrable y por zonas permitidas.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Trazado de la DI.",
@@ -417,7 +426,7 @@ export const checklistEnlace = [
     "severity": "DG",
     "help": {
       "images": [
-        "/help/01_01_18_derivación_individual.png"
+        "/help/01_01_18_derivacion_individual.png"
       ]
     },
     "itc": "ITC-BT-15",
@@ -437,14 +446,14 @@ export const checklistEnlace = [
     "blockId": "rebt2002_block_01",
     "section": "Derivación Individual",
     "title": "Hilo de mando para cambio de tarifa",
-    "question": "¿Existe hilo de mando de 1,5 mm2 cuando proceda?",
+    "question": "¿Existe hilo de mando de 1,5 mm² cuando proceda?",
     "reference": "ITC-BT-15 pto. 3",
-    "favorable": "Cable rojo de 1,5 mm2 cuando proceda.",
+    "favorable": "Cable rojo de 1,5 mm² cuando proceda.",
     "severity": "DL",
     "itc": "ITC-BT-15",
     "apartado": "Punto 3",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Hilo de mando para cambio de tarifa.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Cable rojo de 1,5 mm2 cuando proceda.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Cable rojo de 1,5 mm² cuando proceda.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DL por incumplimiento, falta de justificación o condición no conforme en: Hilo de mando para cambio de tarifa.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-15. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -463,7 +472,7 @@ export const checklistEnlace = [
     "favorable": "Colores normalizados: azul neutro, amarillo-verde tierra.",
     "severity": "DG",
     "itc": "ITC-BT-15 / ITC-BT-19",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Identificación de conductores de DI.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Colores normalizados: azul neutro, amarillo-verde tierra.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Identificación de conductores de DI.",
@@ -479,14 +488,19 @@ export const checklistEnlace = [
     "blockId": "rebt2002_block_01",
     "section": "Derivación Individual",
     "title": "Sección mínima de la DI",
-    "question": "¿Es la sección de la DI de al menos 6 mm2 Cu?",
+    "question": "¿La sección de la derivación individual es reglamentaria y adecuada a la potencia, protección y caída de tensión?",
     "reference": "ITC-BT-15 pto. 3",
-    "favorable": "Mínimo 6 mm2 Cu.",
+    "favorable": "Mínimo 6 mm² Cu.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/01_01_21.png"
+      ]
+    },
     "itc": "ITC-BT-15",
     "apartado": "Punto 3",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Sección mínima de la DI.",
-    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 6 mm2 Cu.",
+    "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Mínimo 6 mm² Cu.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Sección mínima de la DI.",
     "fuente": "REBT 2002 (RD 842/2002), ITC-BT-15. Resumen técnico propio para inspección.",
     "tipoCriterio": "normativo",
@@ -505,7 +519,7 @@ export const checklistEnlace = [
     "favorable": "Debe existir conductor de protección hasta el cuadro.",
     "severity": "DG",
     "itc": "ITC-BT-15 / ITC-BT-18",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Conductor de protección en DI.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe existir conductor de protección hasta el cuadro.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Conductor de protección en DI.",
@@ -547,7 +561,7 @@ export const checklistEnlace = [
     "favorable": "Registros adecuados, precintables si procede.",
     "severity": "DG",
     "itc": "ITC-BT-15",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Canalización de DI en vertical.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Registros adecuados, precintables si procede.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Canalización de DI en vertical.",
@@ -568,7 +582,7 @@ export const checklistEnlace = [
     "favorable": "Sin empalmes indebidos, daños ni calentamientos.",
     "severity": "DG",
     "itc": "ITC-BT-15",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Estado general de DI.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin empalmes indebidos, daños ni calentamientos.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Estado general de DI.",
@@ -589,7 +603,7 @@ export const checklistEnlace = [
     "favorable": "Debe estar identificada y corresponder al usuario.",
     "severity": "DG",
     "itc": "ITC-BT-15 / ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula la derivación individual desde la centralización o caja de protección hasta los dispositivos generales de mando y protección. Aplicado al punto: Correspondencia DI-contador-usuario.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Debe estar identificada y corresponder al usuario.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Correspondencia DI-contador-usuario.",
@@ -607,15 +621,16 @@ export const checklistEnlace = [
     "title": "Ubicación de la centralización",
     "question": "¿Es adecuada la ubicación de la centralización?",
     "reference": "ITC-BT-16",
-    "favorable": "En local, armario o espacio adecuado y accesible.",
+    "favorable": "Se debe identificar primero si está en local, armario o espacio permitido.",
     "severity": "DG",
     "help": {
       "images": [
+        "/help/01_01_27.png",
         "/help/01_01_27_centralizacion_contadores.png"
       ]
     },
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Ubicación de la centralización.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: En local, armario o espacio adecuado y accesible.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Ubicación de la centralización.",
@@ -656,6 +671,11 @@ export const checklistEnlace = [
     "reference": "ITC-BT-16 pto. 2.2.1",
     "favorable": "Altura mín. 2,30 m; pasillo mín. 1,10 m (o 1,50 m enfrentados).",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/01_01_29.png"
+      ]
+    },
     "itc": "ITC-BT-16",
     "apartado": "Punto 2.2.1",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Dimensiones del local de contadores.",
@@ -666,7 +686,8 @@ export const checklistEnlace = [
     "evidenciasRequeridas": [
       "Observación técnica del inspector"
     ],
-    "medicionesRequeridas": []
+    "medicionesRequeridas": [],
+    "aplicaSi": { "tipoCentralizacion": "local" }
   },
   {
     "id": "01.01.30",
@@ -678,7 +699,7 @@ export const checklistEnlace = [
     "favorable": "Puerta adecuada, apertura hacia exterior, cierre normalizado.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Puerta del local de contadores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Puerta adecuada, apertura hacia exterior, cierre normalizado.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Puerta del local de contadores.",
@@ -748,7 +769,7 @@ export const checklistEnlace = [
     "favorable": "Local adecuado, seco, sin riesgo de inundación.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Características constructivas del local.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Local adecuado, seco, sin riesgo de inundación.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Características constructivas del local.",
@@ -768,8 +789,13 @@ export const checklistEnlace = [
     "reference": "ITC-BT-16",
     "favorable": "Armario normalizado, accesible, ventilado.",
     "severity": "DG",
+    "help": {
+      "images": [
+        "/help/01_01_34.png"
+      ]
+    },
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Armario de centralización.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Armario normalizado, accesible, ventilado.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Armario de centralización.",
@@ -778,7 +804,8 @@ export const checklistEnlace = [
     "evidenciasRequeridas": [
       "Observación técnica del inspector"
     ],
-    "medicionesRequeridas": []
+    "medicionesRequeridas": [],
+    "aplicaSi": { "tipoCentralizacion": "armario" }
   },
   {
     "id": "01.01.35",
@@ -790,7 +817,7 @@ export const checklistEnlace = [
     "favorable": "Módulos normalizados, precintables.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Módulos de contadores.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Módulos normalizados, precintables.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Módulos de contadores.",
@@ -811,7 +838,7 @@ export const checklistEnlace = [
     "favorable": "Cada contador identificado con su derivación y usuario.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Identificación de contadores y suministros.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Cada contador identificado con su derivación y usuario.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Identificación de contadores y suministros.",
@@ -832,7 +859,7 @@ export const checklistEnlace = [
     "favorable": "Fusibles adecuados y correctamente instalados.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Fusibles de seguridad / protección de salidas.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Fusibles adecuados y correctamente instalados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Fusibles de seguridad / protección de salidas.",
@@ -853,7 +880,7 @@ export const checklistEnlace = [
     "favorable": "Conductores adecuados, ordenados, identificados.",
     "severity": "DG",
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Cableado interior de centralización.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Conductores adecuados, ordenados, identificados.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Cableado interior de centralización.",
@@ -905,7 +932,7 @@ export const checklistEnlace = [
       ]
     },
     "itc": "ITC-BT-16",
-    "apartado": "Apartado aplicable según la ITC indicada",
+    "apartado": "Pendiente de concretar",
     "normaResumen": "Regula centralizaciones de contadores, ubicación, condiciones de acceso, envolventes, cableado, identificación y seguridad del recinto. Aplicado al punto: Estado general de la centralización.",
     "criterioInspeccion": "Comprobar en campo y con la documentación disponible que se cumple: Sin deterioros, calentamientos ni partes activas accesibles.",
     "defectoSiNoCumple": "Si no se cumple, registrar defecto DG por incumplimiento, falta de justificación o condición no conforme en: Estado general de la centralización.",

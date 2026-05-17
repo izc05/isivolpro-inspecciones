@@ -1,15 +1,15 @@
-// Checklist completo REBT 2002 para IsiVolt Pro.
-import checklistDocumentacion from "./checklistDocumentacion";
-import checklistEnlace from "./checklistEnlace";
-import checklistInterior from "./checklistInterior";
-import checklistAlumbradoExterior from "./checklistAlumbradoExterior";
-import checklistPublicaConcurrencia from "./checklistPublicaConcurrencia";
-import checklistAtex from "./checklistAtex";
-import checklistLocalesEspeciales from "./checklistLocalesEspeciales";
-import checklistFotovoltaica from "./checklistFotovoltaica";
-import checklistIrve from "./checklistIrve";
+import { checklistDocumentacion } from "./checklistDocumentacion";
+import { checklistEnlace } from "./checklistEnlace";
+import { checklistInterior } from "./checklistInterior";
+import { checklistAlumbradoExterior } from "./checklistAlumbradoExterior";
+import { checklistPublicaConcurrencia } from "./checklistPublicaConcurrencia";
+import { checklistAtex } from "./checklistAtex";
+import { checklistLocalesEspeciales } from "./checklistLocalesEspeciales";
+import { checklistFotovoltaica } from "./checklistFotovoltaica";
+import { checklistIrve } from "./checklistIrve";
+import { applyChecklistCorrections } from "./checklistCorrections";
 
-export const CHECKLIST = [
+const RAW_CHECKLIST = [
   ...checklistDocumentacion,
   ...checklistEnlace,
   ...checklistInterior,
@@ -20,5 +20,7 @@ export const CHECKLIST = [
   ...checklistFotovoltaica,
   ...checklistIrve
 ];
+
+export const CHECKLIST = applyChecklistCorrections(RAW_CHECKLIST);
 
 export default CHECKLIST;
