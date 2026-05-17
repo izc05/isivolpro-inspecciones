@@ -43,6 +43,8 @@ import {
   PenTool,
   UserCheck,
   User,
+  MessageCircle,
+  Star,
 } from "lucide-react";
 
 
@@ -1672,10 +1674,9 @@ function StageFlow({ current, setScreen, onReportClick }) {
   );
 }
 
-function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generatedReportsCount = 0, onExportBackup, onImportBackup }) {
+function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generatedReportsCount = 0 }) {
   const last = inspections[0];
   const recent = inspections.slice(1, 3);
-  const fileInputRef = React.useRef(null);
 
   return (
     <div className="pb-28">
@@ -1755,40 +1756,6 @@ function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generate
             </div>
           </section>
         )}
-
-        <section className="bg-white border border-slate-100 rounded-[1.5rem] p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Save className="w-5 h-5 text-[#071E3D]" />
-            <h2 className="font-black text-slate-900">Copias de Seguridad</h2>
-          </div>
-          <p className="text-xs text-slate-500 mb-4 font-medium">Exporta tus inspecciones para no perderlas si borras los datos del navegador.</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button 
-              onClick={onExportBackup}
-              className="flex items-center justify-center gap-2 py-3 bg-[#071E3D] text-[#FFC928] rounded-xl font-black text-xs hover:bg-[#0a2955] transition-colors shadow-lg shadow-blue-900/10"
-            >
-              <Download className="w-4 h-4" /> Exportar
-            </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept=".json"
-              onChange={(e) => {
-                if(e.target.files && e.target.files[0]) {
-                  onImportBackup(e.target.files[0]);
-                  e.target.value = null;
-                }
-              }} 
-            />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 py-3 bg-white border-2 border-slate-200 text-slate-600 rounded-xl font-black text-xs hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              <Upload className="w-4 h-4" /> Importar
-            </button>
-          </div>
-        </section>
 
         <button type="button" onClick={() => setScreen("plan")} className="w-full bg-white border border-yellow-100 rounded-[1.5rem] p-4 text-left shadow-sm flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-yellow-50 text-[#071E3D] flex items-center justify-center">
@@ -2034,9 +2001,60 @@ function SettingsScreen({
   generatedReportsCount = 0,
   customReportTitle = DEFAULT_REPORT_TITLE,
   setCustomReportTitle,
+  theme,
+  setTheme,
 }) {
   const [legalDetail, setLegalDetail] = useState(null);
+  const fileInputRef = React.useRef(null);
   const isPro = plan === "pro";
+
+  function exportBackup() {
+    try {
+      const data = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        data[key] = localStorage.getItem(key);
+      }
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `isivolt_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert("Error al generar la copia de seguridad.");
+    }
+  }
+
+  function importBackup(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        Object.entries(imported).forEach(([key, value]) => {
+          localStorage.setItem(key, value);
+        });
+        alert("Copia de seguridad importada. Recarga la aplicación para aplicar los cambios.");
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("Error al importar la copia de seguridad.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function factoryReset() {
+    if (window.confirm("¡ATENCIÓN! Vas a borrar TODOS los datos de la aplicación de este dispositivo, incluyendo inspecciones, fotos y ajustes. Esta acción no se puede deshacer.\n\n¿Estás completamente seguro de que quieres continuar?")) {
+      if (window.confirm("Última advertencia. ¿Borrar absolutamente todo?")) {
+        localStorage.clear();
+        window.location.reload();
+      }
+    }
+  }
 
   return (
     <div className="pb-28">
@@ -2080,13 +2098,48 @@ function SettingsScreen({
           )}
         </Section>
 
-        <Section title="Seguridad y versión" number="04">
+        <Section title="Apariencia" number="04">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 p-3 rounded-2xl">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white text-[#071E3D] shrink-0">
+              <Sun className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-slate-900">Tema de la app</p>
+              <select 
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="w-full mt-1 bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 font-medium focus:ring-2 focus:ring-[#FFC928] outline-none"
+              >
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+                <option value="system">Sistema</option>
+              </select>
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Seguridad y versión" number="05">
           <SettingsRow icon={LockKeyhole} title="PIN de acceso" text="Preparado para proteger inspecciones locales." />
           <SettingsRow icon={Store} title="Play Store" text="IsiVolt Pro V1.0.0 - Base técnica REBT 2002 V1." />
           <Button variant="soft" onClick={() => setPlan("demo")} className="w-full"><RotateCcw className="w-4 h-4" />Volver a Demo</Button>
         </Section>
 
-        <Section title="Legal y privacidad" number="05">
+        <Section title="Ayuda y soporte" number="06">
+          <SettingsRow 
+            icon={MessageCircle} 
+            title="Contactar con soporte" 
+            text="Envíanos un correo con tus dudas o sugerencias." 
+            onClick={() => window.location.href = "mailto:soporte@isivolt.com?subject=Soporte IsiVolt Pro"} 
+          />
+          <SettingsRow 
+            icon={Star} 
+            title="Valorar IsiVolt Pro" 
+            text="Ayúdanos dejando una reseña en la Play Store." 
+            onClick={() => alert("Próximamente disponible en Play Store.")} 
+          />
+        </Section>
+
+        <Section title="Legal y privacidad" number="07">
           <div className={classNames("rounded-2xl border p-4", legalAccepted ? "bg-emerald-50 border-emerald-100" : "bg-yellow-50 border-yellow-200")}>
             <div className="flex items-start gap-3">
               <div className={classNames("w-10 h-10 rounded-2xl flex items-center justify-center shrink-0", legalAccepted ? "bg-emerald-600 text-white" : "bg-[#FFC928] text-[#071E3D]")}>
@@ -2122,12 +2175,31 @@ function SettingsScreen({
           </div>
         </Section>
 
-        <Section title="Versión" number="06">
-          <SettingsRow icon={Store} title="Versión de la app" text={`IsiVolt Pro ${APP_VERSION}`} />
-          <SettingsRow icon={FileText} title="Base normativa" text="REBT 2002 · Base técnica V1." />
-          <SettingsRow icon={ShieldCheck} title="última actualización legal" text={LEGAL_UPDATED_AT} />
-          <SettingsRow icon={Download} title="Exportar diagnóstico" text="Preparado para soporte técnico en futuras versiones." />
+        <Section title="Versión" number="08">
+          {/* Backup Export */}
+          <SettingsRow icon={Download} title="Copia de seguridad" text="Exportar datos locales a archivo JSON" onClick={exportBackup} />
+          {/* Backup Import */}
+          <SettingsRow icon={Upload} title="Importar copia" text="Restaurar datos desde archivo JSON" onClick={() => fileInputRef.current?.click()} />
+          <input type="file" accept="application/json" ref={fileInputRef} className="hidden" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) importBackup(file);
+            e.target.value = "";
+          }} />
         </Section>
+
+        <Section title="Peligro" number="09">
+          <button 
+            onClick={factoryReset}
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-red-50 border border-red-100 p-4 text-red-600 font-black active:scale-95 transition hover:bg-red-100"
+          >
+            <Trash2 className="w-5 h-5" />
+            Borrar todos los datos de la app
+          </button>
+          <p className="text-center text-[10px] text-slate-400 mt-2 font-medium">
+            Esto eliminará permanentemente inspecciones, fotos y ajustes del almacenamiento local.
+          </p>
+        </Section>
+
       </div>
       {legalDetail && (
         <LegalDetailModal
@@ -2741,15 +2813,22 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen, onRe
   );
 }
 
-function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled, onReportClick }) {
+function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled, onReportClick, customItems = [], setCustomItems }) {
   const [search, setSearch] = useState("");
   const [helpItem, setHelpItem] = useState(null);
   const [showPending, setShowPending] = useState(false);
   const [checkMode, setCheckMode] = useState("tecnico");
   const [openBlocks, setOpenBlocks] = useState({});
   const [highlightedId, setHighlightedId] = useState("");
+  const [showCustomModal, setShowCustomModal] = useState(null);
+  const [editingCustomItem, setEditingCustomItem] = useState(null);
 
-  const items = useMemo(() => getInspectableChecklistItems(selectedBlocks), [selectedBlocks]);
+  const items = useMemo(() => {
+    const baseItems = getInspectableChecklistItems(selectedBlocks);
+    const blockIds = selectedBlocks.filter(id => isInspectableBlockId(id));
+    const currentCustomItems = customItems.filter(ci => blockIds.includes(ci.blockId));
+    return [...baseItems, ...currentCustomItems];
+  }, [selectedBlocks, customItems]);
   const completion = getInspectionCompletion(selectedBlocks, responses);
 
   const blockEntries = useMemo(() => {
@@ -2818,6 +2897,18 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
   const setDefectLocation = (item, defectLocation) => {
     setResponses((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || { item }), item, defectLocation } }));
   };
+
+  const deleteCustomItem = (itemToDelete) => {
+    if (window.confirm(`¿Seguro que quieres borrar el punto personalizado "${itemToDelete.title}"?`)) {
+      setCustomItems(prev => prev.filter(i => i.id !== itemToDelete.id));
+      setResponses(prev => {
+        const next = { ...prev };
+        delete next[itemToDelete.id];
+        return next;
+      });
+    }
+  };
+
   const addDefectInstance = (item) => {
     setResponses((prev) => {
       const response = prev[item.id] || { item };
@@ -2964,7 +3055,15 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
         <div className="flex items-start gap-3">
           <div className="bg-slate-100 text-[#071E3D] rounded-2xl px-3 py-2 text-xs font-black shrink-0">{item.id}</div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-black text-slate-900 text-[15px]">{fixText(item.title)}</h3>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-black text-slate-900 text-[15px]">{fixText(item.title)}</h3>
+              {item.isCustom && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => setEditingCustomItem(item)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg" title="Editar punto personalizado"><Edit3 className="w-4 h-4" /></button>
+                  <button onClick={() => deleteCustomItem(item)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg" title="Borrar punto personalizado"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              )}
+            </div>
             <p className="text-sm text-slate-500 mt-1">{fixText(item.question)}</p>
             {checkMode === "tecnico" && <p className="text-xs text-slate-400 mt-1">{fixText(item.reference)} - defecto base {item.severity}</p>}
           </div>
@@ -3223,6 +3322,13 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
                         </div>
                       </div>
                     ))}
+                    <button 
+                      type="button" 
+                      onClick={() => setShowCustomModal(block.id)}
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white p-4 text-slate-500 font-black hover:bg-slate-50 hover:text-[#071E3D] active:scale-95 transition-all mt-4"
+                    >
+                      <Plus className="w-5 h-5" /> Añadir punto personalizado
+                    </button>
                   </div>
                 )}
               </section>
@@ -3231,6 +3337,124 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
         </div>
       </div>
       {helpItem && <HelpModal item={helpItem} onClose={() => setHelpItem(null)} />}
+      {editingCustomItem && (
+        <CustomItemModal 
+          blockId={editingCustomItem.blockId} 
+          blockCode={getBlock(editingCustomItem.blockId)?.code || "99"}
+          blockItems={items.filter(i => i.blockId === editingCustomItem.blockId)}
+          initialItem={editingCustomItem}
+          onClose={() => setEditingCustomItem(null)} 
+          onSave={(updatedItem) => {
+            setCustomItems(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+            setEditingCustomItem(null);
+          }}
+        />
+      )}
+      {showCustomModal && (
+        <CustomItemModal 
+          blockId={showCustomModal} 
+          blockCode={getBlock(showCustomModal)?.code || "99"}
+          blockItems={items.filter(i => i.blockId === showCustomModal)}
+          onClose={() => setShowCustomModal(null)} 
+          onSave={(newItem) => {
+            setCustomItems(prev => [...prev, newItem]);
+            setShowCustomModal(null);
+            setSearch("");
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CustomItemModal({ blockId, blockCode, blockItems, initialItem, onClose, onSave }) {
+  const [title, setTitle] = useState(initialItem ? initialItem.title : "");
+  const [question, setQuestion] = useState(initialItem ? initialItem.question : "");
+  const [section, setSection] = useState(initialItem ? initialItem.section : "Puntos Personalizados");
+  const [customId, setCustomId] = useState(initialItem ? initialItem.id : "");
+
+  useEffect(() => {
+    if (!initialItem) {
+      let maxSuffix = 0;
+      let commonPrefix = `${blockCode}.01.`;
+      blockItems.forEach(i => {
+        const parts = i.id.split('.');
+        if (parts.length === 3) {
+          const suffix = parseInt(parts[2], 10);
+          if (!isNaN(suffix) && suffix > maxSuffix) {
+            maxSuffix = suffix;
+            commonPrefix = `${parts[0]}.${parts[1]}.`;
+          }
+        }
+      });
+      const nextSuffix = (maxSuffix + 1).toString().padStart(2, '0');
+      setCustomId(`${commonPrefix}${nextSuffix}`);
+    }
+  }, [initialItem, blockCode, blockItems]);
+
+  const handleSave = () => {
+    if (!title.trim() || !question.trim() || !customId.trim()) {
+      alert("Debes indicar un código, título y descripción.");
+      return;
+    }
+    
+    // Check if ID already exists when creating new
+    if (!initialItem && blockItems.some(i => i.id === customId.trim())) {
+      alert("Este código de punto ya existe en este bloque. Por favor, elige otro.");
+      return;
+    }
+
+    onSave({
+      id: customId.trim(),
+      blockId,
+      section: section.trim(),
+      title: title.trim(),
+      question: question.trim(),
+      reference: initialItem ? initialItem.reference : "Añadido por el inspector",
+      favorable: initialItem ? initialItem.favorable : "Cumple las exigencias específicas indicadas por el inspector.",
+      severity: initialItem ? initialItem.severity : "DG",
+      isCustom: true
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 print:hidden">
+      <div className="w-full max-w-md bg-white rounded-t-[2rem] sm:rounded-[2rem] max-h-[92vh] overflow-y-auto shadow-2xl p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-black text-xl text-[#071E3D]">Añadir punto</h2>
+          <button onClick={onClose} className="p-2 bg-slate-100 rounded-full text-slate-500"><X className="w-5 h-5" /></button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Código del punto</label>
+            <input 
+              value={customId} 
+              onChange={e => setCustomId(e.target.value)} 
+              disabled={!!initialItem}
+              placeholder="Ej. 01.01.35" 
+              className={classNames("mt-1 w-full border rounded-2xl px-4 py-3 font-black text-sm outline-none focus:ring-2 focus:ring-[#FFC928]", initialItem ? "bg-slate-100 border-transparent text-slate-400" : "bg-slate-50 border-slate-200")} 
+            />
+            {!!initialItem && <p className="text-[10px] text-slate-400 mt-1">El código no se puede modificar una vez creado.</p>}
+          </div>
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Título del punto</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ej. Estado de la bomba de agua" className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+          </div>
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Descripción o pregunta</label>
+            <textarea value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ej. ¿La bomba presenta signos de corrosión severa?" className="mt-1 w-full min-h-[80px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+          </div>
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Sección (Opcional)</label>
+            <input value={section} onChange={e => setSection(e.target.value)} placeholder="Ej. Puntos Personalizados" className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+          </div>
+        </div>
+
+        <button onClick={handleSave} className="w-full py-4 bg-[#071E3D] text-white rounded-2xl font-black shadow-lg shadow-blue-900/20 active:scale-95 transition-transform">
+          Guardar punto
+        </button>
+      </div>
     </div>
   );
 }
@@ -6176,6 +6400,8 @@ export default function IsiVoltProInspecciones() {
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalAcceptedAt, setLegalAcceptedAt] = useState("");
   const [checklistFocusItemId, setChecklistFocusItemId] = useState("");
+  const [theme, setTheme] = useState("system");
+  const [customChecklistItems, setCustomChecklistItems] = useState([]);
 
   // Estados de la inspección actual
   const [data, setData] = useState(INITIAL_INSPECTION);
@@ -6206,6 +6432,10 @@ export default function IsiVoltProInspecciones() {
         console.error("Error cargando inspecciones", e);
       }
     }
+    const savedCustomItems = localStorage.getItem("isivolt_custom_items");
+    if (savedCustomItems) {
+      try { setCustomChecklistItems(JSON.parse(savedCustomItems)); } catch (e) {}
+    }
     const accepted = localStorage.getItem(LEGAL_STORAGE_KEYS.accepted) === "true";
     const acceptedVersion = localStorage.getItem(LEGAL_STORAGE_KEYS.version);
     const acceptedAt = localStorage.getItem(LEGAL_STORAGE_KEYS.acceptedAt) || "";
@@ -6218,6 +6448,7 @@ export default function IsiVoltProInspecciones() {
     const savedReportCount = Number(localStorage.getItem(REPORT_COUNT_STORAGE_KEY) || 0);
     setGeneratedReportsCount(Number.isFinite(savedReportCount) ? savedReportCount : 0);
     setCustomReportTitle(localStorage.getItem(CUSTOM_REPORT_TITLE_STORAGE_KEY) || DEFAULT_REPORT_TITLE);
+    setTheme(localStorage.getItem("theme") || "system");
     if (!accepted || acceptedVersion !== LEGAL_VERSION) {
       setShowLegalIntro(true);
     }
@@ -6234,6 +6465,19 @@ export default function IsiVoltProInspecciones() {
   useEffect(() => {
     localStorage.setItem(CUSTOM_REPORT_TITLE_STORAGE_KEY, customReportTitle || DEFAULT_REPORT_TITLE);
   }, [customReportTitle]);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("isivolt_custom_items", JSON.stringify(customChecklistItems));
+  }, [customChecklistItems]);
 
   // Guardar lista de inspecciones cuando cambie
   useEffect(() => {
@@ -6489,15 +6733,15 @@ export default function IsiVoltProInspecciones() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex justify-center print:block print:bg-white">
-      <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex justify-center print:block print:bg-white transition-colors duration-300">
+      <div className="w-full max-w-md bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300">
         {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
         {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
-        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} />}
+        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} theme={theme} setTheme={setTheme} />}
         {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} onReportClick={openReportReview} />}
         {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} onReportClick={openReportReview} />}
-        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} />}
+        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} customItems={customChecklistItems} setCustomItems={setCustomChecklistItems} />}
         {screen === "fieldSheet" && <FieldSheetsScreen fieldSheets={fieldSheets} setFieldSheets={setFieldSheets} calculations={calculations} setCalculations={setCalculations} setScreen={setScreen} currentId={currentId} onReportClick={openReportReview} />}
         {screen === "measurements" && <MeasurementsScreen measurements={measurements} setMeasurements={setMeasurements} setScreen={setScreen} data={data} onReportClick={openReportReview} />}
         {screen === "report" && (
