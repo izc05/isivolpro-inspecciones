@@ -60,16 +60,94 @@ import {
 import { CHECKLIST } from "./data/checklistRebt2002";
 
 const DEFAULT_REPORT_TITLE = "Informe de inspección eléctrica";
+const EMPTY_SIGNATURES = { inspector: null, client: null };
 const DEMO_REPORT_LIMIT = 2;
 const PLAN_STORAGE_KEY = "subscriptionPlan";
 const REPORT_COUNT_STORAGE_KEY = "generatedReportsCount";
 const CUSTOM_REPORT_TITLE_STORAGE_KEY = "customReportTitle";
+const CHECKLIST_OVERRIDES_STORAGE_KEY = "isivolt_checklist_overrides";
+const COMPANY_SETTINGS_STORAGE_KEY = "companySettings";
+
+const DEFAULT_COMPANY_SETTINGS = {
+  name: "",
+  legalName: "",
+  cif: "",
+  address: "",
+  postalCode: "",
+  city: "",
+  province: "",
+  phone: "",
+  email: "",
+  website: "",
+  technicianName: "",
+  technicianCredential: "",
+};
 
 function normalizeSubscriptionPlan(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (["pro", "profesional", "professional", "premium", "empresa"].includes(normalized)) return "pro";
   if (normalized === "demo") return "demo";
   return "demo";
+}
+
+function mergeCompanySettings(value) {
+  return { ...DEFAULT_COMPANY_SETTINGS, ...(value && typeof value === "object" ? value : {}) };
+}
+
+function normalizeWebsite(value) {
+  const cleaned = String(value || "").trim();
+  if (!cleaned) return "";
+  return cleaned.replace(/^https?:\/\//i, "");
+}
+
+function getCompanySetting(settings, key) {
+  return String(settings?.[key] || "").trim();
+}
+
+function hasCompanyBranding(settings) {
+  const merged = mergeCompanySettings(settings);
+  return Boolean(
+    getCompanySetting(merged, "name") ||
+    getCompanySetting(merged, "legalName") ||
+    getCompanySetting(merged, "cif") ||
+    getCompanySetting(merged, "address") ||
+    getCompanySetting(merged, "phone") ||
+    getCompanySetting(merged, "email") ||
+    getCompanySetting(merged, "website") ||
+    getCompanySetting(merged, "technicianName")
+  );
+}
+
+function getReportBrand(plan, companySettings) {
+  const settings = mergeCompanySettings(companySettings);
+  const isPro = plan === "pro";
+  const commercialName = getCompanySetting(settings, "name");
+  const legalName = getCompanySetting(settings, "legalName");
+  const website = normalizeWebsite(settings.website);
+  const email = getCompanySetting(settings, "email");
+  const phone = getCompanySetting(settings, "phone");
+
+  if (isPro && (commercialName || legalName)) {
+    return {
+      main: commercialName || legalName,
+      sub: legalName && commercialName && legalName !== commercialName ? legalName : "Informe técnico eléctrico",
+      footer: [
+        website || commercialName || "Empresa inspectora",
+        email || "Email no indicado",
+        phone || "Teléfono no indicado",
+      ],
+      poweredBy: "Generado con IsiVolt Pro",
+      isCompany: true,
+    };
+  }
+
+  return {
+    main: "IsiVoltPro",
+    sub: "INSPECCIONES ELÉCTRICAS",
+    footer: ["www.isivoltpro.com", "info@isivoltpro.com", "600 123 456"],
+    poweredBy: "",
+    isCompany: false,
+  };
 }
 
 const BLOCKS = [
@@ -863,6 +941,36 @@ function getBlock(id) {
   return BLOCKS.find((b) => b.id === id);
 }
 
+function getChecklistOverride(itemId, overrides = {}) {
+  return overrides?.[itemId] || {};
+}
+
+function hasChecklistTextOverride(override = {}) {
+  return ["title", "question", "reference", "favorable", "favorableCriteria", "severity", "defaultSeverity"].some((key) =>
+    Object.prototype.hasOwnProperty.call(override, key)
+  );
+}
+
+function applyChecklistOverrides(checklist = CHECKLIST, overrides = {}) {
+  return checklist
+    .map((item) => {
+      const override = getChecklistOverride(item.id, overrides);
+      if (!override || Object.keys(override).length === 0) return item;
+      const favorable = override.favorable ?? override.favorableCriteria;
+      const severity = override.severity ?? override.defaultSeverity;
+      return {
+        ...item,
+        ...(override.title !== undefined ? { title: override.title } : {}),
+        ...(override.question !== undefined ? { question: override.question } : {}),
+        ...(override.reference !== undefined ? { reference: override.reference } : {}),
+        ...(favorable !== undefined ? { favorable, favorableCriteria: favorable } : {}),
+        ...(severity !== undefined ? { severity, defaultSeverity: severity } : {}),
+        isBaseEdited: hasChecklistTextOverride(override),
+      };
+    })
+    .filter((item) => !getChecklistOverride(item.id, overrides).hidden);
+}
+
 const CHECKLIST_INSPECTABLE_BLOCK_IDS = [
   "rebt2002_block_00",
   "rebt2002_block_01",
@@ -1502,7 +1610,7 @@ function FinalReviewModal({ completion, onClose, onChecklist, onDraft, onFinal, 
               </>
             ) : (
               <Button variant="gold" onClick={onFinal} className="w-full py-4 shadow-xl shadow-yellow-200">
-                Generar informe final
+                Revisar y firmar informe final
               </Button>
             )}
             <button onClick={onClose} className="text-slate-400 font-bold text-sm py-2">
@@ -2001,10 +2109,17 @@ function SettingsScreen({
   generatedReportsCount = 0,
   customReportTitle = DEFAULT_REPORT_TITLE,
   setCustomReportTitle,
+  companySettings = DEFAULT_COMPANY_SETTINGS,
+  setCompanySettings,
   theme,
   setTheme,
+  checklistOverrides = {},
+  setChecklistOverrides,
+  customChecklistItems = [],
 }) {
   const [legalDetail, setLegalDetail] = useState(null);
+  const [showChecklistManager, setShowChecklistManager] = useState(false);
+  const [showCompanySettings, setShowCompanySettings] = useState(false);
   const fileInputRef = React.useRef(null);
   const isPro = plan === "pro";
 
@@ -2075,9 +2190,32 @@ function SettingsScreen({
         </Section>
 
         <Section title="Empresa" number="02">
-          <SettingsRow icon={Building2} title="Datos de empresa" text={isPro ? "Nombre comercial, CIF/NIF, teléfono, email y web." : "Disponible en el plan Pro."} locked={!isPro} />
+          <SettingsRow
+            icon={Building2}
+            title="Datos de empresa"
+            text={isPro ? "Nombre comercial, CIF/NIF, dirección, teléfono, email y web." : "Disponible en el plan Pro."}
+            locked={!isPro}
+            onClick={() => (isPro ? setShowCompanySettings(true) : setScreen("plan"))}
+          />
           <SettingsRow icon={ImageIcon} title="Logo en informe" text={isPro ? "Disponible para personalizar la marca." : "Disponible en el plan Pro."} locked={!isPro} />
-          <SettingsRow icon={Users} title="Datos del técnico" text={isPro ? "Preparado para personalizar el informe." : "Disponible en el plan Pro."} locked={!isPro} />
+          <SettingsRow
+            icon={Users}
+            title="Datos del técnico"
+            text={isPro ? "Nombre e identificación profesional para el informe." : "Disponible en el plan Pro."}
+            locked={!isPro}
+            onClick={() => (isPro ? setShowCompanySettings(true) : setScreen("plan"))}
+          />
+          {isPro && hasCompanyBranding(companySettings) && (
+            <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 text-sm text-emerald-900">
+              <p className="font-black">{companySettings.name || companySettings.legalName}</p>
+              <p className="font-bold text-emerald-700 mt-1">
+                {[
+                  companySettings.cif && `CIF/NIF: ${companySettings.cif}`,
+                  companySettings.website && normalizeWebsite(companySettings.website),
+                ].filter(Boolean).join(" · ") || "Datos de empresa preparados para el informe."}
+              </p>
+            </div>
+          )}
         </Section>
 
         <Section title="Informe" number="03">
@@ -2118,13 +2256,27 @@ function SettingsScreen({
           </div>
         </Section>
 
-        <Section title="Seguridad y versión" number="05">
+        <Section title="Checklist" number="05">
+          <SettingsRow
+            icon={ClipboardList}
+            title="Gestionar puntos del checklist"
+            text="Editar textos, ocultar puntos base y restaurar criterios originales."
+            onClick={() => setShowChecklistManager(true)}
+          />
+          <SettingsRow
+            icon={Plus}
+            title="Puntos personalizados"
+            text={`${customChecklistItems.length} punto${customChecklistItems.length === 1 ? "" : "s"} creado${customChecklistItems.length === 1 ? "" : "s"} por el inspector.`}
+          />
+        </Section>
+
+        <Section title="Seguridad y versión" number="06">
           <SettingsRow icon={LockKeyhole} title="PIN de acceso" text="Preparado para proteger inspecciones locales." />
           <SettingsRow icon={Store} title="Play Store" text="IsiVolt Pro V1.0.0 - Base técnica REBT 2002 V1." />
           <Button variant="soft" onClick={() => setPlan("demo")} className="w-full"><RotateCcw className="w-4 h-4" />Volver a Demo</Button>
         </Section>
 
-        <Section title="Ayuda y soporte" number="06">
+        <Section title="Ayuda y soporte" number="07">
           <SettingsRow 
             icon={MessageCircle} 
             title="Contactar con soporte" 
@@ -2139,7 +2291,7 @@ function SettingsScreen({
           />
         </Section>
 
-        <Section title="Legal y privacidad" number="07">
+        <Section title="Legal y privacidad" number="08">
           <div className={classNames("rounded-2xl border p-4", legalAccepted ? "bg-emerald-50 border-emerald-100" : "bg-yellow-50 border-yellow-200")}>
             <div className="flex items-start gap-3">
               <div className={classNames("w-10 h-10 rounded-2xl flex items-center justify-center shrink-0", legalAccepted ? "bg-emerald-600 text-white" : "bg-[#FFC928] text-[#071E3D]")}>
@@ -2175,7 +2327,7 @@ function SettingsScreen({
           </div>
         </Section>
 
-        <Section title="Versión" number="08">
+        <Section title="Versión" number="09">
           {/* Backup Export */}
           <SettingsRow icon={Download} title="Copia de seguridad" text="Exportar datos locales a archivo JSON" onClick={exportBackup} />
           {/* Backup Import */}
@@ -2187,7 +2339,7 @@ function SettingsScreen({
           }} />
         </Section>
 
-        <Section title="Peligro" number="09">
+        <Section title="Peligro" number="10">
           <button 
             onClick={factoryReset}
             className="w-full flex items-center justify-center gap-2 rounded-2xl bg-red-50 border border-red-100 p-4 text-red-600 font-black active:scale-95 transition hover:bg-red-100"
@@ -2201,6 +2353,14 @@ function SettingsScreen({
         </Section>
 
       </div>
+      {showChecklistManager && (
+        <ChecklistManagerModal
+          overrides={checklistOverrides}
+          setOverrides={setChecklistOverrides}
+          customItems={customChecklistItems}
+          onClose={() => setShowChecklistManager(false)}
+        />
+      )}
       {legalDetail && (
         <LegalDetailModal
           content={LEGAL_CONTENT[legalDetail]}
@@ -2424,10 +2584,7 @@ function DataScreen({ data, setData, setScreen, onReportClick }) {
             <Field label="CUPS" value={data.cups || ""} onChange={(v) => update("cups", v)} placeholder="ES..." />
             <Field label="Compañía suministradora" value={data.supplyCompany || ""} onChange={(v) => update("supplyCompany", v)} placeholder="Compañía" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="N.º de expediente / orden" value={data.orderNumber || ""} onChange={(v) => update("orderNumber", v)} placeholder="Expediente" />
-            <Field label="Lugar de emisión" value={data.reportLocation || ""} onChange={(v) => update("reportLocation", v)} placeholder="Municipio" />
-          </div>
+          <Field label="N.º de expediente / orden" value={data.orderNumber || ""} onChange={(v) => update("orderNumber", v)} placeholder="Expediente" />
           <div className="grid grid-cols-2 gap-3">
             <Select label="Alcance" value={data.inspectionScope || "completa"} onChange={(v) => update("inspectionScope", v)} options={INSPECTION_SCOPE_OPTIONS} />
             <Field label="Motivo de inspección" value={data.inspectionReason || ""} onChange={(v) => update("inspectionReason", v)} placeholder="Inicial, periódica, subsanación..." />
@@ -2813,7 +2970,7 @@ function BlocksScreen({ data, selectedBlocks, setSelectedBlocks, setScreen, onRe
   );
 }
 
-function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled, onReportClick, customItems = [], setCustomItems }) {
+function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, currentId, focusItemId, onFocusHandled, onReportClick, customItems = [], setCustomItems, checklist = CHECKLIST }) {
   const [search, setSearch] = useState("");
   const [helpItem, setHelpItem] = useState(null);
   const [showPending, setShowPending] = useState(false);
@@ -2823,13 +2980,8 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
   const [showCustomModal, setShowCustomModal] = useState(null);
   const [editingCustomItem, setEditingCustomItem] = useState(null);
 
-  const items = useMemo(() => {
-    const baseItems = getInspectableChecklistItems(selectedBlocks);
-    const blockIds = selectedBlocks.filter(id => isInspectableBlockId(id));
-    const currentCustomItems = customItems.filter(ci => blockIds.includes(ci.blockId));
-    return [...baseItems, ...currentCustomItems];
-  }, [selectedBlocks, customItems]);
-  const completion = getInspectionCompletion(selectedBlocks, responses);
+  const items = useMemo(() => getInspectableChecklistItems(selectedBlocks, checklist), [selectedBlocks, checklist]);
+  const completion = getInspectionCompletion(selectedBlocks, responses, checklist);
 
   const blockEntries = useMemo(() => {
     return BLOCKS
@@ -3458,6 +3610,196 @@ function CustomItemModal({ blockId, blockCode, blockItems, initialItem, onClose,
     </div>
   );
 }
+
+function ChecklistManagerModal({ overrides = {}, setOverrides, customItems = [], onClose }) {
+  const [search, setSearch] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
+
+  const visibleItems = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return CHECKLIST.filter((item) => {
+      if (!term) return true;
+      const block = getBlock(item.blockId);
+      return [
+        item.id,
+        item.title,
+        item.question,
+        item.reference,
+        block?.code,
+        block?.title,
+      ].some((value) => String(value || "").toLowerCase().includes(term));
+    });
+  }, [search]);
+
+  const editedCount = Object.values(overrides).filter((override) => hasChecklistTextOverride(override)).length;
+  const hiddenCount = Object.values(overrides).filter((override) => override?.hidden).length;
+
+  const toggleHidden = (item) => {
+    setOverrides((prev) => {
+      const current = prev[item.id] || {};
+      return {
+        ...prev,
+        [item.id]: {
+          ...current,
+          hidden: !current.hidden,
+        },
+      };
+    });
+  };
+
+  const restoreItem = (item) => {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      delete next[item.id];
+      return next;
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 print:hidden">
+      <div className="w-full max-w-md bg-slate-50 rounded-t-[2rem] sm:rounded-[2rem] max-h-[92vh] overflow-hidden shadow-2xl border border-white/20">
+        <div className="bg-[#071E3D] text-white p-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-yellow-300 text-xs font-black uppercase tracking-widest">Ajustes del checklist</p>
+            <h2 className="font-black text-xl mt-1">Gestionar puntos</h2>
+            <p className="text-white/70 text-xs mt-1">{editedCount} editados · {hiddenCount} ocultos · {customItems.length} personalizados</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-2xl bg-white/10 active:scale-90 transition" aria-label="Cerrar">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4 space-y-4 max-h-[76vh] overflow-y-auto no-scrollbar">
+          <div className="rounded-2xl bg-yellow-50 border border-yellow-100 p-4 text-xs font-bold text-yellow-900 leading-5">
+            Los puntos base no se eliminan físicamente para conservar compatibilidad con inspecciones antiguas. Puedes ocultarlos, editarlos o restaurarlos.
+          </div>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por código, bloque o texto"
+            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#FFC928]"
+          />
+          <div className="space-y-3">
+            {visibleItems.map((item) => {
+              const block = getBlock(item.blockId);
+              const override = getChecklistOverride(item.id, overrides);
+              const hidden = Boolean(override.hidden);
+              const edited = hasChecklistTextOverride(override);
+              return (
+                <div key={item.id} className={classNames("bg-white rounded-3xl border p-4 shadow-sm", hidden ? "border-slate-200 opacity-70" : "border-slate-100")}>
+                  <div className="flex items-start gap-3">
+                    <span className="px-3 py-2 rounded-2xl bg-slate-100 text-[#071E3D] text-xs font-black shrink-0">{item.id}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-black text-slate-900 leading-tight">{fixText(override.title ?? item.title)}</p>
+                      <p className="text-[11px] font-bold text-slate-400 mt-1">Bloque {block?.code || "--"} · {fixText(block?.title || "Sin bloque")}</p>
+                      <p className="text-xs text-slate-500 mt-2 line-clamp-2">{fixText(override.question ?? item.question)}</p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {edited && <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black">Editado</span>}
+                        {hidden && <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black">Oculto</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-4">
+                    <button type="button" onClick={() => setEditingItem(item)} className="rounded-2xl bg-slate-50 border border-slate-100 py-2 text-xs font-black text-slate-700 flex items-center justify-center gap-1">
+                      <Edit3 className="w-3.5 h-3.5" />Editar
+                    </button>
+                    <button type="button" onClick={() => toggleHidden(item)} className="rounded-2xl bg-slate-50 border border-slate-100 py-2 text-xs font-black text-slate-700 flex items-center justify-center gap-1">
+                      <Eye className="w-3.5 h-3.5" />{hidden ? "Mostrar" : "Ocultar"}
+                    </button>
+                    <button type="button" onClick={() => restoreItem(item)} className="rounded-2xl bg-slate-50 border border-slate-100 py-2 text-xs font-black text-slate-700 flex items-center justify-center gap-1">
+                      <RotateCcw className="w-3.5 h-3.5" />Restaurar
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      {editingItem && (
+        <BaseChecklistItemEditModal
+          item={editingItem}
+          override={getChecklistOverride(editingItem.id, overrides)}
+          onClose={() => setEditingItem(null)}
+          onSave={(patch) => {
+            setOverrides((prev) => ({
+              ...prev,
+              [editingItem.id]: {
+                ...(prev[editingItem.id] || {}),
+                ...patch,
+              },
+            }));
+            setEditingItem(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BaseChecklistItemEditModal({ item, override = {}, onClose, onSave }) {
+  const [title, setTitle] = useState(override.title ?? item.title ?? "");
+  const [question, setQuestion] = useState(override.question ?? item.question ?? "");
+  const [reference, setReference] = useState(override.reference ?? item.reference ?? "");
+  const [favorable, setFavorable] = useState(override.favorableCriteria ?? override.favorable ?? item.favorableCriteria ?? item.favorable ?? "");
+  const [severity, setSeverity] = useState(override.defaultSeverity ?? override.severity ?? item.defaultSeverity ?? item.severity ?? "DG");
+
+  const handleSave = () => {
+    if (!title.trim() || !question.trim()) {
+      alert("El punto necesita título y pregunta.");
+      return;
+    }
+    onSave({
+      title: title.trim(),
+      question: question.trim(),
+      reference: reference.trim(),
+      favorableCriteria: favorable.trim(),
+      favorable: favorable.trim(),
+      defaultSeverity: severity,
+      severity,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 print:hidden">
+      <div className="w-full max-w-md bg-white rounded-t-[2rem] sm:rounded-[2rem] max-h-[92vh] overflow-y-auto shadow-2xl p-6 space-y-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-black text-[#FFC928] uppercase tracking-widest">{item.id}</p>
+            <h2 className="font-black text-xl text-[#071E3D]">Editar punto base</h2>
+            <p className="text-xs text-slate-400 font-bold mt-1">El código se mantiene fijo para no romper inspecciones guardadas.</p>
+          </div>
+          <button onClick={onClose} className="p-2 bg-slate-100 rounded-full text-slate-500"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="space-y-4">
+          <Field label="Título del punto" value={title} onChange={setTitle} placeholder="Título del punto" />
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Pregunta</label>
+            <textarea value={question} onChange={(e) => setQuestion(e.target.value)} className="mt-1 w-full min-h-[92px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+          </div>
+          <Field label="Referencia" value={reference} onChange={setReference} placeholder="ITC-BT-..." />
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Criterio favorable</label>
+            <textarea value={favorable} onChange={(e) => setFavorable(e.target.value)} className="mt-1 w-full min-h-[92px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+          </div>
+          <div>
+            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Defecto base</label>
+            <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-black text-sm outline-none focus:ring-2 focus:ring-[#FFC928]">
+              <option value="DL">DL</option>
+              <option value="DG">DG</option>
+              <option value="DMG">DMG</option>
+            </select>
+          </div>
+        </div>
+
+        <button onClick={handleSave} className="w-full py-4 bg-[#071E3D] text-white rounded-2xl font-black shadow-lg shadow-blue-900/20 active:scale-95 transition-transform">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function statusClass(s) {
   if (s === "Favorable") return "bg-emerald-600 border-emerald-600 text-white";
   if (s === "DL") return "bg-amber-50 border-amber-400 text-amber-700";
@@ -3644,6 +3986,92 @@ const BOARD_TYPE_OPTIONS = [
   { value: "irve", label: "IRVE" },
   { value: "otro", label: "Otro" },
 ];
+
+function CalculationHelpTables() {
+  const normalizedSections = ["1,5", "2,5", "4", "6", "10", "16", "25", "35", "50", "70", "95", "120", "150", "185", "240"];
+  const copperRows = [
+    ["1,5", "15 A", "Alumbrado y mando"],
+    ["2,5", "20 A", "Tomas de uso general"],
+    ["4", "25 A", "Cargas medias"],
+    ["6", "32 A", "Cocina, fuerza o derivaciones cortas"],
+    ["10", "44 A", "Líneas principales o cargas altas"],
+    ["16", "57 A", "Alimentaciones principales"],
+  ];
+  const voltageDropRows = [
+    ["Alumbrado", "3%", "Criterio habitual para circuitos de iluminación."],
+    ["Otros usos", "5%", "Tomas, fuerza y circuitos generales."],
+    ["Proyecto / fabricante", "Según caso", "Aplicar siempre el criterio más restrictivo."],
+  ];
+
+  return (
+    <section className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm space-y-4">
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-2xl bg-[#071E3D] text-[#FFC928] flex items-center justify-center shrink-0">
+          <BookOpen className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="font-black text-[#071E3D] text-base">Ayuda rápida de cálculo</h3>
+          <p className="text-xs text-slate-500 font-semibold mt-1">
+            Tablas orientativas para el técnico. Esta ayuda no se incluye en el informe final.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-[1.5rem] bg-[#071E3D] text-white p-4">
+        <p className="text-[10px] font-black text-yellow-300 uppercase tracking-wider mb-3">Secciones normalizadas</p>
+        <div className="flex flex-wrap gap-2">
+          {normalizedSections.map((section) => (
+            <span key={section} className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 text-xs font-black">
+              {section} mm²
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="rounded-[1.5rem] border border-slate-200 overflow-hidden">
+          <div className="bg-slate-50 px-4 py-3 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#071E3D]" />
+            <p className="text-xs font-black text-[#071E3D] uppercase tracking-wider">Intensidad orientativa Cu</p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {copperRows.map(([section, current, use]) => (
+              <div key={section} className="grid grid-cols-[72px_72px_1fr] gap-2 px-4 py-2.5 text-xs">
+                <strong className="text-[#071E3D]">{section} mm²</strong>
+                <span className="font-black text-emerald-700">{current}</span>
+                <span className="text-slate-500 font-semibold">{use}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-slate-200 overflow-hidden">
+          <div className="bg-slate-50 px-4 py-3 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-[#FFC928] fill-current" />
+            <p className="text-xs font-black text-[#071E3D] uppercase tracking-wider">Caída de tensión</p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {voltageDropRows.map(([use, limit, note]) => (
+              <div key={use} className="grid grid-cols-[96px_64px_1fr] gap-2 px-4 py-2.5 text-xs">
+                <strong className="text-[#071E3D]">{use}</strong>
+                <span className="font-black text-amber-600">{limit}</span>
+                <span className="text-slate-500 font-semibold">{note}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[1.5rem] bg-yellow-50 border border-yellow-100 p-4 flex gap-3">
+        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+          Comprueba siempre sección por caída de tensión, sección por criterio térmico, método de instalación,
+          temperatura, agrupamiento y protección magnetotérmica antes de aceptar el dimensionamiento.
+        </p>
+      </div>
+    </section>
+  );
+}
 
 function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalculations, setScreen, currentId, onReportClick }) {
   const [newBoard, setNewBoard] = useState(createEmptyBoard);
@@ -3918,6 +4346,8 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
             </div>
           </div>
         </section>
+
+        <CalculationHelpTables />
       </div>
     );
   };
@@ -4321,7 +4751,6 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
       ["Próximo vencimiento", String(data?.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar")],
       ["Técnico inspector", String(data?.technicianName || "Sin indicar")],
       ["Identificación profesional", String(data?.technicianCredential || "Sin indicar")],
-      ["Lugar de emisión", String(data?.reportLocation || "Sin indicar")],
       ["Esquema TT/TN/IT", String(data?.distributionSystem || "Sin indicar")],
       ["Uso pública concurrencia", String(data?.publicUse || "Sin indicar")],
       ["Aforo previsto", String(data?.occupancy || "Sin indicar")],
@@ -4670,9 +5099,9 @@ async function waitForImages(root) {
   }));
 }
 
-const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], calculations, signatures, reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE, onItcClick }, ref) => {
+const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], calculations, signatures, reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE, onItcClick, onSignatureRequest, checklist = CHECKLIST }, ref) => {
 
-  const completion = getInspectionCompletion(selectedBlocks, responses);
+  const completion = getInspectionCompletion(selectedBlocks, responses, checklist);
   const verdict = calculateVerdict(responses, completion.isComplete);
   const responseList = Object.values(responses).filter((r) => r.status);
   const defects = getDefectEntriesFromResponses(responses);
@@ -4680,8 +5109,12 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
   const dl = defects.filter((r) => r.status === "DL").length;
   const dg = defects.filter((r) => r.status === "DG").length;
   const dmg = defects.filter((r) => r.status === "DMG").length;
-  const loadedPoints = getInspectableChecklistItems(selectedBlocks);
-  const blocks = selectedBlocks.map((id) => getBlock(id)).filter(Boolean).sort((a, b) => a.order - b.order);
+  const loadedPoints = getInspectableChecklistItems(selectedBlocks, checklist);
+  const blocks = selectedBlocks
+    .filter((id) => id !== "custom_block_26_calculations")
+    .map((id) => getBlock(id))
+    .filter(Boolean)
+    .sort((a, b) => a.order - b.order);
   const itcReferences = getSelectedItcReferences(selectedBlocks, data?.regulation);
   const itcDisplay = useMemo(() => {
     if (!itcReferences.length) return "Pendiente de definir según datos iniciales";
@@ -4818,6 +5251,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
 
       <ReportPage title="Datos generales" icon={FileText}>
         <ReportTable
+          className="report-data-table-compact"
           rows={[
             ["Nombre de la instalación", data.name || "Sin indicar"],
             ["Dirección", data.address || "Sin indicar"],
@@ -4841,7 +5275,6 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Técnico inspector", data.technicianName || "Sin indicar"],
             ["Identificación profesional", data.technicianCredential || "Sin indicar"],
-            ["Lugar de emisión", data.reportLocation || "Sin indicar"],
             ["Esquema TT/TN/IT", data.distributionSystem],
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
@@ -4921,12 +5354,6 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         </ReportPage>
       ))}
 
-      {reportVariant === "tecnico" && selectedBlocks.includes("custom_block_26_calculations") && (
-        <ReportPage title="Cálculos Eléctricos de Línea" icon={Wrench}>
-          <CalculationsReportView calculations={calculations} />
-        </ReportPage>
-      )}
-
       <FieldSheetsReportPages fieldSheets={fieldSheets} />
 
       {reportVariant === "campo" && (
@@ -4955,8 +5382,8 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
 
         <MeasurementsReportTable measurements={measurements} />
         <div className="report-signatures">
-          <SignatureLine label="Firma del inspector" signature={signatures?.inspector} />
-          <SignatureLine label="Firma del titular" signature={signatures?.client} />
+          <SignatureLine label="Firma del inspector" signature={signatures?.inspector} onRequest={onSignatureRequest ? () => onSignatureRequest("inspector") : null} />
+          <SignatureLine label="Firma del titular" signature={signatures?.client} onRequest={onSignatureRequest ? () => onSignatureRequest("client") : null} />
           <SignatureLine label="Fecha de emisión" date={new Date().toLocaleDateString("es-ES")} />
         </div>
 
@@ -4985,6 +5412,7 @@ function ReportScreen({
   onDemoLimit,
   signatures: propsSignatures,
   onSignaturesChange,
+  checklist = CHECKLIST,
 }) {
 
   const [printError, setPrintError] = useState("");
@@ -4994,7 +5422,7 @@ function ReportScreen({
   const [showItcModal, setShowItcModal] = useState(false);
   const [reportResponses, setReportResponses] = useState(responses);
   const [reportFieldSheets, setReportFieldSheets] = useState(fieldSheets || []);
-  const [signatures, setSignatures] = useState(propsSignatures || { inspector: null, client: null });
+  const [signatures, setSignatures] = useState(propsSignatures || EMPTY_SIGNATURES);
   const [activeSignature, setActiveSignature] = useState(null);
   const [filesReady, setFilesReady] = useState(false);
 
@@ -5011,6 +5439,16 @@ function ReportScreen({
     : DEFAULT_REPORT_TITLE;
   const itcReferences = useMemo(() => getSelectedItcReferences(selectedBlocks, data?.regulation), [selectedBlocks, data?.regulation]);
   const demoLimitReached = reportMode === "final" && plan === "demo" && !reportGenerated && generatedReportsCount >= DEMO_REPORT_LIMIT;
+
+  useEffect(() => {
+    setSignatures(propsSignatures || EMPTY_SIGNATURES);
+  }, [propsSignatures]);
+
+  const updateSignature = (type, dataUrl) => {
+    const updated = { ...signatures, [type]: dataUrl };
+    setSignatures(updated);
+    onSignaturesChange?.(updated);
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -5149,6 +5587,44 @@ function ReportScreen({
 
 
       {/* ÁREA DE CAPTURA (OCULTA PERO A TAMAÑO REAL) */}
+      <div className="no-print px-5 pb-4 max-w-lg mx-auto">
+        <div className="bg-white rounded-[1.75rem] border border-slate-100 shadow-sm p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#071E3D] text-[#FFC928] flex items-center justify-center shrink-0">
+              <PenTool className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-black text-[#071E3D] text-sm">Firmar antes de generar</h3>
+              <p className="text-slate-500 text-xs leading-snug">La firma queda guardada solo en esta inspección y saldrá en el PDF cuando lo exportes.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => setActiveSignature("inspector")}
+              className={classNames(
+                "flex items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-xs font-black transition active:scale-[0.98]",
+                signatures.inspector ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-slate-50 border-slate-200 text-[#071E3D]"
+              )}
+            >
+              {signatures.inspector ? <CheckCircle2 className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+              {signatures.inspector ? "Técnico firmado" : "Firmar técnico"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSignature("client")}
+              className={classNames(
+                "flex items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-xs font-black transition active:scale-[0.98]",
+                signatures.client ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-slate-50 border-slate-200 text-[#071E3D]"
+              )}
+            >
+              {signatures.client ? <CheckCircle2 className="w-4 h-4" /> : <User className="w-4 h-4" />}
+              {signatures.client ? "Titular firmado" : "Firmar titular"}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="absolute left-[-9999px] top-0 no-print report-capture-area" ref={captureRef}>
         <ReportDocument
           data={data}
@@ -5162,13 +5638,15 @@ function ReportScreen({
           plan={plan}
           reportTitle={effectiveReportTitle}
           onItcClick={() => setShowItcModal(true)}
+          checklist={checklist}
         />
 
       </div>
 
       {/* VISTA PREVIA (ESCALADA PARA MÓVIL) */}
       <div ref={containerRef} className="report-preview-mobile no-print min-h-[60vh]">
-        <div className="report-scaling-container" style={{ transform: `scale(${scale})` }}>
+        <div className="report-scaling-shell" style={{ width: `${794 * scale}px` }}>
+          <div className="report-scaling-container" style={{ transform: `scale(${scale})` }}>
           <ReportDocument
             data={data}
             selectedBlocks={selectedBlocks}
@@ -5181,8 +5659,10 @@ function ReportScreen({
             plan={plan}
             reportTitle={effectiveReportTitle}
             onItcClick={() => setShowItcModal(true)}
+            onSignatureRequest={setActiveSignature}
+            checklist={checklist}
           />
-
+          </div>
         </div>
       </div>
 
@@ -5203,11 +5683,7 @@ function ReportScreen({
               </span>
               <InlineSignatureCanvas
                 signature={signatures.inspector}
-                onChange={(dataUrl) => {
-                  const updated = { ...signatures, inspector: dataUrl };
-                  setSignatures(updated);
-                  if (onSignaturesChange) onSignaturesChange(updated);
-                }}
+                onChange={(dataUrl) => updateSignature("inspector", dataUrl)}
                 label="Inspector"
               />
             </div>
@@ -5219,11 +5695,7 @@ function ReportScreen({
               </span>
               <InlineSignatureCanvas
                 signature={signatures.client}
-                onChange={(dataUrl) => {
-                  const updated = { ...signatures, client: dataUrl };
-                  setSignatures(updated);
-                  if (onSignaturesChange) onSignaturesChange(updated);
-                }}
+                onChange={(dataUrl) => updateSignature("client", dataUrl)}
                 label="Titular"
               />
             </div>
@@ -5245,6 +5717,7 @@ function ReportScreen({
           plan={plan}
           reportTitle={effectiveReportTitle}
           onItcClick={() => setShowItcModal(true)}
+          checklist={checklist}
         />
 
       </div>
@@ -5293,12 +5766,11 @@ function ReportScreen({
           subtitle={activeSignature === "inspector" ? "T\u00e9cnico certificador" : "Titular de la instalaci\u00f3n"}
           existing={signatures[activeSignature]}
           onSave={(dataUrl) => {
-            setSignatures(prev => ({ ...prev, [activeSignature]: dataUrl }));
+            updateSignature(activeSignature, dataUrl);
             setActiveSignature(null);
-            if (onSignaturesChange) onSignaturesChange({ ...signatures, [activeSignature]: dataUrl });
           }}
           onClear={() => {
-            setSignatures(prev => ({ ...prev, [activeSignature]: null }));
+            updateSignature(activeSignature, null);
           }}
           onCancel={() => setActiveSignature(null)}
         />
@@ -5450,9 +5922,9 @@ function CounterCard({ label, value, tone = "navy" }) {
   return <div className={classNames("counter-card", tone)}><strong>{value}</strong><span>{fixText(label)}</span></div>;
 }
 
-function ReportTable({ rows }) {
+function ReportTable({ rows, className = "" }) {
   return (
-    <table className="report-data-table">
+    <table className={classNames("report-data-table", className)}>
       <tbody>
         {rows.map(([label, value]) => (
           <tr key={label}>
@@ -6065,6 +6537,7 @@ function InlineSignatureCanvas({ signature, onChange, label }) {
 
   const startDrawing = (e) => {
     e.preventDefault();
+    e.currentTarget?.setPointerCapture?.(e.pointerId);
     const pos = getPos(e);
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
@@ -6143,13 +6616,11 @@ function InlineSignatureCanvas({ signature, onChange, label }) {
             height={160}
             className="w-full rounded-2xl touch-none cursor-crosshair border border-slate-200 bg-slate-50 hover:bg-slate-100/50 transition-all"
             style={{ height: "96px" }}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
-            onTouchMove={draw}
-            onTouchEnd={stopDrawing}
+            onPointerDown={startDrawing}
+            onPointerMove={draw}
+            onPointerUp={stopDrawing}
+            onPointerCancel={stopDrawing}
+            onPointerLeave={stopDrawing}
           />
           {!hasDrawn && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-60">
@@ -6165,9 +6636,21 @@ function InlineSignatureCanvas({ signature, onChange, label }) {
   );
 }
 
-function SignatureLine({ label, signature, date }) {
+function SignatureLine({ label, signature, date, onRequest }) {
   return (
-    <div className="signature-line-container">
+    <div
+      className={classNames("signature-line-container", onRequest && "signature-clickable")}
+      role={onRequest ? "button" : undefined}
+      tabIndex={onRequest ? 0 : undefined}
+      onClick={onRequest || undefined}
+      onKeyDown={onRequest ? (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onRequest();
+        }
+      } : undefined}
+      title={onRequest ? "Pulsar para firmar" : undefined}
+    >
       {/* Zona de firma */}
       <div className="signature-box">
         {signature ? (
@@ -6213,6 +6696,7 @@ function SignaturePad({ onSave, onClear, onCancel, title, subtitle, existing }) 
 
   const startDrawing = (e) => {
     e.preventDefault();
+    e.currentTarget?.setPointerCapture?.(e.pointerId);
     const pos = getPos(e);
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
@@ -6267,12 +6751,12 @@ function SignaturePad({ onSave, onClear, onCancel, title, subtitle, existing }) 
   }, [mode]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col justify-end" style={{background: "rgba(7,30,61,0.6)", backdropFilter: "blur(6px)"}}>
+    <div className="fixed inset-0 z-[200] flex flex-col justify-end items-center" style={{background: "rgba(7,30,61,0.6)", backdropFilter: "blur(6px)"}}>
       {/* Overlay para cerrar */}
       <div className="absolute inset-0" onClick={onCancel} />
 
       {/* Panel de firma — compacto para móvil */}
-      <div className="relative bg-white rounded-t-[1.75rem] shadow-2xl overflow-hidden" style={{animation: "slideUp 0.22s ease-out"}}>
+      <div className="relative w-full max-w-md bg-white rounded-t-[1.75rem] sm:rounded-[1.75rem] shadow-2xl overflow-hidden" style={{animation: "slideUp 0.22s ease-out"}}>
 
         {/* Tirador (drag handle) */}
         <div className="flex justify-center pt-2.5 pb-1">
@@ -6327,13 +6811,11 @@ function SignaturePad({ onSave, onClear, onCancel, title, subtitle, existing }) 
                 height={200}
                 className="w-full rounded-2xl touch-none cursor-crosshair border-2 transition-colors"
                 style={{background: "#f8fafc", borderColor: isDrawing ? "#FFC928" : "#e2e8f0", height: "100px"}}
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing}
-                onTouchMove={draw}
-                onTouchEnd={stopDrawing}
+                onPointerDown={startDrawing}
+                onPointerMove={draw}
+                onPointerUp={stopDrawing}
+                onPointerCancel={stopDrawing}
+                onPointerLeave={stopDrawing}
               />
               {!hasDrawn && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -6402,6 +6884,7 @@ export default function IsiVoltProInspecciones() {
   const [checklistFocusItemId, setChecklistFocusItemId] = useState("");
   const [theme, setTheme] = useState("system");
   const [customChecklistItems, setCustomChecklistItems] = useState([]);
+  const [checklistOverrides, setChecklistOverrides] = useState({});
 
   // Estados de la inspección actual
   const [data, setData] = useState(INITIAL_INSPECTION);
@@ -6409,7 +6892,7 @@ export default function IsiVoltProInspecciones() {
   const [responses, setResponses] = useState({});
   const [measurements, setMeasurements] = useState({ location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" });
   const [fieldSheets, setFieldSheets] = useState([]);
-  const [signatures, setSignatures] = useState({ inspector: null, client: null });
+  const [signatures, setSignatures] = useState(EMPTY_SIGNATURES);
   const [calculations, setCalculations] = useState(INITIAL_INSPECTION.calculations);
 
 
@@ -6417,6 +6900,10 @@ export default function IsiVoltProInspecciones() {
   // Gestión de múltiples inspecciones y persistencia
   const [inspections, setInspections] = useState([]);
   const [currentId, setCurrentId] = useState(null);
+  const activeChecklistItems = useMemo(
+    () => [...applyChecklistOverrides(CHECKLIST, checklistOverrides), ...customChecklistItems],
+    [checklistOverrides, customChecklistItems]
+  );
 
   const setPlan = (value) => {
     setPlanState(normalizeSubscriptionPlan(value));
@@ -6435,6 +6922,10 @@ export default function IsiVoltProInspecciones() {
     const savedCustomItems = localStorage.getItem("isivolt_custom_items");
     if (savedCustomItems) {
       try { setCustomChecklistItems(JSON.parse(savedCustomItems)); } catch (e) {}
+    }
+    const savedOverrides = localStorage.getItem(CHECKLIST_OVERRIDES_STORAGE_KEY);
+    if (savedOverrides) {
+      try { setChecklistOverrides(JSON.parse(savedOverrides)); } catch (e) {}
     }
     const accepted = localStorage.getItem(LEGAL_STORAGE_KEYS.accepted) === "true";
     const acceptedVersion = localStorage.getItem(LEGAL_STORAGE_KEYS.version);
@@ -6479,6 +6970,10 @@ export default function IsiVoltProInspecciones() {
     localStorage.setItem("isivolt_custom_items", JSON.stringify(customChecklistItems));
   }, [customChecklistItems]);
 
+  useEffect(() => {
+    localStorage.setItem(CHECKLIST_OVERRIDES_STORAGE_KEY, JSON.stringify(checklistOverrides));
+  }, [checklistOverrides]);
+
   // Guardar lista de inspecciones cuando cambie
   useEffect(() => {
     localStorage.setItem("isivolt_inspecciones", JSON.stringify(inspections));
@@ -6488,7 +6983,7 @@ export default function IsiVoltProInspecciones() {
   useEffect(() => {
     if (!currentId) return;
 
-    const completion = getInspectionCompletion(selectedBlocks, responses);
+    const completion = getInspectionCompletion(selectedBlocks, responses, activeChecklistItems);
     const verdict = calculateVerdict(responses, completion.isComplete);
     const defectCount = getDefectEntriesFromResponses(responses).length;
 
@@ -6514,7 +7009,7 @@ export default function IsiVoltProInspecciones() {
         return ins;
       })
     );
-  }, [data, selectedBlocks, responses, measurements, fieldSheets, calculations, currentId]);
+  }, [data, selectedBlocks, responses, measurements, fieldSheets, signatures, calculations, currentId, activeChecklistItems]);
 
   const createInspection = () => {
     const newId = Date.now().toString(); // ID simple basado en tiempo
@@ -6526,6 +7021,7 @@ export default function IsiVoltProInspecciones() {
       responses: {},
       measurements: { location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" },
       fieldSheets: [],
+      signatures: EMPTY_SIGNATURES,
       calculations: INITIAL_INSPECTION.calculations,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -6541,6 +7037,7 @@ export default function IsiVoltProInspecciones() {
     setResponses(newInspection.responses);
     setMeasurements(newInspection.measurements);
     setFieldSheets(newInspection.fieldSheets);
+    setSignatures(newInspection.signatures);
     setCalculations(newInspection.calculations);
     setScreen("data");
   };
@@ -6554,6 +7051,7 @@ export default function IsiVoltProInspecciones() {
       setResponses(ins.responses);
       setMeasurements(ins.measurements);
       setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+      setSignatures(ins.signatures || EMPTY_SIGNATURES);
       setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
       setScreen("checklist");
     }
@@ -6574,6 +7072,7 @@ export default function IsiVoltProInspecciones() {
         setResponses({});
         setMeasurements({ location: "", lux: "", earth: "", rcd: "", tripMs: "", insulation: "" });
         setFieldSheets([]);
+        setSignatures(EMPTY_SIGNATURES);
         setCalculations(INITIAL_INSPECTION.calculations);
       }
     }
@@ -6588,6 +7087,7 @@ export default function IsiVoltProInspecciones() {
       setResponses(ins.responses);
       setMeasurements(ins.measurements);
       setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+      setSignatures(ins.signatures || EMPTY_SIGNATURES);
       setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
       setScreen("data");
     }
@@ -6610,6 +7110,7 @@ export default function IsiVoltProInspecciones() {
     setResponses(ins.responses);
     setMeasurements(ins.measurements);
     setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+    setSignatures(ins.signatures || EMPTY_SIGNATURES);
     setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
     setReportMode("final");
     if (!legalAccepted) {
@@ -6650,7 +7151,7 @@ export default function IsiVoltProInspecciones() {
   };
 
   const defects = getDefectEntriesFromResponses(responses).length;
-  const completion = getInspectionCompletion(selectedBlocks, responses);
+  const completion = getInspectionCompletion(selectedBlocks, responses, activeChecklistItems);
   const openReportReview = () => setShowFinalReview(true);
   const openReport = (mode) => {
     if (mode === "final" && !legalAccepted) {
@@ -6738,10 +7239,10 @@ export default function IsiVoltProInspecciones() {
         {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
         {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
-        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} theme={theme} setTheme={setTheme} />}
+        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} theme={theme} setTheme={setTheme} checklistOverrides={checklistOverrides} setChecklistOverrides={setChecklistOverrides} customChecklistItems={customChecklistItems} />}
         {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} onReportClick={openReportReview} />}
         {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} onReportClick={openReportReview} />}
-        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} customItems={customChecklistItems} setCustomItems={setCustomChecklistItems} />}
+        {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} customItems={customChecklistItems} setCustomItems={setCustomChecklistItems} checklist={activeChecklistItems} />}
         {screen === "fieldSheet" && <FieldSheetsScreen fieldSheets={fieldSheets} setFieldSheets={setFieldSheets} calculations={calculations} setCalculations={setCalculations} setScreen={setScreen} currentId={currentId} onReportClick={openReportReview} />}
         {screen === "measurements" && <MeasurementsScreen measurements={measurements} setMeasurements={setMeasurements} setScreen={setScreen} data={data} onReportClick={openReportReview} />}
         {screen === "report" && (
@@ -6764,6 +7265,7 @@ export default function IsiVoltProInspecciones() {
             customReportTitle={customReportTitle}
             onReportGenerated={markReportGenerated}
             onDemoLimit={() => setShowPlanLimit(true)}
+            checklist={activeChecklistItems}
           />
         )}
 

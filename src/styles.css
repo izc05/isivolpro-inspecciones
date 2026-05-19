@@ -34,14 +34,20 @@ textarea {
 .report-preview-mobile {
   background: #dbe3ee;
   width: 100%;
-  overflow-x: hidden;
-  padding: 20px 0;
+  overflow-x: auto;
+  padding: 20px 12px 140px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+}
+
+.report-scaling-shell {
+  flex: 0 0 auto;
 }
 
 .report-scaling-container {
-  transform-origin: top center;
+  width: 794px;
+  transform-origin: top left;
   transition: transform 0.2s ease-in-out;
 }
 
@@ -73,16 +79,17 @@ textarea {
 .report-page::after {
   content: "";
   position: absolute;
+  z-index: 0;
   pointer-events: none;
 }
 
 .report-page::before {
   top: 0;
   right: 0;
-  width: 46%;
-  height: 130px;
+  width: 28%;
+  height: 82px;
   background: linear-gradient(135deg, #071e3d 0%, #092746 100%);
-  clip-path: polygon(18% 0, 100% 0, 100% 100%, 42% 100%);
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 48% 100%);
 }
 
 .report-page::after {
@@ -100,7 +107,7 @@ textarea {
 .report-brand,
 .report-cover-body {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .report-page-head {
@@ -115,6 +122,9 @@ textarea {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 150px);
 }
 
 .report-section-title h2 {
@@ -134,6 +144,10 @@ textarea {
 }
 
 .report-mini-brand {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 120px;
+  text-align: right;
   color: #fff;
   font-weight: 900;
   font-size: 14px;
@@ -472,6 +486,20 @@ textarea {
   background: #071e3d;
   color: #fff;
   font-weight: 900;
+}
+
+.report-data-table-compact {
+  font-size: 9.5px;
+}
+
+.report-data-table-compact th,
+.report-data-table-compact td {
+  padding: 4.5px 7px;
+  line-height: 1.18;
+}
+
+.report-data-table-compact th {
+  width: 42%;
 }
 
 .report-pill {
@@ -957,6 +985,13 @@ textarea {
 /* Digital Signatures */
 .report-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 38px; }
 .signature-line-container { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.signature-line-container.signature-clickable { cursor: pointer; border-radius: 14px; outline: none; }
+.signature-line-container.signature-clickable:hover .signature-box,
+.signature-line-container.signature-clickable:focus-visible .signature-box {
+  border-color: #ffc928;
+  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);
+}
+.signature-line-container.signature-clickable:active { transform: scale(0.99); }
 .signature-box {
   width: 100%; height: 90px;
   background: #f8fafc;
