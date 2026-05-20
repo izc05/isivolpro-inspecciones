@@ -3470,7 +3470,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
           )}
           <div className="grid grid-cols-2 gap-2">
             {(checkMode === "tecnico" || hasDefect) && (
-              <FilePickerButton accept={IMAGE_ACCEPT} capture="environment" multiple onFiles={(files) => addPointPhotos(item, files)} className="text-xs py-2">
+              <FilePickerButton accept={IMAGE_ACCEPT} multiple onFiles={(files) => addPointPhotos(item, files)} className="text-xs py-2">
                 <Camera className="w-4 h-4" />Añadir foto{response.photos?.length ? ` (${response.photos.length})` : ""}
               </FilePickerButton>
             )}
@@ -4101,10 +4101,10 @@ function createEmptyBoard() {
   };
 }
 
-function createEmptyDifferential() {
+function createEmptyDifferential(label = "ID1") {
   return {
     id: makeLocalId("diff"),
-    label: "ID1",
+    label,
     InA: "40",
     sensitivitymA: "30",
     type: "AC",
@@ -4311,7 +4311,12 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
   const addDifferential = (boardId) => {
     const board = boards.find((item) => item.id === boardId);
     if (!board) return;
-    updateBoard(boardId, { differentials: [...(board.differentials || []), createEmptyDifferential()] });
+    const existingNumbers = (board.differentials || [])
+      .map((diff) => String(diff.label || "").match(/^ID\s*(\d+)$/i)?.[1])
+      .filter(Boolean)
+      .map((value) => Number(value));
+    const nextNumber = existingNumbers.length ? Math.max(...existingNumbers) + 1 : (board.differentials || []).length + 1;
+    updateBoard(boardId, { differentials: [...(board.differentials || []), createEmptyDifferential(`ID${nextNumber}`)] });
   };
   const updateDifferential = (boardId, diffId, patch) => {
     const board = boards.find((item) => item.id === boardId);
@@ -4359,7 +4364,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
         <textarea value={b.observations || ""} onChange={(event) => update({ observations: event.target.value })} placeholder="Observaciones generales del cuadro..." className="w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
         <PhotoThumbGrid photos={b.photo ? [b.photo] : []} onDelete={() => deleteBoardPhoto(b, isNew)} />
         <div className="grid grid-cols-2 gap-2">
-          <FilePickerButton accept={IMAGE_ACCEPT} capture="environment" onFiles={(files) => setBoardPhoto(b, files, isNew)} className="text-xs py-2">
+          <FilePickerButton accept={IMAGE_ACCEPT} onFiles={(files) => setBoardPhoto(b, files, isNew)} className="text-xs py-2">
             <Camera className="w-4 h-4" />{b.photo ? "Sustituir foto" : "Añadir foto"}
           </FilePickerButton>
           {!isNew && <Button variant="soft" onClick={() => {
@@ -5608,7 +5613,6 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         <div className="report-signatures">
           <SignatureLine label="Firma del inspector" signature={signatures?.inspector} onRequest={onSignatureRequest ? () => onSignatureRequest("inspector") : null} />
           <SignatureLine label="Firma del titular" signature={signatures?.client} onRequest={onSignatureRequest ? () => onSignatureRequest("client") : null} />
-          <SignatureLine label="Fecha de emisión" date={new Date().toLocaleDateString("es-ES")} />
         </div>
 
 
