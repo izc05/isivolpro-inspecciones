@@ -104,6 +104,16 @@ function getCompanySetting(settings, key) {
   return String(settings?.[key] || "").trim();
 }
 
+function formatCompanyAddress(settings) {
+  const merged = mergeCompanySettings(settings);
+  const locality = [getCompanySetting(merged, "postalCode"), getCompanySetting(merged, "city")].filter(Boolean).join(" ");
+  return [
+    getCompanySetting(merged, "address"),
+    locality,
+    getCompanySetting(merged, "province"),
+  ].filter(Boolean).join(", ");
+}
+
 function hasCompanyBranding(settings) {
   const merged = mergeCompanySettings(settings);
   return Boolean(
@@ -2361,6 +2371,16 @@ function SettingsScreen({
           onClose={() => setShowChecklistManager(false)}
         />
       )}
+      {showCompanySettings && (
+        <CompanySettingsModal
+          settings={companySettings}
+          onClose={() => setShowCompanySettings(false)}
+          onSave={(nextSettings) => {
+            setCompanySettings?.(nextSettings);
+            setShowCompanySettings(false);
+          }}
+        />
+      )}
       {legalDetail && (
         <LegalDetailModal
           content={LEGAL_CONTENT[legalDetail]}
@@ -2369,6 +2389,68 @@ function SettingsScreen({
           legalAccepted={legalAccepted}
         />
       )}
+    </div>
+  );
+}
+
+function CompanySettingsModal({ settings, onSave, onClose }) {
+  const [draft, setDraft] = useState(() => mergeCompanySettings(settings));
+
+  const update = (key, value) => setDraft((prev) => ({ ...prev, [key]: value }));
+
+  const save = () => {
+    onSave?.(mergeCompanySettings(draft));
+  };
+
+  return (
+    <div className="fixed inset-0 z-[90] bg-[#071E3D]/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 print:hidden">
+      <div className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-slate-50 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl border border-white/60">
+        <div className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur border-b border-slate-200 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black text-[#FFC928] uppercase tracking-widest">Plan Pro</p>
+            <h2 className="text-xl font-black text-[#071E3D]">Datos de empresa</h2>
+            <p className="text-xs font-bold text-slate-500 mt-1">
+              Estos datos sustituyen la marca IsiVolt Pro en el informe cuando estén completos.
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 rounded-2xl bg-slate-100 text-slate-500 active:scale-90 transition" aria-label="Cerrar">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          <Section title="Empresa" number="01">
+            <Field label="Nombre comercial" value={draft.name} onChange={(value) => update("name", value)} placeholder="Ej. Instalaciones López" />
+            <Field label="Razón social" value={draft.legalName} onChange={(value) => update("legalName", value)} placeholder="Ej. Instalaciones López S.L." />
+            <Field label="CIF/NIF" value={draft.cif} onChange={(value) => update("cif", value)} placeholder="Ej. B00000000" />
+            <Field label="Dirección" value={draft.address} onChange={(value) => update("address", value)} placeholder="Calle, número, local" />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Código postal" value={draft.postalCode} onChange={(value) => update("postalCode", value)} placeholder="28000" />
+              <Field label="Localidad" value={draft.city} onChange={(value) => update("city", value)} placeholder="Madrid" />
+            </div>
+            <Field label="Provincia" value={draft.province} onChange={(value) => update("province", value)} placeholder="Provincia" />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Teléfono" value={draft.phone} onChange={(value) => update("phone", value)} placeholder="600 000 000" />
+              <Field label="Email" value={draft.email} onChange={(value) => update("email", value)} placeholder="info@empresa.com" />
+            </div>
+            <Field label="Página web" value={draft.website} onChange={(value) => update("website", value)} placeholder="www.empresa.com" />
+          </Section>
+
+          <Section title="Técnico" number="02">
+            <Field label="Nombre del técnico" value={draft.technicianName} onChange={(value) => update("technicianName", value)} placeholder="Nombre y apellidos" />
+            <Field label="Identificación profesional" value={draft.technicianCredential} onChange={(value) => update("technicianCredential", value)} placeholder="Nº colegiado, carné o acreditación" />
+          </Section>
+
+          <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-xs font-bold text-slate-600">
+            Si el nombre comercial queda vacío, el informe seguirá usando la marca IsiVolt Pro. El logo de empresa se puede añadir más adelante sin tocar esta configuración.
+          </div>
+
+          <div className="sticky bottom-0 bg-slate-50 pt-2 pb-1 grid grid-cols-2 gap-3">
+            <Button variant="soft" onClick={onClose} className="py-3">Cancelar</Button>
+            <Button variant="gold" onClick={save} className="py-3"><Save className="w-4 h-4" />Guardar cambios</Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -4561,13 +4643,19 @@ function MeasurementsScreen({ measurements = {}, setMeasurements, setScreen, dat
   );
 }
 
-function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signatures, draft = false, variant = "tecnico" }) {
+function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signatures, draft = false, variant = "tecnico", plan = "demo", reportTitle = DEFAULT_REPORT_TITLE, companySettings = DEFAULT_COMPANY_SETTINGS }) {
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const page = { width: 210, height: 297, margin: 15 };
   const navy = [7, 30, 61];
   const gold = [255, 201, 40];
   const slate = [51, 65, 85];
+  const reportCompanySettings = mergeCompanySettings(companySettings);
+  const reportBrand = getReportBrand(plan, reportCompanySettings);
+  const footerItems = reportBrand.footer?.length ? reportBrand.footer : getReportBrand("demo", null).footer;
+  const technicianName = data?.technicianName || reportCompanySettings.technicianName || "Sin indicar";
+  const technicianCredential = data?.technicianCredential || reportCompanySettings.technicianCredential || "Sin indicar";
+  const companyAddress = formatCompanyAddress(reportCompanySettings) || "Sin indicar";
 
   const completion = getInspectionCompletion(selectedBlocks, responses);
   const verdict = calculateVerdict(responses, completion.isComplete);
@@ -4607,9 +4695,9 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...slate);
-    doc.text("www.isivoltpro.com", page.margin, 290);
-    doc.text("info@isivoltpro.com", 82, 290);
-    doc.text("600 123 456", 158, 290);
+    doc.text(fixText(footerItems[0] || ""), page.margin, 290);
+    doc.text(fixText(footerItems[1] || ""), page.width / 2, 290, { align: "center" });
+    doc.text(fixText(footerItems[2] || ""), page.width - page.margin, 290, { align: "right" });
   };
 
   const header = (title) => {
@@ -4620,7 +4708,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("ISIVOLTPRO", page.margin, 15);
+    doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 15);
     doc.setTextColor(...navy);
     doc.setFontSize(22);
     doc.text(title, page.margin, 42);
@@ -4647,14 +4735,19 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  doc.text("ISIVOLTPRO", page.margin, 26);
+  doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 26);
   doc.setFontSize(10);
   doc.setTextColor(...gold);
-  doc.text("INSPECCIONES", page.margin, 36);
+  doc.text(fixText(reportBrand.sub || "INSPECCIONES ELÉCTRICAS"), page.margin, 36);
   doc.setTextColor(...navy);
-  doc.setFontSize(34);
-  doc.text(draft ? "Borrador de" : "Informe de", page.margin, 82);
-  doc.text("Inspección Eléctrica", page.margin, 96);
+  doc.setFontSize(draft ? 26 : 30);
+  const fallbackTitleLines = doc.splitTextToSize(fixText(reportTitle || DEFAULT_REPORT_TITLE), 150);
+  if (draft) {
+    doc.text("Borrador de", page.margin, 82);
+    doc.text(fallbackTitleLines, page.margin, 96);
+  } else {
+    doc.text(fallbackTitleLines, page.margin, 86);
+  }
   doc.setTextColor(217, 154, 0);
   doc.setFontSize(22);
   doc.text("de Baja Tensión", page.margin, 109);
@@ -4749,8 +4842,17 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
       ["Fecha de inspección", String(reportDate || "Sin indicar")],
       ["última inspección", String(data?.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar")],
       ["Próximo vencimiento", String(data?.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar")],
-      ["Técnico inspector", String(data?.technicianName || "Sin indicar")],
-      ["Identificación profesional", String(data?.technicianCredential || "Sin indicar")],
+      ...(reportBrand.isCompany ? [
+        ["Empresa inspectora", String(reportBrand.main || "Sin indicar")],
+        ["Razón social", String(reportCompanySettings.legalName || "Sin indicar")],
+        ["CIF/NIF empresa", String(reportCompanySettings.cif || "Sin indicar")],
+        ["Dirección empresa", String(companyAddress)],
+        ["Teléfono empresa", String(reportCompanySettings.phone || "Sin indicar")],
+        ["Email empresa", String(reportCompanySettings.email || "Sin indicar")],
+        ["Web empresa", String(normalizeWebsite(reportCompanySettings.website) || "Sin indicar")],
+      ] : []),
+      ["Técnico inspector", String(technicianName)],
+      ["Identificación profesional", String(technicianCredential)],
       ["Esquema TT/TN/IT", String(data?.distributionSystem || "Sin indicar")],
       ["Uso pública concurrencia", String(data?.publicUse || "Sin indicar")],
       ["Aforo previsto", String(data?.occupancy || "Sin indicar")],
@@ -5099,7 +5201,7 @@ async function waitForImages(root) {
   }));
 }
 
-const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], calculations, signatures, reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE, onItcClick, onSignatureRequest, checklist = CHECKLIST }, ref) => {
+const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, measurements, fieldSheets = [], calculations, signatures, reportVariant, plan, reportTitle = DEFAULT_REPORT_TITLE, companySettings = DEFAULT_COMPANY_SETTINGS, onItcClick, onSignatureRequest, checklist = CHECKLIST }, ref) => {
 
   const completion = getInspectionCompletion(selectedBlocks, responses, checklist);
   const verdict = calculateVerdict(responses, completion.isComplete);
@@ -5126,6 +5228,11 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
   const hasDetailedPointTable = reportVariant === "tecnico";
   const inspectionType = data.inspectionType ? String(data.inspectionType).charAt(0).toUpperCase() + String(data.inspectionType).slice(1) : "Sin indicar";
   const installationType = Array.isArray(data.installationTypes) ? data.installationTypes.map((type) => String(type).replaceAll("_", " ")).join(", ") : "Sin indicar";
+  const reportCompanySettings = useMemo(() => mergeCompanySettings(companySettings), [companySettings]);
+  const reportBrand = useMemo(() => getReportBrand(plan, reportCompanySettings), [plan, reportCompanySettings]);
+  const companyAddress = formatCompanyAddress(reportCompanySettings) || "Sin indicar";
+  const technicianName = data.technicianName || reportCompanySettings.technicianName || "Sin indicar";
+  const technicianCredential = data.technicianCredential || reportCompanySettings.technicianCredential || "Sin indicar";
 
 
   // Función para dividir arrays en trozos (para multi-página)
@@ -5160,17 +5267,24 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
 
   return (
     <div ref={ref} className="report-document print-root">
-      <ReportPage cover>
+      <ReportPage cover brand={reportBrand}>
         <div className="report-brand">
           <div className="report-logo">
             <Zap className="w-10 h-10 fill-current" />
           </div>
           <div>
             <p className="report-brand-title">
-              <span className="text-white">IsiVolt</span>
-              <span className="text-[#FFC928]">Pro</span>
+              {reportBrand.isCompany ? (
+                <span className="text-white">{reportBrand.main}</span>
+              ) : (
+                <>
+                  <span className="text-white">IsiVolt</span>
+                  <span className="text-[#FFC928]">Pro</span>
+                </>
+              )}
             </p>
-            <p className="report-brand-sub">INSPECCIONES ELECTRICAS</p>
+            <p className="report-brand-sub">{reportBrand.sub}</p>
+            {reportBrand.poweredBy && <p className="report-brand-powered">{reportBrand.poweredBy}</p>}
           </div>
         </div>
         <div className="report-blueprint" />
@@ -5214,7 +5328,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         </div>
       </ReportPage>
 
-      <ReportPage title="Resumen ejecutivo" icon={ClipboardCheck}>
+      <ReportPage title="Resumen ejecutivo" icon={ClipboardCheck} brand={reportBrand}>
         <div className="flex gap-6 mb-6">
           <div className="report-summary-grid flex-1">
             <SummaryBox label="Instalación inspeccionada" value={data.name || "Sin indicar"} />
@@ -5249,7 +5363,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         </div>
       </ReportPage>
 
-      <ReportPage title="Datos generales" icon={FileText}>
+      <ReportPage title="Datos generales" icon={FileText} brand={reportBrand}>
         <ReportTable
           className="report-data-table-compact"
           rows={[
@@ -5273,8 +5387,17 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Fecha de inspección", reportDate],
             ["última inspección", data.previousInspectionDate ? new Date(data.previousInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
             ["Próximo vencimiento", data.nextInspectionDate ? new Date(data.nextInspectionDate).toLocaleDateString("es-ES") : "Sin indicar"],
-            ["Técnico inspector", data.technicianName || "Sin indicar"],
-            ["Identificación profesional", data.technicianCredential || "Sin indicar"],
+            ...(reportBrand.isCompany ? [
+              ["Empresa inspectora", reportBrand.main],
+              ["Razón social", reportCompanySettings.legalName || "Sin indicar"],
+              ["CIF/NIF empresa", reportCompanySettings.cif || "Sin indicar"],
+              ["Dirección empresa", companyAddress],
+              ["Teléfono empresa", reportCompanySettings.phone || "Sin indicar"],
+              ["Email empresa", reportCompanySettings.email || "Sin indicar"],
+              ["Web empresa", normalizeWebsite(reportCompanySettings.website) || "Sin indicar"],
+            ] : []),
+            ["Técnico inspector", technicianName],
+            ["Identificación profesional", technicianCredential],
             ["Esquema TT/TN/IT", data.distributionSystem],
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
@@ -5289,7 +5412,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         />
       </ReportPage>
 
-      <ReportPage title="Normativa e ITC aplicables" icon={BookOpen}>
+      <ReportPage title="Normativa e ITC aplicables" icon={BookOpen} brand={reportBrand}>
         <p className="report-subtitle">Resumen de instrucciones técnicas según el reglamento y los bloques seleccionados.</p>
         {itcReferences.length ? (
           <div className="report-itc-list">
@@ -5312,17 +5435,18 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
           key={`points-page-${idx}`}
           title={idx === 0 ? "Tabla resumen de puntos" : "Tabla de puntos (cont.)"}
           icon={ClipboardCheck}
+          brand={reportBrand}
         >
           <CompactPointsTable rows={chunk} />
         </ReportPage>
       ))}
 
-      <ReportPage title="Tabla de defectos" icon={AlertTriangle}>
+      <ReportPage title="Tabla de defectos" icon={AlertTriangle} brand={reportBrand}>
         {defects.length === 0 ? <EmptyReportText text="No hay defectos registrados." /> : <DefectSummaryTable defects={defects} />}
       </ReportPage>
 
       {reportVariant === "tecnico" && defects.map((r, index) => (
-        <DefectReportPage key={r?.defectEntryId || `${r?.item?.id || 'unknown'}-${index}`} r={r} index={index} />
+        <DefectReportPage key={r?.defectEntryId || `${r?.item?.id || 'unknown'}-${index}`} r={r} index={index} brand={reportBrand} />
       ))}
 
 
@@ -5331,6 +5455,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
           key={`photo-annex-page-${idx}`}
           title={idx === 0 ? "Anexo de Pruebas Gráficas" : "Anexo de Pruebas Gráficas (cont.)"}
           icon={ImageIcon}
+          brand={reportBrand}
         >
           <div className="photo-annex-grid-2x2">
             {chunk.map(({ r, photo, pIdx }) => (
@@ -5354,10 +5479,10 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         </ReportPage>
       ))}
 
-      <FieldSheetsReportPages fieldSheets={fieldSheets} />
+      <FieldSheetsReportPages fieldSheets={fieldSheets} brand={reportBrand} />
 
       {reportVariant === "campo" && (
-        <ReportPage title="Hoja de Campo para Inspección" icon={ClipboardList}>
+        <ReportPage title="Hoja de Campo para Inspección" icon={ClipboardList} brand={reportBrand}>
           <p className="report-subtitle mb-4">Plantilla para toma de datos manual en campo. Basado en estándares TUV SUD.</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 h-32 flex flex-col justify-end">
@@ -5378,7 +5503,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
         </ReportPage>
       )}
 
-      <ReportPage title="Medidas y Firmas" icon={Gauge}>
+      <ReportPage title="Medidas y Firmas" icon={Gauge} brand={reportBrand}>
 
         <MeasurementsReportTable measurements={measurements} />
         <div className="report-signatures">
@@ -5408,6 +5533,7 @@ function ReportScreen({
   reportGenerated = false,
   generatedReportsCount = 0,
   customReportTitle = DEFAULT_REPORT_TITLE,
+  companySettings = DEFAULT_COMPANY_SETTINGS,
   onReportGenerated,
   onDemoLimit,
   signatures: propsSignatures,
@@ -5520,7 +5646,10 @@ function ReportScreen({
           measurements,
           signatures,
           variant: reportVariant,
-          draft: reportMode === "draft"
+          draft: reportMode === "draft",
+          plan,
+          reportTitle: effectiveReportTitle,
+          companySettings,
         });
         onReportGenerated?.();
         setPrintMessage("Informe generado (modo alternativo).");
@@ -5637,6 +5766,7 @@ function ReportScreen({
           reportVariant={reportVariant}
           plan={plan}
           reportTitle={effectiveReportTitle}
+          companySettings={companySettings}
           onItcClick={() => setShowItcModal(true)}
           checklist={checklist}
         />
@@ -5658,6 +5788,7 @@ function ReportScreen({
             reportVariant={reportVariant}
             plan={plan}
             reportTitle={effectiveReportTitle}
+            companySettings={companySettings}
             onItcClick={() => setShowItcModal(true)}
             onSignatureRequest={setActiveSignature}
             checklist={checklist}
@@ -5716,6 +5847,7 @@ function ReportScreen({
           reportVariant={reportVariant}
           plan={plan}
           reportTitle={effectiveReportTitle}
+          companySettings={companySettings}
           onItcClick={() => setShowItcModal(true)}
           checklist={checklist}
         />
@@ -5786,7 +5918,8 @@ function ReportScreen({
   );
 }
 
-function ReportPage({ title, icon: Icon = FileText, children, cover = false }) {
+function ReportPage({ title, icon: Icon = FileText, children, cover = false, brand }) {
+  const reportBrand = brand || getReportBrand("demo", null);
   return (
     <section className={classNames("report-page", cover && "report-cover")}>
       {!cover && (
@@ -5796,23 +5929,34 @@ function ReportPage({ title, icon: Icon = FileText, children, cover = false }) {
             <h2>{fixText(title)}</h2>
           </div>
           <div className="report-mini-brand">
-            <span className="text-[#071E3D]">IsiVolt</span>
-            <span className="text-[#FFC928]">Pro</span>
+            {reportBrand.isCompany ? (
+              <>
+                <span className="text-[#071E3D]">{reportBrand.main}</span>
+                {reportBrand.poweredBy && <small>{reportBrand.poweredBy}</small>}
+              </>
+            ) : (
+              <>
+                <span className="text-[#071E3D]">IsiVolt</span>
+                <span className="text-[#FFC928]">Pro</span>
+              </>
+            )}
           </div>
         </div>
       )}
       <div className="report-page-content">{children}</div>
-      {!cover && <ReportFooter />}
+      {!cover && <ReportFooter brand={reportBrand} />}
     </section>
   );
 }
 
-function ReportFooter() {
+function ReportFooter({ brand }) {
+  const reportBrand = brand || getReportBrand("demo", null);
+  const footerItems = reportBrand.footer?.length ? reportBrand.footer : getReportBrand("demo", null).footer;
   return (
     <footer className="report-footer">
-      <span>www.isivoltpro.com</span>
-      <span>info@isivoltpro.com</span>
-      <span>600 123 456</span>
+      {footerItems.slice(0, 3).map((item, index) => (
+        <span key={`${item}-${index}`}>{item}</span>
+      ))}
     </footer>
   );
 }
@@ -6053,11 +6197,11 @@ function ReportPhotoGrid({ photos = [], emptyText = "No hay fotografías asociad
   );
 }
 
-function DefectReportPage({ r, index }) {
+function DefectReportPage({ r, index, brand }) {
   const photos = getReportPhotos(r);
   const location = getDefectLocation(r) || "Sin indicar";
   return (
-    <ReportPage title={`Defecto ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle}>
+    <ReportPage title={`Defecto ${String(index + 1).padStart(2, "0")}`} icon={AlertTriangle} brand={brand}>
       <div className="defect-report-card">
         <div className="defect-report-head">
           <span className={classNames("status-chip", String(r?.status || "").toLowerCase())}>{r?.status || "DG"} - {r?.status === "DL" ? "Defecto leve" : r?.status === "DG" ? "Defecto grave" : "Defecto muy grave"}</span>
@@ -6305,13 +6449,13 @@ function getMeasurementSummary(fieldSheets) {
   return { boards, totalDifferentials, totalInsulationCircuits, measurementDefects };
 }
 
-function FieldSheetsReportPages({ fieldSheets }) {
+function FieldSheetsReportPages({ fieldSheets, brand }) {
   const summary = getMeasurementSummary(fieldSheets);
   const { boards } = summary;
 
   return (
     <>
-      <ReportPage title="Hoja de campo / Mediciones" icon={Gauge}>
+      <ReportPage title="Hoja de campo / Mediciones" icon={Gauge} brand={brand}>
         <p className="report-subtitle">Mediciones realizadas por cuadro eléctrico revisado.</p>
         <div className="report-counter-grid field-summary-grid">
           <CounterCard label="Cuadros revisados" value={boards.length} />
@@ -6343,13 +6487,13 @@ function FieldSheetsReportPages({ fieldSheets }) {
       </ReportPage>
 
       {boards.map((board, index) => (
-        <FieldSheetBoardReportPage key={board.id || `${board.name}-${index}`} board={board} index={index} />
+        <FieldSheetBoardReportPage key={board.id || `${board.name}-${index}`} board={board} index={index} brand={brand} />
       ))}
     </>
   );
 }
 
-function FieldSheetBoardReportPage({ board, index }) {
+function FieldSheetBoardReportPage({ board, index, brand }) {
   const differentials = board.differentials || [];
   const circuits = board.insulationCircuits || [];
   const boardPhotoSrc = typeof board.photo === "string"
@@ -6370,7 +6514,7 @@ function FieldSheetBoardReportPage({ board, index }) {
 
   return (
     <>
-      <ReportPage title={`Cuadro ${String(index + 1).padStart(2, "0")}`} icon={Gauge}>
+      <ReportPage title={`Cuadro ${String(index + 1).padStart(2, "0")}`} icon={Gauge} brand={brand}>
         <div className="field-board-report-card">
           <div className="field-board-report-head">
             <div>
@@ -6403,7 +6547,7 @@ function FieldSheetBoardReportPage({ board, index }) {
         </div>
       </ReportPage>
       {continuationRows.map((chunk, chunkIndex) => (
-        <ReportPage key={`${board.id || board.name}-cont-${chunkIndex}`} title={`Cuadro ${String(index + 1).padStart(2, "0")} cont.`} icon={Gauge}>
+        <ReportPage key={`${board.id || board.name}-cont-${chunkIndex}`} title={`Cuadro ${String(index + 1).padStart(2, "0")} cont.`} icon={Gauge} brand={brand}>
           <h3 className="field-cont-title">{fieldValue(board.name)}</h3>
           {chunk.differentials.length > 0 && (
             <>
@@ -6885,6 +7029,7 @@ export default function IsiVoltProInspecciones() {
   const [theme, setTheme] = useState("system");
   const [customChecklistItems, setCustomChecklistItems] = useState([]);
   const [checklistOverrides, setChecklistOverrides] = useState({});
+  const [companySettings, setCompanySettingsState] = useState(DEFAULT_COMPANY_SETTINGS);
 
   // Estados de la inspección actual
   const [data, setData] = useState(INITIAL_INSPECTION);
@@ -6907,6 +7052,12 @@ export default function IsiVoltProInspecciones() {
 
   const setPlan = (value) => {
     setPlanState(normalizeSubscriptionPlan(value));
+  };
+
+  const setCompanySettings = (value) => {
+    const merged = mergeCompanySettings(value);
+    setCompanySettingsState(merged);
+    localStorage.setItem(COMPANY_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
   };
 
   // Cargar inspecciones al arrancar
@@ -6939,6 +7090,14 @@ export default function IsiVoltProInspecciones() {
     const savedReportCount = Number(localStorage.getItem(REPORT_COUNT_STORAGE_KEY) || 0);
     setGeneratedReportsCount(Number.isFinite(savedReportCount) ? savedReportCount : 0);
     setCustomReportTitle(localStorage.getItem(CUSTOM_REPORT_TITLE_STORAGE_KEY) || DEFAULT_REPORT_TITLE);
+    const savedCompanySettings = localStorage.getItem(COMPANY_SETTINGS_STORAGE_KEY);
+    if (savedCompanySettings) {
+      try {
+        setCompanySettingsState(mergeCompanySettings(JSON.parse(savedCompanySettings)));
+      } catch (e) {
+        console.warn("No se pudieron cargar los datos de empresa", e);
+      }
+    }
     setTheme(localStorage.getItem("theme") || "system");
     if (!accepted || acceptedVersion !== LEGAL_VERSION) {
       setShowLegalIntro(true);
@@ -7239,7 +7398,7 @@ export default function IsiVoltProInspecciones() {
         {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
         {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
-        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} theme={theme} setTheme={setTheme} checklistOverrides={checklistOverrides} setChecklistOverrides={setChecklistOverrides} customChecklistItems={customChecklistItems} />}
+        {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} companySettings={companySettings} setCompanySettings={setCompanySettings} theme={theme} setTheme={setTheme} checklistOverrides={checklistOverrides} setChecklistOverrides={setChecklistOverrides} customChecklistItems={customChecklistItems} />}
         {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} onReportClick={openReportReview} />}
         {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} onReportClick={openReportReview} />}
         {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} customItems={customChecklistItems} setCustomItems={setCustomChecklistItems} checklist={activeChecklistItems} />}
@@ -7263,6 +7422,7 @@ export default function IsiVoltProInspecciones() {
             reportGenerated={Boolean(currentInspection?.reportGenerated)}
             generatedReportsCount={generatedReportsCount}
             customReportTitle={customReportTitle}
+            companySettings={companySettings}
             onReportGenerated={markReportGenerated}
             onDemoLimit={() => setShowPlanLimit(true)}
             checklist={activeChecklistItems}

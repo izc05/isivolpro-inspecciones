@@ -147,11 +147,24 @@ textarea {
   position: relative;
   z-index: 3;
   flex: 0 0 120px;
+  max-width: 58mm;
   text-align: right;
   color: #fff;
   font-weight: 900;
   font-size: 14px;
+  line-height: 1;
   letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.report-mini-brand small {
+  display: block;
+  margin-top: 1mm;
+  color: rgba(7, 30, 61, 0.45);
+  font-size: 5.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .report-footer {
@@ -216,6 +229,7 @@ textarea {
   font-size: 30px;
   line-height: 1;
   font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .report-brand-sub {
@@ -223,6 +237,15 @@ textarea {
   color: #ffc928;
   font-weight: 800;
   letter-spacing: 0.26em;
+}
+
+.report-brand-powered {
+  margin: 2mm 0 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .report-blueprint {
