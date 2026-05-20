@@ -79,6 +79,8 @@ const DEFAULT_COMPANY_SETTINGS = {
   phone: "",
   email: "",
   website: "",
+  logoDataUrl: "",
+  logoFileName: "",
   technicianName: "",
   technicianCredential: "",
 };
@@ -117,6 +119,7 @@ function formatCompanyAddress(settings) {
 function hasCompanyBranding(settings) {
   const merged = mergeCompanySettings(settings);
   return Boolean(
+    getCompanySetting(merged, "logoDataUrl") ||
     getCompanySetting(merged, "name") ||
     getCompanySetting(merged, "legalName") ||
     getCompanySetting(merged, "cif") ||
@@ -133,20 +136,22 @@ function getReportBrand(plan, companySettings) {
   const isPro = plan === "pro";
   const commercialName = getCompanySetting(settings, "name");
   const legalName = getCompanySetting(settings, "legalName");
+  const logoDataUrl = getCompanySetting(settings, "logoDataUrl");
   const website = normalizeWebsite(settings.website);
   const email = getCompanySetting(settings, "email");
   const phone = getCompanySetting(settings, "phone");
 
-  if (isPro && (commercialName || legalName)) {
+  if (isPro) {
     return {
-      main: commercialName || legalName,
+      main: commercialName || legalName || "Empresa inspectora",
       sub: legalName && commercialName && legalName !== commercialName ? legalName : "Informe técnico eléctrico",
+      logoDataUrl,
       footer: [
         website || commercialName || "Empresa inspectora",
         email || "Email no indicado",
         phone || "Teléfono no indicado",
       ],
-      poweredBy: "Generado con IsiVolt Pro",
+      poweredBy: "",
       isCompany: true,
     };
   }
@@ -154,6 +159,7 @@ function getReportBrand(plan, companySettings) {
   return {
     main: "IsiVoltPro",
     sub: "INSPECCIONES ELÉCTRICAS",
+    logoDataUrl: "",
     footer: ["www.isivoltpro.com", "info@isivoltpro.com", "600 123 456"],
     poweredBy: "",
     isCompany: false,
@@ -2207,7 +2213,13 @@ function SettingsScreen({
             locked={!isPro}
             onClick={() => (isPro ? setShowCompanySettings(true) : setScreen("plan"))}
           />
-          <SettingsRow icon={ImageIcon} title="Logo en informe" text={isPro ? "Disponible para personalizar la marca." : "Disponible en el plan Pro."} locked={!isPro} />
+          <SettingsRow
+            icon={ImageIcon}
+            title="Logo en informe"
+            text={isPro ? "Disponible para personalizar la marca." : "Disponible en el plan Pro."}
+            locked={!isPro}
+            onClick={() => (isPro ? setShowCompanySettings(true) : setScreen("plan"))}
+          />
           <SettingsRow
             icon={Users}
             title="Datos del técnico"
@@ -2395,8 +2407,33 @@ function SettingsScreen({
 
 function CompanySettingsModal({ settings, onSave, onClose }) {
   const [draft, setDraft] = useState(() => mergeCompanySettings(settings));
+  const logoInputRef = React.useRef(null);
 
   const update = (key, value) => setDraft((prev) => ({ ...prev, [key]: value }));
+
+  async function handleLogoFile(file) {
+    if (!file) return;
+    if (!file.type?.startsWith("image/")) {
+      alert("Selecciona una imagen para el logo.");
+      return;
+    }
+
+    try {
+      const compressed = await compressImage(file, 900, 0.85);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setDraft((prev) => ({
+          ...prev,
+          logoDataUrl: String(reader.result || ""),
+          logoFileName: file.name || "logo-empresa",
+        }));
+      };
+      reader.readAsDataURL(compressed);
+    } catch (error) {
+      console.error(error);
+      alert("No se ha podido preparar el logo.");
+    }
+  }
 
   const save = () => {
     onSave?.(mergeCompanySettings(draft));
@@ -2420,6 +2457,45 @@ function CompanySettingsModal({ settings, onSave, onClose }) {
 
         <div className="p-5 space-y-5">
           <Section title="Empresa" number="01">
+            <div className="rounded-2xl bg-white border border-slate-200 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                  {draft.logoDataUrl ? (
+                    <img src={draft.logoDataUrl} alt="Logo de empresa" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <ImageIcon className="w-7 h-7 text-slate-400" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-black text-[#071E3D]">Logo de empresa</p>
+                  <p className="text-xs font-bold text-slate-500 mt-1">
+                    {draft.logoFileName || "PNG, JPG o WEBP. Se usara en el informe Pro."}
+                  </p>
+                </div>
+              </div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => {
+                  handleLogoFile(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="soft" onClick={() => logoInputRef.current?.click()} className="py-3">
+                  <Upload className="w-4 h-4" /> Subir logo
+                </Button>
+                <Button
+                  variant="soft"
+                  onClick={() => setDraft((prev) => ({ ...prev, logoDataUrl: "", logoFileName: "" }))}
+                  className="py-3"
+                >
+                  <Trash2 className="w-4 h-4" /> Quitar logo
+                </Button>
+              </div>
+            </div>
             <Field label="Nombre comercial" value={draft.name} onChange={(value) => update("name", value)} placeholder="Ej. Instalaciones López" />
             <Field label="Razón social" value={draft.legalName} onChange={(value) => update("legalName", value)} placeholder="Ej. Instalaciones López S.L." />
             <Field label="CIF/NIF" value={draft.cif} onChange={(value) => update("cif", value)} placeholder="Ej. B00000000" />
@@ -2442,7 +2518,7 @@ function CompanySettingsModal({ settings, onSave, onClose }) {
           </Section>
 
           <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-xs font-bold text-slate-600">
-            Si el nombre comercial queda vacío, el informe seguirá usando la marca IsiVolt Pro. El logo de empresa se puede añadir más adelante sin tocar esta configuración.
+            En plan Pro, cuando haya logo o nombre comercial, el informe usara solo la marca de tu empresa. Si no configuras marca propia, se mantendra la marca por defecto.
           </div>
 
           <div className="sticky bottom-0 bg-slate-50 pt-2 pb-1 grid grid-cols-2 gap-3">
@@ -4656,6 +4732,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
   const technicianName = data?.technicianName || reportCompanySettings.technicianName || "Sin indicar";
   const technicianCredential = data?.technicianCredential || reportCompanySettings.technicianCredential || "Sin indicar";
   const companyAddress = formatCompanyAddress(reportCompanySettings) || "Sin indicar";
+  const logoFormat = reportBrand.logoDataUrl?.startsWith("data:image/png") ? "PNG" : "JPEG";
 
   const completion = getInspectionCompletion(selectedBlocks, responses);
   const verdict = calculateVerdict(responses, completion.isComplete);
@@ -4708,7 +4785,16 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 15);
+    if (reportBrand.logoDataUrl) {
+      try {
+        doc.addImage(reportBrand.logoDataUrl, logoFormat, page.margin, 5, 14, 14);
+        doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin + 18, 15);
+      } catch {
+        doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin, 15);
+      }
+    } else {
+      doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 15);
+    }
     doc.setTextColor(...navy);
     doc.setFontSize(22);
     doc.text(title, page.margin, 42);
@@ -4735,7 +4821,16 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 26);
+  if (reportBrand.logoDataUrl) {
+    try {
+      doc.addImage(reportBrand.logoDataUrl, logoFormat, page.margin, 12, 26, 26);
+      doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin + 32, 26);
+    } catch {
+      doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin, 26);
+    }
+  } else {
+    doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 26);
+  }
   doc.setFontSize(10);
   doc.setTextColor(...gold);
   doc.text(fixText(reportBrand.sub || "INSPECCIONES ELÉCTRICAS"), page.margin, 36);
@@ -5269,8 +5364,12 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
     <div ref={ref} className="report-document print-root">
       <ReportPage cover brand={reportBrand}>
         <div className="report-brand">
-          <div className="report-logo">
-            <Zap className="w-10 h-10 fill-current" />
+          <div className={classNames("report-logo", reportBrand.logoDataUrl && "report-logo-image")}>
+            {reportBrand.logoDataUrl ? (
+              <img src={reportBrand.logoDataUrl} alt={`Logo ${reportBrand.main}`} />
+            ) : (
+              <Zap className="w-10 h-10 fill-current" />
+            )}
           </div>
           <div>
             <p className="report-brand-title">
@@ -5931,8 +6030,8 @@ function ReportPage({ title, icon: Icon = FileText, children, cover = false, bra
           <div className="report-mini-brand">
             {reportBrand.isCompany ? (
               <>
+                {reportBrand.logoDataUrl && <img src={reportBrand.logoDataUrl} alt="" />}
                 <span className="text-[#071E3D]">{reportBrand.main}</span>
-                {reportBrand.poweredBy && <small>{reportBrand.poweredBy}</small>}
               </>
             ) : (
               <>
