@@ -5846,7 +5846,7 @@ async function exportRenderedReportPdf({ fileName = "isivolt-informe.pdf" } = {}
     if (index > 0) pdf.addPage();
     pdf.addImage(image, "JPEG", 0, 0, 210, 297);
   }
-  pdf.save(fileName);
+  await saveOrSharePdf(pdf, fileName);
 }
 
 async function waitForImages(root) {
