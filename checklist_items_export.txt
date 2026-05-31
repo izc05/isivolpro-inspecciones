@@ -1,0 +1,283 @@
+03.01.01 | rebt2002_block_07 | Documentación, proyecto y clasificación | Documentación técnica de la instalación
+03.01.02 | rebt2002_block_07 | Documentación, proyecto y clasificación | Correspondencia con la instalación real
+03.01.03 | rebt2002_block_07 | Documentación, proyecto y clasificación | Clasificación como alumbrado exterior
+03.01.04 | rebt2002_block_07 | Cuadros de mando, protección y control | Ubicación y accesibilidad del cuadro
+03.01.05 | rebt2002_block_07 | Cuadros de mando, protección y control | Envolvente del cuadro
+03.01.06 | rebt2002_block_07 | Cuadros de mando, protección y control | Protecciones generales y por circuitos
+03.01.07 | rebt2002_block_07 | Cuadros de mando, protección y control | Control, maniobra y encendido
+03.01.08 | rebt2002_block_07 | Líneas y canalizaciones de alimentación | Canalizaciones subterráneas
+03.01.09 | rebt2002_block_07 | Líneas y canalizaciones de alimentación | Sección mínima de conductores
+03.01.10 | rebt2002_block_07 | Líneas y canalizaciones de alimentación | Canalizaciones aéreas o sobre fachada
+03.01.11 | rebt2002_block_07 | Líneas y canalizaciones de alimentación | Identificación de conductores
+03.01.12 | rebt2002_block_07 | Líneas y canalizaciones de alimentación | Estado general de líneas
+03.01.13 | rebt2002_block_07 | Soportes, columnas y baculos | Estado mecánico de soportes
+03.01.14 | rebt2002_block_07 | Soportes, columnas y baculos | Puerta de registro del soporte
+03.01.15 | rebt2002_block_07 | Soportes, columnas y baculos | Conexiones internas del soporte
+03.01.16 | rebt2002_block_07 | Soportes, columnas y baculos | Protección individual del punto de luz
+03.01.17 | rebt2002_block_07 | Soportes, columnas y baculos | Puesta a tierra de soportes metálicos
+03.01.18 | rebt2002_block_07 | Luminarias y proyectores | Estado de luminarias
+03.01.19 | rebt2002_block_07 | Luminarias y proyectores | Grado IP/IK de luminarias
+03.01.20 | rebt2002_block_07 | Luminarias y proyectores | Luminarias suspendidas
+03.01.21 | rebt2002_block_07 | Luminarias y proyectores | Proyectores exteriores
+03.01.22 | rebt2002_block_07 | Puesta a tierra y tensión de contacto | Red de tierra común
+03.01.23 | rebt2002_block_07 | Puesta a tierra y tensión de contacto | Electrodos de tierra
+03.01.24 | rebt2002_block_07 | Puesta a tierra y tensión de contacto | Continuidad de tierra
+03.01.25 | rebt2002_block_07 | Puesta a tierra y tensión de contacto | Tensión de contacto máxima
+03.01.26 | rebt2002_block_07 | Puesta a tierra y tensión de contacto | Cálculo RA x IDn
+05.01.01 | rebt2002_block_06 | 1. Documentación | Documento de clasificación de zonas
+05.01.02 | rebt2002_block_06 | 1. Documentación | Coherencia de la clasificación de zonas
+05.01.03 | rebt2002_block_06 | 2. Equipos y material ATEX | Categoría del material según zona
+05.01.04 | rebt2002_block_06 | 2. Equipos y material ATEX | Entradas de cables selladas
+05.01.05 | rebt2002_block_06 | 3. Canalizaciones, sellados y seguridad global | Sellado entre zonas distintas
+05.01.06 | rebt2002_block_06 | 3. Canalizaciones, sellados y seguridad global | Canalizaciones y cables adecuados
+05.01.07 | rebt2002_block_06 | 2. Equipos y material ATEX | Modo de protección y marcado reglamentario
+05.01.08 | rebt2002_block_06 | 3. Canalizaciones, sellados y seguridad global | Protección física de cables
+05.01.09 | rebt2002_block_06 | 3. Canalizaciones, sellados y seguridad global | Validación global del cumplimiento ATEX
+00.01.01 | rebt2002_block_00 | Documentación general | Proyecto técnico o memoria técnica
+00.01.02 | rebt2002_block_00 | Documentación general | Certificado de instalación eléctrica / boletín
+00.01.03 | rebt2002_block_00 | Documentación general | Esquema unifilar actualizado
+00.01.04 | rebt2002_block_00 | Documentación general | Notificación / registro administrativo
+00.01.05 | rebt2002_block_00 | Documentación general | Factura eléctrica / CUPS
+00.01.06 | rebt2002_block_00 | Documentación general | Contrato de mantenimiento
+00.01.07 | rebt2002_block_00 | Documentación general | Inspección OCA anterior
+00.01.08 | rebt2002_block_00 | Documentación general | Fecha de última inspección y vencimiento
+00.01.09 | rebt2002_block_00 | Documentación general | Manuales o fichas técnicas de equipos
+00.01.10 | rebt2002_block_00 | Documentación específica | Certificados de equipos especiales
+00.01.11 | rebt2002_block_00 | Documentación específica | Justificación de clasificación de zonas ATEX
+00.01.12 | rebt2002_block_00 | Documentación específica | Justificación de ventilación / desclasificación
+00.01.13 | rebt2002_block_00 | Documentación específica | Justificación de suministro complementario
+00.01.14 | rebt2002_block_00 | Documentación específica | Documentación de alumbrado de emergencia
+00.01.15 | rebt2002_block_00 | Documentación específica | Documentación fotovoltaica
+00.01.16 | rebt2002_block_00 | Documentación específica | Documentación IRVE
+00.01.17 | rebt2002_block_00 | Documentación general | Planos de planta / ubicación
+00.01.18 | rebt2002_block_00 | Validación documental | Correspondencia documentación-instalación real
+00.01.19 | rebt2002_block_00 | Validación documental | Fotografías o evidencias documentales
+00.01.20 | rebt2002_block_00 | Validación documental | Validación global documental
+01.01.01 | rebt2002_block_01 | Caja General de Protección | Estado exterior y acceso a la CGP / CGPM
+01.01.02 | rebt2002_block_01 | Caja General de Protección | Tapa, envolvente e interior de la CGP
+01.01.03 | rebt2002_block_01 | Caja General de Protección | Altura de instalación de la CGP / CGPM
+01.01.04 | rebt2002_block_01 | Caja General de Protección | Distancia a otras canalizaciones
+01.01.05 | rebt2002_block_01 | Caja General de Protección | Características de la CGP / CGPM
+01.01.06 | rebt2002_block_01 | Línea General de Alimentación | Tipo de canalización de la LGA
+01.01.07 | rebt2002_block_01 | Línea General de Alimentación | Trazado por zonas comunes y dimensiones
+01.01.08 | rebt2002_block_01 | Línea General de Alimentación | Conducto vertical resistente al fuego
+01.01.09 | rebt2002_block_01 | Línea General de Alimentación | Registros de la LGA
+01.01.10 | rebt2002_block_01 | Línea General de Alimentación | Sección mínima de conductores LGA
+01.01.11 | rebt2002_block_01 | Línea General de Alimentación | Cables de seguridad en LGA
+01.01.12 | rebt2002_block_01 | Línea General de Alimentación | Identificación de conductores
+01.01.13 | rebt2002_block_01 | Línea General de Alimentación | Caída de tensión de la LGA
+01.01.14 | rebt2002_block_01 | Línea General de Alimentación | Estado general de la LGA
+01.01.15 | rebt2002_block_01 | Derivación Individual | Independencia de la derivación individual
+01.01.16 | rebt2002_block_01 | Derivación Individual | Diámetro mínimo de tubo de DI
+01.01.17 | rebt2002_block_01 | Derivación Individual | Trazado de la DI
+01.01.18 | rebt2002_block_01 | Derivación Individual | Conductores de la DI
+01.01.19 | rebt2002_block_01 | Derivación Individual | Hilo de mando para cambio de tarifa
+01.01.20 | rebt2002_block_01 | Derivación Individual | Identificación de conductores de DI
+01.01.21 | rebt2002_block_01 | Derivación Individual | Sección mínima de la DI
+01.01.22 | rebt2002_block_01 | Derivación Individual | Conductor de protección en DI
+01.01.23 | rebt2002_block_01 | Derivación Individual | Caída de tensión máxima de DI
+01.01.24 | rebt2002_block_01 | Derivación Individual | Canalización de DI en vertical
+01.01.25 | rebt2002_block_01 | Derivación Individual | Estado general de DI
+01.01.26 | rebt2002_block_01 | Derivación Individual | Correspondencia DI-contador-usuario
+01.01.27 | rebt2002_block_01 | Centralización de contadores | Ubicación de la centralización
+01.01.28 | rebt2002_block_01 | Centralización de contadores | Uso exclusivo del local de contadores
+01.01.29 | rebt2002_block_01 | Centralización de contadores | Dimensiones del local de contadores
+01.01.30 | rebt2002_block_01 | Centralización de contadores | Puerta del local de contadores
+01.01.31 | rebt2002_block_01 | Centralización de contadores | Ventilación e iluminación de emergencia
+01.01.32 | rebt2002_block_01 | Centralización de contadores | Extintor próximo al local de contadores
+01.01.33 | rebt2002_block_01 | Centralización de contadores | Características constructivas del local
+01.01.34 | rebt2002_block_01 | Centralización de contadores | Armario de centralización
+01.01.35 | rebt2002_block_01 | Centralización de contadores | Módulos de contadores
+01.01.36 | rebt2002_block_01 | Centralización de contadores | Identificación de contadores y suministros
+01.01.37 | rebt2002_block_01 | Centralización de contadores | Fusibles de seguridad / protección de salidas
+01.01.38 | rebt2002_block_01 | Centralización de contadores | Cableado interior de centralización
+01.01.39 | rebt2002_block_01 | Centralización de contadores | Interruptor General de Maniobra / IGM
+01.01.40 | rebt2002_block_01 | Centralización de contadores | Estado general de la centralización
+08.01.01 | rebt2002_block_04 | A. Documentación y clasificación | Documentación técnica de la instalación FV
+08.01.02 | rebt2002_block_04 | A. Documentación y clasificación | Correspondencia entre documentación e instalación real
+08.01.03 | rebt2002_block_04 | A. Documentación y clasificación | Tipo de instalación generadora
+08.01.04 | rebt2002_block_04 | A. Documentación y clasificación | Potencia instalada y potencia de inversores
+08.01.05 | rebt2002_block_04 | A. Documentación y clasificación | Circuito dedicado e independiente del generador
+08.01.06 | rebt2002_block_04 | B. Seccionamiento y protecciones | Seccionamiento en corriente continua / strings
+08.01.07 | rebt2002_block_04 | B. Seccionamiento y protecciones | Seccionamiento en corriente alterna
+08.01.08 | rebt2002_block_04 | B. Seccionamiento y protecciones | Protección contra sobreintensidades en CC
+08.01.09 | rebt2002_block_04 | B. Seccionamiento y protecciones | Protección contra sobreintensidades en CA
+08.01.10 | rebt2002_block_04 | B. Seccionamiento y protecciones | Protección diferencial adecuada
+08.01.11 | rebt2002_block_04 | B. Seccionamiento y protecciones | Justificación de corriente residual continua 6 mA
+08.01.12 | rebt2002_block_04 | B. Seccionamiento y protecciones | Protección contra sobretensiones en CC
+08.01.13 | rebt2002_block_04 | B. Seccionamiento y protecciones | Protección contra sobretensiones en CA
+08.01.14 | rebt2002_block_04 | C. Puesta a tierra y seguridad | Puesta a tierra de estructuras y masas
+08.01.15 | rebt2002_block_04 | C. Puesta a tierra y seguridad | Continuidad del conductor de protección
+08.01.16 | rebt2002_block_04 | C. Puesta a tierra y seguridad | Tensión de contacto en exterior
+08.01.17 | rebt2002_block_04 | D. Cableado, canalizaciones y cajas | Canalizaciones exteriores adecuadas
+08.01.18 | rebt2002_block_04 | D. Cableado, canalizaciones y cajas | Cableado de corriente continua adecuado
+08.01.19 | rebt2002_block_04 | D. Cableado, canalizaciones y cajas | Conectores de CC compatibles y bien crimpados
+08.01.20 | rebt2002_block_04 | D. Cableado, canalizaciones y cajas | Cajas de string / cajas de conexión
+08.01.21 | rebt2002_block_04 | D. Cableado, canalizaciones y cajas | Identificación y señalización de circuitos FV
+08.01.22 | rebt2002_block_04 | E. Inversor, conexión a red y medida | Ubicación y protección del inversor
+08.01.23 | rebt2002_block_04 | E. Inversor, conexión a red y medida | Ventilación y disipacion térmica del inversor
+08.01.24 | rebt2002_block_04 | E. Inversor, conexión a red y medida | Anti-isla / desconexión automática
+08.01.25 | rebt2002_block_04 | E. Inversor, conexión a red y medida | Sistema antivertido, si aplica
+08.01.26 | rebt2002_block_04 | E. Inversor, conexión a red y medida | Equipo de medida / contador bidireccional, si aplica
+08.01.27 | rebt2002_block_04 | F. Mediciones | Ensayo de aislamiento en CC
+08.01.28 | rebt2002_block_04 | F. Mediciones | Polaridad de strings
+08.01.29 | rebt2002_block_04 | F. Mediciones | Tensión de circuito abierto / Voc
+08.01.30 | rebt2002_block_04 | F. Mediciones | Corriente de strings / Isc o corriente de operación
+08.01.31 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Estado visual de módulos FV
+08.01.32 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Fijación mecánica de módulos y estructura
+08.01.33 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Compatibilidad de estructura con cubierta o soporte
+08.01.34 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Pasos de cubierta y estanqueidad
+08.01.35 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Accesibilidad para mantenimiento
+08.01.36 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Riesgo de incendio por canalizaciones o conectores
+08.01.37 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Compatibilidad con otros bloques
+08.01.38 | rebt2002_block_04 | G. Módulos, estructura y cubierta | Validación global de la instalación FV
+02.01.01 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Identificación de cuadros y circuitos
+02.01.02 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Estado de la envolvente del cuadro
+02.01.03 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Accesibilidad del cuadro
+02.01.04 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Grado de protección del cuadro
+02.01.05 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Interruptor General Automático / IGA
+02.01.06 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Protección contra sobrecargas y cortocircuitos
+02.01.07 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Correspondencia entre sección y magnetotérmico
+02.01.08 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Corte omnipolar cuando proceda
+02.01.09 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Existencia de protección diferencial
+02.01.10 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Sensibilidad de diferenciales
+02.01.11 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Tipo de diferencial adecuado
+02.01.12 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Funcionamiento del botón de prueba del diferencial
+02.01.13 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Diferenciales no puenteados ni anulados
+02.01.14 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Protección contra contactos directos
+02.01.15 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Protección contra sobretensiones
+02.01.16 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Terminales y conexiones de conductores
+02.01.17 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Estado térmico de conexiones
+02.01.18 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Orden interno del cableado del cuadro
+02.01.19 | rebt2002_block_02 | Cuadros eléctricos y protecciones | Tapas, obturadores y módulos libres
+02.01.20 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Canalizaciones bajo tuberías con condensación
+02.01.21 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Separación con otras canalizaciones
+02.01.22 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Cajas de conexión con tapa
+02.01.23 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Estado de tubos, canales y bandejas
+02.01.24 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Ocupación de canalizaciones
+02.01.25 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Conductores adecuados al uso
+02.01.26 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Identificación de conductores
+02.01.27 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Empalmes y derivaciones
+02.01.28 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Mezcla de circuitos o tensiones
+02.01.29 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Protección mecánica de cables
+02.01.30 | rebt2002_block_02 | Canalizaciones, cajas y conductores | Tomas de corriente y mecanismos
+02.01.31 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Tensión de contacto
+02.01.32 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Resistencia de puesta a tierra
+02.01.33 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Continuidad del conductor de protección
+02.01.34 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Borne principal de tierra
+02.01.35 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Unión de masas al conductor de protección
+02.01.36 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Conductores de protección dimensionados
+02.01.37 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Equipotencialidad principal
+02.01.38 | rebt2002_block_02 | Puesta a tierra y contactos indirectos | Equipotencialidad suplementaria
+02.01.39 | rebt2002_block_02 | Mediciones eléctricas | Resistencia de aislamiento
+02.01.40 | rebt2002_block_02 | Mediciones eléctricas | Ensayo de diferenciales
+02.01.41 | rebt2002_block_02 | Mediciones eléctricas | Medición de tierra
+02.01.42 | rebt2002_block_02 | Mediciones eléctricas | Continuidad de protección
+02.01.43 | rebt2002_block_02 | Mediciones eléctricas | Polaridad y conexión de bases
+02.01.44 | rebt2002_block_02 | Mediciones eléctricas | Caída de tensión interior
+02B.01 | rebt2002_block_02b | Baños y duchas | Identificación de volúmenes en baños/duchas
+02B.02 | rebt2002_block_02b | Baños y duchas | Elementos eléctricos en volumen 0
+02B.03 | rebt2002_block_02b | Baños y duchas | Elementos eléctricos en volumen 1
+02B.04 | rebt2002_block_02b | Baños y duchas | Elementos eléctricos en volumen 2
+02B.05 | rebt2002_block_02b | Baños y duchas | Tomas de corriente en baños/duchas
+02B.06 | rebt2002_block_02b | Baños y duchas | Equipotencialidad suplementaria
+13.01.01 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Documentación técnica IRVE
+13.01.02 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Correspondencia documentación-instalación real
+13.01.03 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Tipo de esquema de instalación
+13.01.04 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Modo de carga
+13.01.05 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Potencia del punto de recarga
+13.01.06 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Circuito exclusivo de recarga
+13.01.07 | rebt2002_block_04 | A. Documentación, esquema y datos generales | Previsión de cargas / simultaneidad
+13.01.08 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | SAVE adecuado al emplazamiento
+13.01.09 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Estado físico del SAVE
+13.01.10 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Cierre o control de acceso
+13.01.11 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Grado de protección IP/IK
+13.01.12 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Señalización de prohibición de gases
+13.01.13 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Identificación del punto de recarga
+13.01.14 | rebt2002_block_04 | B. SAVE, envolvente, accesibilidad y señalización | Accesibilidad y maniobra
+13.01.15 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Canalización adecuada
+13.01.16 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Conductores adecuados
+13.01.17 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Protección mecánica de cables
+13.01.18 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Separación de otras instalaciones
+13.01.19 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Caída de tensión máxima
+13.01.20 | rebt2002_block_04 | C. Canalizaciones, cableado y caída de tensión | Identificación de conductores
+13.01.21 | rebt2002_block_04 | D. Protecciones eléctricas | Protección magnetotérmica
+13.01.22 | rebt2002_block_04 | D. Protecciones eléctricas | Curva del magnetotérmico
+13.01.23 | rebt2002_block_04 | D. Protecciones eléctricas | Corte omnipolar
+13.01.24 | rebt2002_block_04 | D. Protecciones eléctricas | Protección diferencial tipo A
+13.01.25 | rebt2002_block_04 | D. Protecciones eléctricas | Protección frente a corriente continua 6 mA
+13.01.26 | rebt2002_block_04 | D. Protecciones eléctricas | Sensibilidad diferencial
+13.01.27 | rebt2002_block_04 | D. Protecciones eléctricas | Funcionamiento diferencial / botón test
+13.01.28 | rebt2002_block_04 | D. Protecciones eléctricas | Protección contra sobretensiones
+13.01.29 | rebt2002_block_04 | D. Protecciones eléctricas | Sistema SPL / gestión de cargas
+13.01.30 | rebt2002_block_04 | D. Protecciones eléctricas | Selectividad y coordinación de protecciones
+13.01.31 | rebt2002_block_04 | E. Puesta a tierra y seguridad de contacto | Conexión al conductor de protección
+13.01.32 | rebt2002_block_04 | E. Puesta a tierra y seguridad de contacto | Continuidad de tierra
+13.01.33 | rebt2002_block_04 | E. Puesta a tierra y seguridad de contacto | Resistencia de tierra
+13.01.34 | rebt2002_block_04 | E. Puesta a tierra y seguridad de contacto | Tensión de contacto
+13.01.35 | rebt2002_block_04 | E. Puesta a tierra y seguridad de contacto | Equipotencialidad de masas metálicas próximas
+13.01.36 | rebt2002_block_04 | F. Iluminación, ubicación y condiciones del emplazamiento | Iluminación mínima en zona de recarga
+13.01.37 | rebt2002_block_04 | F. Iluminación, ubicación y condiciones del emplazamiento | Ubicación segura del punto de recarga
+13.01.38 | rebt2002_block_04 | F. Iluminación, ubicación y condiciones del emplazamiento | Protección contra impacto de vehículos
+13.01.39 | rebt2002_block_04 | F. Iluminación, ubicación y condiciones del emplazamiento | Instalación en exterior / intemperie
+13.01.40 | rebt2002_block_04 | F. Iluminación, ubicación y condiciones del emplazamiento | Instalación en garaje / ventilación / ATEX
+13.01.41 | rebt2002_block_04 | G. Mediciones y validación final | Ensayo de aislamiento
+13.01.42 | rebt2002_block_04 | G. Mediciones y validación final | Ensayo de diferencial
+13.01.43 | rebt2002_block_04 | G. Mediciones y validación final | Comprobación de polaridad / secuencia
+13.01.44 | rebt2002_block_04 | G. Mediciones y validación final | Prueba funcional del SAVE
+13.01.45 | rebt2002_block_04 | G. Mediciones y validación final | Comunicación / control / backend, si aplica
+13.01.46 | rebt2002_block_04 | G. Mediciones y validación final | Validación global IRVE
+06.01.01 | rebt2002_block_05 | A. Clasificación del local | Identificación del tipo de local especial
+06.01.02 | rebt2002_block_05 | B. Locales húmedos | Locales húmedos: protección del material eléctrico
+06.01.03 | rebt2002_block_05 | B. Locales húmedos | Locales húmedos: canalizaciones y cajas
+06.01.04 | rebt2002_block_05 | C. Locales mojados / exterior | Locales mojados: grado de protección IP adecuado
+06.01.05 | rebt2002_block_05 | C. Locales mojados / exterior | Locales mojados: canalizaciones estancas
+06.01.06 | rebt2002_block_05 | C. Locales mojados / exterior | Locales mojados: tensión de contacto máxima
+06.01.07 | rebt2002_block_05 | D. Locales con riesgo de corrosión | Locales con riesgo de corrosión
+06.01.08 | rebt2002_block_05 | D. Locales con riesgo de corrosión | Conductores y canalizaciones en ambiente corrosivo
+06.01.09 | rebt2002_block_05 | E. Locales polvorientos | Locales polvorientos sin riesgo de incendio/explosión
+06.01.10 | rebt2002_block_05 | E. Locales polvorientos | Acumulación de polvo sobre equipos eléctricos
+06.01.11 | rebt2002_block_05 | F. Locales con temperaturas extremas | Locales con temperatura elevada
+06.01.12 | rebt2002_block_05 | F. Locales con temperaturas extremas | Locales con muy baja temperatura
+06.01.13 | rebt2002_block_05 | G. Locales con baterías de acumuladores | Locales con baterías de acumuladores: ventilación
+06.01.14 | rebt2002_block_05 | G. Locales con baterías de acumuladores | Locales con baterías: protección contra corrosión y electrolito
+06.01.15 | rebt2002_block_05 | G. Locales con baterías de acumuladores | Locales con baterías: ausencia de fuentes de ignición
+06.01.16 | rebt2002_block_05 | H. Validación final | Mantenimiento y limpieza del local especial
+06.01.17 | rebt2002_block_05 | H. Validación final | Validación global del local especial
+04.01.01 | rebt2002_block_03 | A. Clasificación y documentación | Clasificación como local de pública concurrencia
+04.01.02 | rebt2002_block_03 | A. Clasificación y documentación | Aforo / ocupación prevista
+04.01.03 | rebt2002_block_03 | A. Clasificación y documentación | Proyecto técnico
+04.01.04 | rebt2002_block_03 | A. Clasificación y documentación | Esquema unifilar actualizado
+04.01.05 | rebt2002_block_03 | A. Clasificación y documentación | Documentación de alumbrado de emergencia
+04.01.06 | rebt2002_block_03 | B. Suministro complementario / seguridad | Necesidad de suministro complementario
+04.01.07 | rebt2002_block_03 | B. Suministro complementario / seguridad | Suministro de socorro
+04.01.08 | rebt2002_block_03 | B. Suministro complementario / seguridad | Suministro de reserva
+04.01.09 | rebt2002_block_03 | B. Suministro complementario / seguridad | Conmutación / entrada del suministro de seguridad
+04.01.10 | rebt2002_block_03 | B. Suministro complementario / seguridad | Servicios de seguridad alimentados
+04.01.11 | rebt2002_block_03 | C. Alumbrado de emergencia | Existencia de alumbrado de emergencia
+04.01.12 | rebt2002_block_03 | C. Alumbrado de emergencia | Funcionamiento de luminarias de emergencia
+04.01.13 | rebt2002_block_03 | C. Alumbrado de emergencia | Autonomía mínima
+04.01.14 | rebt2002_block_03 | C. Alumbrado de emergencia | Iluminancia en rutas de evacuación
+04.01.15 | rebt2002_block_03 | C. Alumbrado de emergencia | Iluminancia en cuadros y equipos contra incendios
+04.01.16 | rebt2002_block_03 | C. Alumbrado de emergencia | Alumbrado antipánico / ambiente
+04.01.17 | rebt2002_block_03 | C. Alumbrado de emergencia | Ubicación de emergencias en puntos críticos
+04.01.18 | rebt2002_block_03 | C. Alumbrado de emergencia | Emergencia junto a cuadros eléctricos
+04.01.19 | rebt2002_block_03 | C. Alumbrado de emergencia | Señalización de salidas
+04.01.20 | rebt2002_block_03 | C. Alumbrado de emergencia | Estado físico de luminarias
+04.01.21 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | Ubicación de cuadros fuera del acceso público
+04.01.22 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | Cuadros protegidos y cerrados
+04.01.23 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | Identificación de circuitos
+04.01.24 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | División del alumbrado por circuitos
+04.01.25 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | Protección diferencial y magnetotérmica
+04.01.26 | rebt2002_block_03 | D. Cuadros, circuitos y distribución | Selectividad / continuidad de servicios de seguridad
+04.01.27 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Cables tipo AS en pública concurrencia
+04.01.28 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Cables resistentes al fuego en servicios de seguridad
+04.01.29 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Canalizaciones adecuadas
+04.01.30 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Sin conductores expuestos al público
+04.01.31 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Cajas y empalmes cerrados
+04.01.32 | rebt2002_block_03 | E. Cables, canalizaciones y reacción al fuego | Separación respecto a otras instalaciones
+04.01.33 | rebt2002_block_03 | F. Balizamiento y zonas especiales | Balizamiento en escaleras
+04.01.34 | rebt2002_block_03 | F. Balizamiento y zonas especiales | Balizamiento en rampas
+04.01.35 | rebt2002_block_03 | F. Balizamiento y zonas especiales | Zonas de alto riesgo
+04.01.36 | rebt2002_block_03 | F. Balizamiento y zonas especiales | Locales sanitarios o asistenciales
+04.01.37 | rebt2002_block_03 | F. Balizamiento y zonas especiales | Compatibilidad con otros bloques

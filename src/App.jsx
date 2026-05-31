@@ -2,6 +2,9 @@ import React, { useMemo, useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
+import { Capacitor } from "@capacitor/core";
+import { Directory, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import {
   Zap,
   Home,
@@ -45,6 +48,7 @@ import {
   User,
   MessageCircle,
   Star,
+  Search,
 } from "lucide-react";
 
 
@@ -55,8 +59,10 @@ import {
   deleteFilesByInspection,
   getFile,
   getFileDataUrl,
+  listFilesByInspection,
   saveFile,
 } from "./utils/fileStorage";
+import { useAuth } from "./context/AuthContext";
 import { CHECKLIST } from "./data/checklistRebt2002";
 
 const DEFAULT_REPORT_TITLE = "Informe de inspección eléctrica";
@@ -172,7 +178,7 @@ const BLOCKS = [
   { id: "rebt2002_block_02", code: "02", title: "Instalaciones interiores", regulation: "REBT 2002", order: 2, icon: ShieldCheck },
   { id: "rebt2002_block_03", code: "03", title: "Locales de pública concurrencia", regulation: "REBT 2002", order: 3, icon: Users },
   { id: "rebt2002_block_04", code: "04", title: "Generación y recarga (FV/IRVE)", regulation: "REBT 2002", order: 4, icon: Zap },
-  { id: "rebt2002_block_05", code: "05", title: "Condiciones especiales (Baños/Humedad)", regulation: "REBT 2002", order: 5, icon: AlertTriangle },
+  { id: "rebt2002_block_05", code: "05", title: "Condiciones especiales (Baños/Humedad/Polvo)", regulation: "REBT 2002", order: 5, icon: AlertTriangle },
   { id: "rebt2002_block_06", code: "06", title: "Locales con riesgo ATEX", regulation: "REBT 2002", order: 6, icon: Flame },
   { id: "rebt2002_block_07", code: "07", title: "Alumbrado exterior", regulation: "REBT 2002", order: 7, icon: Sun },
   { id: "custom_block_24_visual", code: "24", title: "Inspección visual general", regulation: "IsiVolt", order: 24, icon: Camera },
@@ -586,6 +592,7 @@ function createAttachmentMeta(record, thumbnailUrl = "") {
   return {
     fileId: record.id,
     fileName: record.fileName,
+    displayName: record.displayName || "",
     mimeType: record.mimeType,
     size: record.size,
     createdAt: record.createdAt,
@@ -684,6 +691,11 @@ async function hydrateFieldSheetsWithFiles(fieldSheets) {
   })));
 }
 
+async function hydrateInspectionDataWithFiles(data) {
+  const attachments = await Promise.all((data?.attachments || []).map(hydrateAttachment));
+  return { ...data, attachments };
+}
+
 function FilePickerButton({ accept, capture, multiple = false, onFiles, children, className = "", variant = "soft" }) {
   const inputRef = React.useRef(null);
   return (
@@ -706,7 +718,7 @@ function FilePickerButton({ accept, capture, multiple = false, onFiles, children
   );
 }
 
-function PhotoThumbGrid({ photos = [], onDelete }) {
+function PhotoThumbGrid({ photos = [], onDelete, onRename }) {
   if (!photos.length) return null;
   return (
     <div className="attachment-grid">
@@ -716,7 +728,17 @@ function PhotoThumbGrid({ photos = [], onDelete }) {
             <img src={photo.thumbnailUrl || photo.dataUrl} alt={photo.fileName || "Foto adjunta"} />
           </button>
           <div className="attachment-card-actions">
-            <span>{photo.fileName || "Foto"}</span>
+            {onRename ? (
+              <input
+                className="attachment-photo-name-input"
+                value={getAttachmentDisplayName(photo, "")}
+                onChange={(event) => onRename(photo, event.target.value)}
+                placeholder="Nombre / ubicación de la foto"
+                aria-label="Nombre de la foto"
+              />
+            ) : (
+              <span>{getAttachmentDisplayName(photo)}</span>
+            )}
             {onDelete && (
               <button type="button" onClick={() => onDelete(photo)} aria-label="Eliminar foto">
                 <Trash2 className="w-4 h-4" />
@@ -745,6 +767,198 @@ function DocumentList({ documents = [], onDelete }) {
           {onDelete && <button type="button" onClick={() => onDelete(doc)} aria-label="Eliminar archivo"><Trash2 className="w-4 h-4" /></button>}
         </div>
       ))}
+    </div>
+  );
+}
+
+function InstallationDocumentsScreen({ data, setData, currentId, setScreen, responses = {}, fieldSheets = [], onReportClick }) {
+  const [allFiles, setAllFiles] = useState([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const folderDocs = data.attachments || [];
+  const folderDocIds = new Set(folderDocs.map((doc) => doc.fileId));
+
+  const reloadFiles = async () => {
+    if (!currentId) {
+      setAllFiles([]);
+      return;
+    }
+    setLoadingFiles(true);
+    try {
+      const files = await listFilesByInspection(currentId);
+      setAllFiles(files.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || ""))));
+    } catch (error) {
+      console.warn("No se pudo listar el expediente local", error);
+      setAllFiles([]);
+    } finally {
+      setLoadingFiles(false);
+    }
+  };
+
+  useEffect(() => {
+    reloadFiles();
+  }, [currentId, folderDocs.length, responses, fieldSheets]);
+
+  const updateFolderDocs = (updater) => {
+    setData((prev) => ({ ...prev, attachments: updater(prev.attachments || []) }));
+  };
+
+  const addFolderDocuments = async (files) => {
+    if (!currentId) {
+      alert("Crea o carga una inspección antes de adjuntar documentación.");
+      return;
+    }
+    try {
+      const savedDocs = [];
+      for (const file of files) {
+        const isImage = file.type.startsWith("image/");
+        const meta = await buildStoredAttachment(file, {
+          currentId,
+          linkedType: "installationFolder",
+          linkedId: "expediente",
+          fileType: isImage ? "image" : "document",
+          compress: isImage,
+        });
+        if (meta) {
+          savedDocs.push({
+            ...meta,
+            displayName: file.name || meta.fileName || "Documento",
+            category: isImage ? "foto" : "cliente",
+            notes: "",
+          });
+        }
+      }
+      if (!savedDocs.length) return;
+      updateFolderDocs((docs) => [...savedDocs, ...docs]);
+      await reloadFiles();
+    } catch (error) {
+      console.error(error);
+      alert("No se ha podido guardar la documentación del expediente.");
+    }
+  };
+
+  const updateFolderDocument = (fileId, patch) => {
+    updateFolderDocs((docs) => docs.map((doc) => doc.fileId === fileId ? { ...doc, ...patch } : doc));
+  };
+
+  const deleteFolderDocument = async (doc) => {
+    if (!window.confirm("¿Eliminar este archivo del expediente?")) return;
+    updateFolderDocs((docs) => docs.filter((entry) => entry.fileId !== doc.fileId));
+    try {
+      await deleteFile(doc.fileId);
+      await reloadFiles();
+    } catch (error) {
+      console.warn("No se pudo borrar el archivo del expediente", error);
+    }
+  };
+
+  const linkedFiles = allFiles.filter((file) => !folderDocIds.has(file.id));
+
+  return (
+    <div className="pb-32">
+      <Header title="Expediente de instalación" subtitle={data.name || "Documentación asociada"} onBack={() => setScreen("inspections")} right={<FileText className="w-6 h-6 text-yellow-300" />} />
+      <StageFlow current="documents" setScreen={setScreen} onReportClick={onReportClick} />
+      <div className="p-5 space-y-5">
+        {!currentId && (
+          <div className="bg-yellow-50 border border-yellow-100 rounded-[1.5rem] p-4 text-sm text-yellow-900 font-bold">
+            Crea o carga una inspección para guardar una carpeta documental.
+          </div>
+        )}
+
+        <section className="bg-[#071E3D] text-white rounded-[1.75rem] p-5 shadow-lg">
+          <p className="text-yellow-300 text-xs font-black uppercase tracking-wider">Carpeta local</p>
+          <h2 className="text-xl font-black mt-1">{data.name || "Instalación sin nombre"}</h2>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div><b className="text-2xl">{folderDocs.length}</b><p className="text-[10px] text-white/60 font-bold">Docs cliente</p></div>
+            <div><b className="text-2xl">{allFiles.length}</b><p className="text-[10px] text-white/60 font-bold">Archivos</p></div>
+            <div><b className="text-2xl">{linkedFiles.length}</b><p className="text-[10px] text-white/60 font-bold">Evidencias</p></div>
+          </div>
+        </section>
+
+        <Section title="Documentación del cliente" number="DOC">
+          <FilePickerButton accept={DOCUMENT_ACCEPT} multiple onFiles={addFolderDocuments} className="w-full py-3" variant="gold">
+            <Upload className="w-5 h-5" /> Añadir documentos o fotos
+          </FilePickerButton>
+
+          {!folderDocs.length ? (
+            <EmptyState title="Sin documentos en el expediente" text="Añade proyecto, esquema unifilar, boletín, actas anteriores, contratos o fotos generales de la instalación." />
+          ) : (
+            <div className="space-y-3">
+              {folderDocs.map((doc) => (
+                <div key={doc.fileId} className="bg-white border border-slate-100 rounded-[1.25rem] p-3 shadow-sm space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                      {String(doc.mimeType || "").startsWith("image/") && (doc.thumbnailUrl || doc.dataUrl) ? (
+                        <img src={doc.thumbnailUrl || doc.dataUrl} alt={getAttachmentDisplayName(doc, "Documento")} className="w-full h-full object-cover" />
+                      ) : (
+                        <FileText className="w-6 h-6 text-[#071E3D]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <input
+                        value={getAttachmentDisplayName(doc, "")}
+                        onChange={(event) => updateFolderDocument(doc.fileId, { displayName: event.target.value })}
+                        placeholder="Nombre visible en el informe"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-[#FFC928]"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          value={doc.category || "cliente"}
+                          onChange={(event) => updateFolderDocument(doc.fileId, { category: event.target.value })}
+                          className="w-full bg-white border border-slate-200 rounded-2xl px-3 py-2 text-xs font-bold text-slate-700 outline-none"
+                        >
+                          {INSTALLATION_DOCUMENT_CATEGORIES.map((category) => (
+                            <option key={category.value} value={category.value}>{category.label}</option>
+                          ))}
+                        </select>
+                        <span className="bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2 text-xs font-black text-slate-500">
+                          {getAttachmentTypeLabel(doc)} · {formatFileSize(doc.size)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <textarea
+                    value={doc.notes || ""}
+                    onChange={(event) => updateFolderDocument(doc.fileId, { notes: event.target.value })}
+                    placeholder="Notas: quién lo entrega, zona, fecha, observación..."
+                    className="w-full min-h-16 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]"
+                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="soft" onClick={() => openStoredAttachment(doc)} className="text-xs py-2"><Eye className="w-4 h-4" />Ver</Button>
+                    <Button variant="soft" onClick={() => downloadStoredAttachment(doc)} className="text-xs py-2"><Download className="w-4 h-4" />Descargar</Button>
+                    <Button variant="soft" onClick={() => deleteFolderDocument(doc)} className="text-xs py-2 text-red-600"><Trash2 className="w-4 h-4" />Borrar</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+
+        <Section title="Archivo local asociado" number="ALL">
+          {loadingFiles ? (
+            <p className="text-sm font-bold text-slate-500">Cargando archivos asociados...</p>
+          ) : linkedFiles.length ? (
+            <div className="space-y-2">
+              {linkedFiles.map((file) => (
+                <div key={file.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-slate-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-slate-800 truncate">{file.fileName || "Archivo"}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase truncate">{file.linkedType || "archivo"} · {file.linkedPointCode || file.linkedId || "sin punto"} · {formatFileSize(file.size)}</p>
+                  </div>
+                  <button type="button" onClick={() => openStoredAttachment({ ...file, fileId: file.id })} className="p-2 rounded-xl bg-white text-slate-600 border border-slate-200" aria-label="Ver archivo asociado">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button type="button" onClick={() => downloadStoredAttachment({ ...file, fileId: file.id })} className="p-2 rounded-xl bg-white text-slate-600 border border-slate-200" aria-label="Descargar archivo asociado">
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="Sin evidencias extra" text="Cuando añadas fotos del checklist, documentos por punto o fotos de cuadros aparecerán también aquí." />
+          )}
+        </Section>
+      </div>
     </div>
   );
 }
@@ -1210,7 +1424,6 @@ function getRecommendedBlockIds(data) {
 
   const isPublicConcurrencyTrigger =
     types.includes("publica_concurrencia") ||
-    (data.hasExternalPublic && Boolean(publicUse)) ||
     [
       "bar",
       "restaurante",
@@ -1349,6 +1562,115 @@ function getEvidenceSummary(entry) {
   if (documents) parts.push(`${documents} documento${documents === 1 ? "" : "s"}`);
   if (required) parts.push(`Requerido: ${required}`);
   return parts.join(" · ") || "Sin evidencia adjunta";
+}
+
+function getAttachmentImageSrc(attachment) {
+  if (typeof attachment === "string") return attachment;
+  return attachment?.dataUrl || attachment?.thumbnailUrl || "";
+}
+
+function getAttachmentDisplayName(attachment, fallback = "Foto") {
+  return String(attachment?.displayName || attachment?.label || attachment?.title || attachment?.fileName || fallback).trim() || fallback;
+}
+
+const INSTALLATION_DOCUMENT_CATEGORIES = [
+  { value: "cliente", label: "Documentación cliente" },
+  { value: "proyecto", label: "Proyecto / memoria" },
+  { value: "esquema", label: "Esquema unifilar" },
+  { value: "boletin", label: "CIE / boletín" },
+  { value: "acta", label: "Acta anterior" },
+  { value: "contrato", label: "Contrato / suministro" },
+  { value: "foto", label: "Fotos generales" },
+  { value: "otros", label: "Otros" },
+];
+
+function getInstallationDocumentCategoryLabel(value) {
+  return INSTALLATION_DOCUMENT_CATEGORIES.find((item) => item.value === value)?.label || "Documentación cliente";
+}
+
+function getAttachmentTypeLabel(attachment) {
+  if (attachment?.fileType === "image" || String(attachment?.mimeType || "").startsWith("image/")) return "Imagen";
+  return "Documento";
+}
+
+function getPdfImageFormat(src) {
+  const value = String(src || "").toLowerCase();
+  if (value.startsWith("data:image/png")) return "PNG";
+  if (value.startsWith("data:image/webp")) return "WEBP";
+  return "JPEG";
+}
+
+function drawPdfImageContain(doc, src, x, y, width, height, options = {}) {
+  if (!src) return false;
+  const { border = true, placeholder = "" } = options;
+  try {
+    if (border) {
+      doc.setDrawColor(159, 176, 195);
+      doc.roundedRect(x, y, width, height, 2, 2);
+    }
+    const props = doc.getImageProperties(src);
+    const imageWidth = Number(props?.width) || width;
+    const imageHeight = Number(props?.height) || height;
+    const scale = Math.min(width / imageWidth, height / imageHeight);
+    const drawWidth = imageWidth * scale;
+    const drawHeight = imageHeight * scale;
+    const drawX = x + (width - drawWidth) / 2;
+    const drawY = y + (height - drawHeight) / 2;
+    doc.addImage(src, getPdfImageFormat(src), drawX, drawY, drawWidth, drawHeight);
+    return true;
+  } catch (error) {
+    console.warn("No se pudo añadir imagen al PDF directo:", error);
+    if (border) {
+      doc.setDrawColor(159, 176, 195);
+      doc.roundedRect(x, y, width, height, 2, 2);
+    }
+    if (placeholder) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text(fixText(placeholder), x + 4, y + height / 2);
+    }
+    return false;
+  }
+}
+
+function addPdfPhotoCaption(doc, photo, fallback, x, y, maxWidth, slate) {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...slate);
+  doc.text(fixText(getAttachmentDisplayName(photo, fallback)), x, y, { maxWidth });
+}
+
+function getPdfBase64(doc) {
+  const dataUri = doc.output("datauristring");
+  return String(dataUri || "").split(",")[1] || "";
+}
+
+async function saveOrSharePdf(doc, fileName) {
+  if (!Capacitor.isNativePlatform()) {
+    doc.save(fileName);
+    return { mode: "download" };
+  }
+
+  const data = getPdfBase64(doc);
+  if (!data) throw new Error("No se pudo preparar el archivo PDF.");
+
+  const path = `isivolt/${fileName}`;
+  const result = await Filesystem.writeFile({
+    path,
+    data,
+    directory: Directory.Cache,
+    recursive: true,
+  });
+
+  await Share.share({
+    title: fileName,
+    text: "Informe IsiVoltPro generado.",
+    url: result.uri,
+    dialogTitle: "Guardar o compartir informe PDF",
+  });
+
+  return { mode: "share", uri: result.uri };
 }
 
 function getResponseDefectEntries(response) {
@@ -1651,7 +1973,7 @@ function BrandedLogo({ light = false, className = "" }) {
           <span className="text-xl font-black tracking-tight text-[#FFC928]">Pro</span>
         </div>
         <span className={classNames("text-[7px] font-bold tracking-[0.2em] uppercase mt-0.5", light ? "text-[#FFC928]" : "text-[#071E3D]")}>
-          Inspecciónes eléctricas
+          Inspecciones eléctricas
         </span>
       </div>
     </div>
@@ -1758,10 +2080,11 @@ function Section({ title, number, children }) {
 function StageFlow({ current, setScreen, onReportClick }) {
   const stages = [
     ["data", "1", "Datos"],
-    ["blocks", "2", "Bloques"],
-    ["checklist", "3", "Inspección"],
-    ["fieldSheet", "4", "Medidas"],
-    ["report", "5", "Informe"],
+    ["documents", "2", "Expediente"],
+    ["blocks", "3", "Bloques"],
+    ["checklist", "4", "Inspección"],
+    ["fieldSheet", "5", "Medidas"],
+    ["report", "6", "Informe"],
   ];
   return (
     <div className="px-5 pt-4 pb-2 print:hidden sticky top-0 z-30 bg-slate-100/95 backdrop-blur">
@@ -1881,16 +2204,6 @@ function HomeScreen({ setScreen, plan, inspections, onContinue, onEdit, generate
           </section>
         )}
 
-        <button type="button" onClick={() => setScreen("plan")} className="w-full bg-white border border-yellow-100 rounded-[1.5rem] p-4 text-left shadow-sm flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-yellow-50 text-[#071E3D] flex items-center justify-center">
-            <Crown className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="font-black text-slate-900">IsiVoltPro</h2>
-            <p className="text-sm text-slate-500">Demo limitada y Pro completo preparados para Play Store.</p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-slate-400" />
-        </button>
       </div>
     </div>
   );
@@ -1911,7 +2224,7 @@ function PlanBadge({ plan, generatedReportsCount = 0 }) {
   );
 }
 
-function InspectionCard({ inspection, onContinue, onEdit, onReport, onDelete }) {
+function InspectionCard({ inspection, onContinue, onEdit, onReport, onDocuments, onDelete }) {
   const dateStr = inspection.updatedAt ? new Date(inspection.updatedAt).toLocaleDateString() : "Sin fecha";
   const types = (inspection.data?.installationTypes || []).map((t) => t.replace("_", " ")).join(", ") || "Tipo no definido";
   const statusText = String(inspection.status || "").toLowerCase();
@@ -1957,9 +2270,12 @@ function InspectionCard({ inspection, onContinue, onEdit, onReport, onDelete }) 
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-2">
+      <div className="mt-4 grid grid-cols-5 gap-2">
         <button type="button" onClick={() => onDelete(inspection.id)} className="bg-red-50 text-red-600 rounded-2xl py-2.5 text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition">
           <Trash2 className="w-4 h-4" />
+        </button>
+        <button type="button" onClick={() => onDocuments(inspection.id)} className="bg-blue-50 text-[#0B4EA2] rounded-2xl py-2.5 text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition">
+          <FileText className="w-4 h-4" />
         </button>
         <button type="button" onClick={() => onEdit(inspection.id)} className="bg-slate-100 text-slate-700 rounded-2xl py-2.5 text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition">
           <Edit3 className="w-4 h-4" /> Editar
@@ -1991,18 +2307,51 @@ function TemplateButton({ icon: Icon, title, text, onClick }) {
   );
 }
 
-function InspectionsScreen({ inspections, setScreen, onContinue, onEdit, onReport, onDelete }) {
+function InspectionsScreen({ inspections, setScreen, onContinue, onEdit, onReport, onDocuments, onDelete }) {
   const [filter, setFilter] = useState("Todas");
+  const [search, setSearch] = useState("");
 
   const filtered = inspections.filter((ins) => {
-    if (filter === "Todas") return true;
-    return String(ins.status || "").toLowerCase() === filter.toLowerCase();
+    const matchesFilter = filter === "Todas" || String(ins.status || "").toLowerCase() === filter.toLowerCase();
+    const term = search.trim().toLowerCase();
+    if (!matchesFilter) return false;
+    if (!term) return true;
+    const data = ins.data || {};
+    return [
+      data.name,
+      data.address,
+      data.city,
+      data.province,
+      data.ownerName,
+      data.holderNif,
+      data.cups,
+      data.orderNumber,
+      data.supplyCompany,
+      ins.status,
+    ]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(term));
   });
 
   return (
     <div className="pb-28">
       <Header title="Mis inspecciones" subtitle={`${inspections.length} guardadas localmente`} onBack={() => setScreen("home")} right={<ClipboardCheck className="w-6 h-6 text-yellow-300" />} />
       <div className="p-5 space-y-5">
+        <div className="bg-white border border-slate-100 rounded-[1.5rem] p-3 shadow-sm flex items-center gap-2">
+          <Search className="w-5 h-5 text-slate-400 shrink-0" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por nombre, dirección, titular, CUPS..."
+            className="flex-1 min-w-0 bg-transparent text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400"
+          />
+          {search && (
+            <button type="button" onClick={() => setSearch("")} className="p-2 rounded-xl bg-slate-50 text-slate-400" aria-label="Limpiar búsqueda">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           {["Todas", "Borrador", "Favorable", "Condicionada", "Negativa"].map((f) => (
             <button key={f} type="button" onClick={() => setFilter(f)} className={classNames("border rounded-2xl py-2 px-4 text-[10px] font-black transition whitespace-nowrap", filter === f ? "bg-[#071E3D] text-white border-[#071E3D]" : "bg-white text-slate-600 border-slate-100")}>
@@ -2025,9 +2374,9 @@ function InspectionsScreen({ inspections, setScreen, onContinue, onEdit, onRepor
         ) : (
           <div className="space-y-4">
             {filtered.map((inspection) => (
-              <InspectionCard key={inspection.id} inspection={inspection} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={onDelete} />
+              <InspectionCard key={inspection.id} inspection={inspection} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDocuments={onDocuments} onDelete={onDelete} />
             ))}
-            {filtered.length === 0 && <p className="text-center py-12 text-slate-400 text-sm font-bold bg-white rounded-[2rem] border border-dashed border-slate-200">No hay inspecciones con estado "{filter}"</p>}
+            {filtered.length === 0 && <p className="text-center py-12 text-slate-400 text-sm font-bold bg-white rounded-[2rem] border border-dashed border-slate-200">No hay inspecciones que coincidan con la búsqueda.</p>}
           </div>
         )}
       </div>
@@ -2099,7 +2448,7 @@ function PlanScreen({ plan, setPlan, setScreen, generatedReportsCount = 0 }) {
               <Button
                 variant={active ? "soft" : "gold"}
                 onClick={() => {
-                  // En producción, este cambio deberá iíntegrarse con Google Play Billing o sistema de licencias.
+                  // En producción, este cambio deberá integrarse con Google Play Billing o sistema de licencias.
                   setPlan(item.id);
                 }}
                 className="w-full mt-4"
@@ -2598,7 +2947,7 @@ function LegalIntroModal({ onAccept, onViewPolicy, canSkip = true, onSkip }) {
             <CheckCircle2 className="w-5 h-5" /> Aceptar y continuar
           </Button>
           <Button variant="soft" onClick={onViewPolicy} className="w-full py-4 border-slate-200">
-            <BookOpen className="w-5 h-5" /> Ver politica completa
+            <BookOpen className="w-5 h-5" /> Ver política completa
           </Button>
           {canSkip && (
             <button type="button" onClick={onSkip} className="w-full text-slate-400 font-bold text-sm py-2">
@@ -2713,6 +3062,9 @@ function DataScreen({ data, setData, setScreen, onReportClick }) {
               </button>
             )}
           </div>
+          <Button variant="soft" onClick={() => setScreen("documents")} className="w-full">
+            <FileText className="w-5 h-5" /> Abrir expediente documental
+          </Button>
         </Section>
 
         <Section title="Identificación" number="01">
@@ -2779,10 +3131,10 @@ function DataScreen({ data, setData, setScreen, onReportClick }) {
             {[
               ["publica_concurrencia", "Pública concurrencia"],
               ["industria", "Industria"],
-              ["local_humedo", "Local humedo"],
+              ["local_humedo", "Local húmedo"],
               ["local_mojado", "Local mojado"],
               ["local_corrosivo", "Corrosivo"],
-              ["local_polvoriento", "Polvoriento"],
+              ["local_polvoriento", "Local polvoriento"],
               ["temperatura_extrema", "Temp. extrema"],
               ["sala_baterías", "Baterías"],
               ["alumbrado_exterior", "Alumbrado ext."],
@@ -2919,21 +3271,6 @@ function PublicConcurrencyForm({ data, update }) {
       />
       <div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-900 font-bold">
         {supplyHint}
-      </div>
-      <div className="grid grid-cols-1 gap-2">
-        {[
-          ["hasExternalPublic", "Hay público ajeno al establecimiento"],
-          ["hasEmergencyLighting", "Existe alumbrado de emergencia"],
-          ["hasGeneratorOrSai", "Hay grupo electrógeno, SAI o baterías"],
-          ["hasPublicAccessiblePanels", "Hay cuadros accesibles al público"],
-          ["hasEvacuationRoutes", "Hay escaleras, rampas o recorridos de evacuación"],
-          ["hasSpecialPublicZones", "Hay cocina, garaje, piscina, ATEX, FV, IRVE o zonas especiales"],
-        ].map(([key, label]) => (
-          <label key={key} className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-2 items-center">
-            <input type="checkbox" checked={Boolean(data[key])} onChange={(e) => update(key, e.target.checked)} />
-            <span className="font-bold text-slate-700">{label}</span>
-          </label>
-        ))}
       </div>
     </Section>
   );
@@ -3271,7 +3608,7 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
     try {
       const currentPhotos = responses[item.id]?.photos || [];
       if (currentPhotos.length + files.length > 10) {
-        alert("Maximo recomendado: 10 fotos por punto.");
+        alert("Máximo recomendado: 10 fotos por punto.");
         return;
       }
       const savedPhotos = [];
@@ -3307,6 +3644,19 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
     } catch (error) {
       console.warn("No se pudo borrar el archivo de IndexedDB", error);
     }
+  };
+  const renamePointPhoto = (item, photo, displayName) => {
+    setResponses((prev) => {
+      const response = prev[item.id] || { item };
+      return {
+        ...prev,
+        [item.id]: {
+          ...response,
+          item,
+          photos: (response.photos || []).map((entry) => entry.fileId === photo.fileId ? { ...entry, displayName } : entry),
+        },
+      };
+    });
   };
   const addPointDocuments = async (item, files) => {
     try {
@@ -3459,9 +3809,9 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
           </div>
         )}
 
-        <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder={hasDefect ? "Observacion general del punto..." : "Observaciones del punto..."} className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
+        <textarea value={response.observation || ""} onChange={(e) => setObs(item, e.target.value)} placeholder={hasDefect ? "Observación general del punto..." : "Observaciones del punto..."} className="mt-3 w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
 
-        <PhotoThumbGrid photos={response.photos || []} onDelete={(photo) => deletePointPhoto(item, photo)} />
+        <PhotoThumbGrid photos={response.photos || []} onDelete={(photo) => deletePointPhoto(item, photo)} onRename={(photo, value) => renamePointPhoto(item, photo, value)} />
         <DocumentList documents={response.documents || []} onDelete={(doc) => deletePointDocument(item, doc)} />
 
         <div className="grid grid-cols-1 gap-2 mt-3">
@@ -4272,18 +4622,25 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
     setFieldSheets((prev) => prev.filter((board) => board.id !== boardId));
     const board = boards.find((item) => item.id === boardId);
     if (board?.photo?.fileId) {
-      deleteFile(board.id, board.photo.fileId).catch(console.error);
+      deleteFile(board.photo.fileId).catch(console.error);
     }
     (board?.differentials || []).forEach((diff) => {
       if (diff.photo?.fileId) {
-        deleteFile(board.id, diff.photo.fileId).catch(console.error);
+        deleteFile(diff.photo.fileId).catch(console.error);
       }
     });
   };
   const setBoardPhoto = async (board, files, isNew = false) => {
     if (!files.length) return;
     try {
-      const saved = await saveFile(currentId || "draft", files[0]);
+      const saved = await buildStoredAttachment(files[0], {
+        currentId,
+        linkedType: "fieldBoard",
+        linkedId: board?.id || newBoard.id,
+        fileType: "image",
+        compress: true,
+      });
+      if (!saved) return;
       if (isNew) {
         updateNewBoard({ photo: saved });
       } else {
@@ -4297,7 +4654,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
     const photo = board.photo;
     if (!photo) return;
     try {
-      await deleteFile(currentId || "draft", photo.fileId);
+      await deleteFile(photo.fileId);
       if (isNew) {
         updateNewBoard({ photo: null });
       } else {
@@ -4305,6 +4662,15 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
       }
     } catch (error) {
       alert("Error eliminando foto");
+    }
+  };
+  const renameBoardPhoto = (board, displayName, isNew = false) => {
+    if (!board?.photo) return;
+    const photo = { ...board.photo, displayName };
+    if (isNew) {
+      updateNewBoard({ photo });
+    } else {
+      updateBoard(board.id, { photo });
     }
   };
 
@@ -4362,7 +4728,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
         </div>
         <Field label="Tensión de ensayo V" value={b.insulationTestVoltage} onChange={(value) => update({ insulationTestVoltage: value })} placeholder="500" />
         <textarea value={b.observations || ""} onChange={(event) => update({ observations: event.target.value })} placeholder="Observaciones generales del cuadro..." className="w-full min-h-20 border border-slate-200 rounded-2xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#FFC928]" />
-        <PhotoThumbGrid photos={b.photo ? [b.photo] : []} onDelete={() => deleteBoardPhoto(b, isNew)} />
+        <PhotoThumbGrid photos={b.photo ? [b.photo] : []} onDelete={() => deleteBoardPhoto(b, isNew)} onRename={(_, value) => renameBoardPhoto(b, value, isNew)} />
         <div className="grid grid-cols-2 gap-2">
           <FilePickerButton accept={IMAGE_ACCEPT} onFiles={(files) => setBoardPhoto(b, files, isNew)} className="text-xs py-2">
             <Camera className="w-4 h-4" />{b.photo ? "Sustituir foto" : "Añadir foto"}
@@ -4724,7 +5090,7 @@ function MeasurementsScreen({ measurements = {}, setMeasurements, setScreen, dat
   );
 }
 
-function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signatures, draft = false, variant = "tecnico", plan = "demo", reportTitle = DEFAULT_REPORT_TITLE, companySettings = DEFAULT_COMPANY_SETTINGS }) {
+function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, fieldSheets = [], signatures, draft = false, variant = "tecnico", plan = "demo", reportTitle = DEFAULT_REPORT_TITLE, companySettings = DEFAULT_COMPANY_SETTINGS }) {
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const page = { width: 210, height: 297, margin: 15 };
@@ -4888,6 +5254,15 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     bodyStyles: { fontStyle: "bold", textColor: navy },
   });
 
+  if (data?.coverImage) {
+    const coverY = Math.min((doc.lastAutoTable?.finalY || 220) + 8, 232);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...navy);
+    doc.text("Imagen principal de la instalación", page.margin, coverY);
+    drawPdfImageContain(doc, data.coverImage, page.margin, coverY + 4, 82, 38, { placeholder: "Imagen principal" });
+  }
+
   footer();
 
   let y = addPage("Resumen ejecutivo");
@@ -4957,7 +5332,6 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
       ["Uso pública concurrencia", String(data?.publicUse || "Sin indicar")],
       ["Aforo previsto", String(data?.occupancy || "Sin indicar")],
       ["Superficie Útil", String(data?.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar")],
-      ["Alumbrado de emergencia", String(data?.hasEmergencyLighting ? "Sí" : "No indicado")],
       ["Suministro complementario", String(data?.complementarySupplyType || "No indicado")],
       ["Proyecto", String(data?.hasProject ? "Sí" : "No indicado")],
       ["Esquema unifilar", String(data?.hasSingleLine ? "Sí" : "No indicado")],
@@ -4995,6 +5369,31 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     styles: { fontSize: 10, cellPadding: 3 },
     columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252] } },
   });
+
+  const installationAttachments = data?.attachments || [];
+  if (installationAttachments.length) {
+    y = addPage("Expediente documental");
+    autoTable(doc, {
+      startY: y,
+      margin: { left: page.margin, right: page.margin },
+      head: [["Nombre", "Categoría", "Tipo", "Tamaño", "Notas"]],
+      body: installationAttachments.map((doc) => [
+        String(getAttachmentDisplayName(doc, "Documento")),
+        String(getInstallationDocumentCategoryLabel(doc.category)),
+        String(getAttachmentTypeLabel(doc)),
+        String(formatFileSize(doc.size)),
+        String(doc.notes || "-"),
+      ]),
+      headStyles: { fillColor: navy },
+      styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
+      columnStyles: {
+        0: { cellWidth: 44 },
+        1: { cellWidth: 34 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 22 },
+      },
+    });
+  }
 
   if (variant === "campo") {
     y = addPage("Hoja de Campo para Inspección");
@@ -5136,14 +5535,10 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
         ["Defecto sugerido", String(r?.item?.defectoSiNoCumple || "Defecto pendiente de describir")],
         ["ITC", String(r?.item?.itc || r?.item?.reference || "Sin indicar")],
         ["Apartado", String(r?.item?.apartado || "Sin indicar")],
-        ["Resumen normativo", String(r?.item?.normaResumen || r?.item?.reference || "Sin indicar")],
-        ["Criterio de inspección", String(r?.item?.criterioInspeccion || r?.item?.favorable || "Sin indicar")],
         ["Evidencia/foto/documento asociado", String(getEvidenceSummary(r) || "Sin evidencia")],
         ["Punto inspeccionado", String(r?.item?.question || "-")],
-        ["Criterio favorable", String(r?.item?.favorableCriteria || r?.item?.favorable || "-")],
         ["Zona / ubicación afectada", String(getDefectLocation(r) || "Sin indicar")],
         ["Observación del inspector", String(r?.observation || "Sin observación específica registrada")],
-        ["Mediciones requeridas", String(formatChecklistList(r?.item?.medicionesRequeridas, "Sin medición específica indicada"))],
         ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
         ["Recomendación", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
       ],
@@ -5152,16 +5547,24 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
       styles: { fontSize: 9, cellPadding: 2.5 },
       columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252], cellWidth: 44 } },
     });
-    const fy = doc.lastAutoTable.finalY + 8;
-    doc.setFont("helvetica", "bold");
-    doc.text("Fotografías asociadas", page.margin, fy);
-    doc.setDrawColor(159, 176, 195);
-    doc.roundedRect(page.margin, fy + 6, 82, 34, 2, 2);
-    doc.roundedRect(113, fy + 6, 82, 34, 2, 2);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Foto 1 - Vista general del defecto", page.margin + 5, fy + 24);
-    doc.text("Foto 2 - Detalle / medición", 118, fy + 24);
+    const defectPhotos = getReportPhotos(r);
+    if (defectPhotos.length) {
+      y = addPage(`Fotografías defecto ${String(index + 1).padStart(2, "0")}`);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...navy);
+      doc.text(fixText(`${r?.item?.id || "-"} - ${r?.item?.title || "Defecto"}`), page.margin, y, { maxWidth: 178 });
+      defectPhotos.forEach((photo, photoIndex) => {
+        const slot = photoIndex % 2;
+        if (photoIndex > 0 && slot === 0) {
+          y = addPage(`Fotografías defecto ${String(index + 1).padStart(2, "0")}`);
+        }
+        const x = slot === 0 ? page.margin : 108;
+        const boxY = 68;
+        drawPdfImageContain(doc, getAttachmentImageSrc(photo), x, boxY, 82, 92, { placeholder: `Foto ${photoIndex + 1}` });
+        addPdfPhotoCaption(doc, photo, `Foto ${photoIndex + 1}`, x, boxY + 98, 82, slate);
+      });
+    }
   });
 
   y = addPage("Hoja auxiliar de medidas");
@@ -5187,24 +5590,180 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     styles: { fontSize: 8, cellPadding: 2.5 },
   });
 
+  const fieldBoards = Array.isArray(fieldSheets) ? fieldSheets : [];
+  if (fieldBoards.length) {
+    const totalDifferentials = fieldBoards.reduce((sum, board) => sum + (board.differentials || []).length, 0);
+    const totalInsulationCircuits = fieldBoards.reduce((sum, board) => sum + (board.insulationCircuits || []).length, 0);
+    const measurementDefects = fieldBoards.reduce((sum, board) => {
+      const boardDefect = board.status === "defect" ? 1 : 0;
+      const differentialDefects = (board.differentials || []).filter((item) => item.result === "defect").length;
+      const insulationDefects = (board.insulationCircuits || []).filter((item) => item.result === "defect").length;
+      return sum + boardDefect + differentialDefects + insulationDefects;
+    }, 0);
+
+    y = addPage("Hoja de campo / Mediciones");
+    autoTable(doc, {
+      startY: y,
+      margin: { left: page.margin, right: page.margin },
+      head: [["Cuadros", "Diferenciales", "Circuitos aislamiento", "Defectos medición"]],
+      body: [[String(fieldBoards.length), String(totalDifferentials), String(totalInsulationCircuits), String(measurementDefects)]],
+      headStyles: { fillColor: navy, textColor: 255 },
+      bodyStyles: { fontStyle: "bold", textColor: navy, halign: "center" },
+      styles: { fontSize: 11, cellPadding: 4, halign: "center" },
+    });
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 8,
+      margin: { left: page.margin, right: page.margin },
+      head: [["Cuadro", "Zona", "Tipo", "Estado", "Tierra", "Aislamiento", "Diferenciales"]],
+      body: fieldBoards.map((board) => [
+        String(fieldValue(board.name)),
+        String(fieldValue(board.zone)),
+        String(getBoardTypeLabel(board.boardType)),
+        String(getFieldResultLabel(board.status)),
+        String(withUnit(board.earthResistanceOhm, "ohm")),
+        String(withUnit(board.insulationGeneralMohm, "MΩ")),
+        String((board.differentials || []).length),
+      ]),
+      headStyles: { fillColor: navy },
+      styles: { fontSize: 7.6, cellPadding: 2, overflow: "linebreak" },
+    });
+
+    fieldBoards.forEach((board, boardIndex) => {
+      y = addPage(`Mediciones cuadro ${String(boardIndex + 1).padStart(2, "0")}`);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...navy);
+      doc.text(fixText(fieldValue(board.name, "Cuadro sin nombre")), page.margin, y);
+      autoTable(doc, {
+        startY: y + 7,
+        margin: { left: page.margin, right: page.margin },
+        body: [
+          ["Zona", String(fieldValue(board.zone))],
+          ["Tipo de cuadro", String(getBoardTypeLabel(board.boardType))],
+          ["Estado", String(getFieldResultLabel(board.status))],
+          ["Resistencia de tierra", String(withUnit(board.earthResistanceOhm, "ohm"))],
+          ["Aislamiento general", String(withUnit(board.insulationGeneralMohm, "MΩ"))],
+          ["Tensión de ensayo", String(withUnit(board.insulationTestVoltage, "V"))],
+          ["Observaciones", String(fieldValue(board.observations))],
+        ],
+        theme: "grid",
+        styles: { fontSize: 8.5, cellPadding: 2.2 },
+        columnStyles: { 0: { fontStyle: "bold", fillColor: [248, 250, 252], cellWidth: 42 } },
+      });
+      y = doc.lastAutoTable.finalY + 8;
+      const boardPhotoSrc = getAttachmentImageSrc(board.photo);
+      if (boardPhotoSrc) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...navy);
+        doc.text("Fotografía del cuadro", page.margin, y);
+        drawPdfImageContain(doc, boardPhotoSrc, page.margin, y + 5, 120, 64, { placeholder: "Foto del cuadro" });
+        addPdfPhotoCaption(doc, board.photo, `Foto de ${fieldValue(board.name, "cuadro")}`, page.margin, y + 74, 120, slate);
+        y += 84;
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...navy);
+      doc.text("Pruebas de diferenciales", page.margin, y);
+      autoTable(doc, {
+        startY: y + 4,
+        margin: { left: page.margin, right: page.margin },
+        head: [["ID", "In", "IΔn", "Tipo", "Polos", "Disparo", "Tiempo", "Resultado", "Observaciones"]],
+        body: (board.differentials || []).length ? (board.differentials || []).map((diff) => [
+          String(fieldValue(diff.label, "-")),
+          String(withUnit(diff.InA, "A")),
+          String(withUnit(diff.sensitivitymA, "mA")),
+          String(fieldValue(diff.type, "-")),
+          String(fieldValue(diff.poles, "-")),
+          String(withUnit(diff.tripCurrentmA, "mA")),
+          String(withUnit(diff.tripTimems, "ms")),
+          String(getFieldResultLabel(diff.result)),
+          String(fieldValue(diff.observations, "-")),
+        ]) : [["-", "-", "-", "-", "-", "-", "-", "-", "No se han registrado diferenciales en este cuadro."]],
+        headStyles: { fillColor: navy },
+        styles: { fontSize: 6.8, cellPadding: 1.7, overflow: "linebreak" },
+        columnStyles: { 8: { cellWidth: 38 } },
+      });
+
+      y = doc.lastAutoTable.finalY + 8;
+      if (y > 232) y = addPage(`Aislamiento cuadro ${String(boardIndex + 1).padStart(2, "0")}`);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...navy);
+      doc.text("Aislamiento por circuitos", page.margin, y);
+      autoTable(doc, {
+        startY: y + 4,
+        margin: { left: page.margin, right: page.margin },
+        head: [["Circuito", "Tensión ensayo", "Valor aislamiento", "Resultado", "Observaciones"]],
+        body: (board.insulationCircuits || []).length ? (board.insulationCircuits || []).map((circuit) => [
+          String(fieldValue(circuit.circuitName, "-")),
+          String(withUnit(circuit.testVoltageV, "V")),
+          String(withUnit(circuit.valueMohm, "MΩ")),
+          String(getFieldResultLabel(circuit.result)),
+          String(fieldValue(circuit.observations, "-")),
+        ]) : [["-", "-", "-", "-", "No se han registrado mediciones de aislamiento por circuitos."]],
+        headStyles: { fillColor: navy },
+        styles: { fontSize: 7.2, cellPadding: 1.9, overflow: "linebreak" },
+        columnStyles: { 4: { cellWidth: 55 } },
+      });
+    });
+  }
+
   if (variant === "tecnico") {
     y = addPage("Anexo fotográfico");
-    const photoGroups = defects.length ? defects : [{ item: { id: "SIN.DEFECTOS", title: "Sin defectos registrados" } }];
-    photoGroups.forEach((r, index) => {
-      if (y > 230) y = addPage("Anexo fotográfico");
+    const seenPhotos = new Set();
+    const photoItems = [
+      ...installationAttachments
+        .filter((photo) => getAttachmentImageSrc(photo))
+        .map((photo, index) => ({ r: { item: { id: "EXP", title: getInstallationDocumentCategoryLabel(photo.category) }, status: "Expediente", observation: photo.notes || "", defectLocation: "Documentación cliente" }, photo, index })),
+      ...defects.flatMap((r) => getReportPhotos(r).map((photo, index) => ({ r, photo, index }))),
+      ...Object.values(responses || {}).flatMap((r) => getReportPhotos(r).map((photo, index) => ({ r, photo, index }))),
+    ].filter(({ r, photo, index }) => {
+      const key = `${r?.defectEntryId || r?.item?.id || "punto"}-${photo?.fileId || getAttachmentImageSrc(photo) || index}`;
+      if (seenPhotos.has(key)) return false;
+      seenPhotos.add(key);
+      return true;
+    });
+    if (!photoItems.length) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
       doc.setTextColor(...navy);
-      doc.text(`${r?.item?.id || "-"} - ${r?.item?.title || "-"}`, page.margin, y);
-      doc.setDrawColor(159, 176, 195);
-      doc.roundedRect(page.margin, y + 6, 82, 36, 2, 2);
-      doc.roundedRect(113, y + 6, 82, 36, 2, 2);
+      doc.text("No hay fotografías adjuntas en la inspección.", page.margin, y);
+    } else {
+      photoItems.forEach(({ r, photo, index }, photoIndex) => {
+        const slot = photoIndex % 4;
+        if (photoIndex > 0 && slot === 0) y = addPage("Anexo fotográfico");
+        const x = slot % 2 === 0 ? page.margin : 108;
+        const boxY = y + Math.floor(slot / 2) * 90;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...navy);
+        doc.text(fixText(`${r?.item?.id || "-"} - ${r?.item?.title || "Punto con defecto"}`), x, boxY, { maxWidth: 82 });
+        drawPdfImageContain(doc, getAttachmentImageSrc(photo), x, boxY + 6, 82, 56, { placeholder: "Fotografía" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(fixText(`${getAttachmentDisplayName(photo, `Foto ${index + 1}`)} · ${r?.status || "Sin estado"}`), x, boxY + 68, { maxWidth: 82 });
+        doc.text(fixText(getDefectLocation(r) || "General"), x, boxY + 74, { maxWidth: 82 });
+      });
+    }
+  }
+
+  if (variant === "tecnico" && Array.isArray(fieldSheets) && fieldSheets.some((board) => getAttachmentImageSrc(board?.photo))) {
+    y = addPage("Fotos de cuadros y mediciones");
+    fieldSheets.filter((board) => getAttachmentImageSrc(board?.photo)).forEach((board, index) => {
+      if (index > 0 && y > 200) y = addPage("Fotos de cuadros y mediciones");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...navy);
+      doc.text(fixText(`Cuadro: ${fieldValue(board.name)}`), page.margin, y);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.text(`Foto ${index * 2 + 1} - Vista general`, page.margin + 5, y + 27);
-      doc.text(`Foto ${index * 2 + 2} - Detalle técnico`, 118, y + 27);
-      y += 54;
-
+      doc.setTextColor(...slate);
+      doc.text(fixText(`Zona: ${fieldValue(board.zone)} · Estado: ${getFieldResultLabel(board.status)}`), page.margin, y + 6);
+      drawPdfImageContain(doc, getAttachmentImageSrc(board.photo), page.margin, y + 12, 120, 72, { placeholder: "Foto del cuadro" });
+      y += 92;
     });
   }
 
@@ -5261,10 +5820,10 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, signa
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text(`Página ${i} de ${pages}`, 184, 290);
+    doc.text(`Página ${i} de ${pages}`, page.width - page.margin, 280, { align: "right" });
   }
 
-  doc.save(fileName);
+  return { doc, fileName };
 }
 
 async function exportRenderedReportPdf({ fileName = "isivolt-informe.pdf" } = {}) {
@@ -5333,6 +5892,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
   const companyAddress = formatCompanyAddress(reportCompanySettings) || "Sin indicar";
   const technicianName = data.technicianName || reportCompanySettings.technicianName || "Sin indicar";
   const technicianCredential = data.technicianCredential || reportCompanySettings.technicianCredential || "Sin indicar";
+  const installationAttachments = data.attachments || [];
 
 
   // Función para dividir arrays en trozos (para multi-página)
@@ -5352,14 +5912,27 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
 
   // Mapeamos todas las fotos asociadas a defectos para el anexo
   const photoAnnexItems = useMemo(() => {
-    return defects.flatMap((r) =>
+    const attachmentPhotos = installationAttachments
+      .filter((photo) => getAttachmentImageSrc(photo))
+      .map((photo, pIdx) => ({
+        r: {
+          item: { id: "EXP", title: getInstallationDocumentCategoryLabel(photo.category) },
+          status: "Expediente",
+          observation: photo.notes || "",
+          defectLocation: "Documentación cliente",
+        },
+        photo,
+        pIdx,
+      }));
+    const defectPhotos = defects.flatMap((r) =>
       getReportPhotos(r).map((photo, pIdx) => ({
         r,
         photo,
         pIdx
       }))
     );
-  }, [defects]);
+    return [...attachmentPhotos, ...defectPhotos];
+  }, [defects, installationAttachments]);
 
   const photoChunks = useMemo(() => {
     return chunkArray(photoAnnexItems, 4);
@@ -5506,7 +6079,6 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             ["Uso pública concurrencia", data.publicUse || "Sin indicar"],
             ["Aforo previsto", data.occupancy || "Sin indicar"],
             ["Superficie Útil", data.usableAreaM2 ? `${data.usableAreaM2} m²` : "Sin indicar"],
-            ["Alumbrado de emergencia", data.hasEmergencyLighting ? "Sí" : "No indicado"],
             ["Suministro complementario", data.complementarySupplyType || "No indicado"],
             ["Proyecto", data.hasProject ? "Sí" : "No indicado"],
             ["CIE / boletín", data.hasCertificate ? "Sí" : "No indicado"],
@@ -5515,6 +6087,34 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
           ]}
         />
       </ReportPage>
+
+      {installationAttachments.length > 0 && (
+        <ReportPage title="Expediente documental" icon={FileText} brand={reportBrand}>
+          <p className="report-subtitle">Documentación aportada por el cliente y asociada a esta instalación.</p>
+          <table className="report-compact-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Tamaño</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {installationAttachments.map((doc) => (
+                <tr key={doc.fileId}>
+                  <td>{getAttachmentDisplayName(doc, "Documento")}</td>
+                  <td>{getInstallationDocumentCategoryLabel(doc.category)}</td>
+                  <td>{getAttachmentTypeLabel(doc)}</td>
+                  <td>{formatFileSize(doc.size)}</td>
+                  <td>{doc.notes || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ReportPage>
+      )}
 
       <ReportPage title="Normativa e ITC aplicables" icon={BookOpen} brand={reportBrand}>
         <p className="report-subtitle">Resumen de instrucciones técnicas según el reglamento y los bloques seleccionados.</p>
@@ -5572,7 +6172,7 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
                     <span className="photo-annex-badge">Punto {r?.item?.id}</span>
                     <span className="photo-annex-location">{getDefectLocation(r) || "General"}</span>
                   </div>
-                  <p className="photo-annex-desc">{fixText(r?.item?.title)}</p>
+                  <p className="photo-annex-desc">{fixText(getAttachmentDisplayName(photo, r?.item?.title || "Fotografía"))}</p>
                   {r?.observation && (
                     <p className="photo-annex-obs">Obs: {fixText(r.observation)}</p>
                   )}
@@ -5649,6 +6249,7 @@ function ReportScreen({
   const [isExporting, setIsExporting] = useState(false);
   const [reportVariant, setReportVariant] = useState("tecnico");
   const [showItcModal, setShowItcModal] = useState(false);
+  const [reportData, setReportData] = useState(data);
   const [reportResponses, setReportResponses] = useState(responses);
   const [reportFieldSheets, setReportFieldSheets] = useState(fieldSheets || []);
   const [signatures, setSignatures] = useState(propsSignatures || EMPTY_SIGNATURES);
@@ -5697,11 +6298,13 @@ function ReportScreen({
     let active = true;
     setFilesReady(false);
     Promise.all([
+      hydrateInspectionDataWithFiles(data),
       hydrateResponsesWithFiles(responses),
       hydrateFieldSheetsWithFiles(fieldSheets),
     ])
-      .then(([hydratedResponses, hydratedFieldSheets]) => {
+      .then(([hydratedData, hydratedResponses, hydratedFieldSheets]) => {
         if (!active) return;
+        setReportData(hydratedData);
         setReportResponses(hydratedResponses);
         setReportFieldSheets(hydratedFieldSheets);
         setFilesReady(true);
@@ -5709,6 +6312,7 @@ function ReportScreen({
       .catch((error) => {
         console.error("Error preparando archivos del informe", error);
         if (!active) return;
+        setReportData(data);
         setReportResponses(responses);
         setReportFieldSheets(fieldSheets);
         setFilesReady(true);
@@ -5716,7 +6320,7 @@ function ReportScreen({
     return () => {
       active = false;
     };
-  }, [responses, fieldSheets]);
+  }, [data, responses, fieldSheets]);
 
   const downloadFinalPdf = async () => {
     setPrintError("");
@@ -5734,38 +6338,39 @@ function ReportScreen({
     setIsExporting(true);
 
     try {
-      // MÉTODO PRINCIPAL: captura visual html2canvas → PDF idéntico a la vista previa
-      await downloadFinalPdfVisual();
+      // Método principal: PDF directo con texto/tablas vectoriales para mayor nitidez.
+      const pdfResult = exportIsiVoltPdf({
+        data: reportData,
+        selectedBlocks,
+        responses: reportResponses,
+        measurements,
+        fieldSheets: reportFieldSheets,
+        signatures,
+        variant: reportVariant,
+        draft: reportMode === "draft",
+        plan,
+        reportTitle: effectiveReportTitle,
+        companySettings,
+      });
+      await saveOrSharePdf(pdfResult.doc, pdfResult.fileName);
       onReportGenerated?.();
-      setPrintMessage("Informe generado con éxito.");
+      setPrintMessage(Capacitor.isNativePlatform() ? "Informe PDF generado. Elige dónde guardarlo o compartirlo." : "Informe PDF de alta calidad generado.");
     } catch (e) {
-      console.warn("html2canvas falló, usando generador alternativo:", e);
-      // FALLBACK: generador programático jsPDF (menos fiel visualmente)
+      console.warn("PDF directo falló, usando captura visual alternativa:", e);
       try {
-        exportIsiVoltPdf({
-          data,
-          selectedBlocks,
-          responses: reportResponses,
-          measurements,
-          signatures,
-          variant: reportVariant,
-          draft: reportMode === "draft",
-          plan,
-          reportTitle: effectiveReportTitle,
-          companySettings,
-        });
+        await downloadFinalPdfVisual();
         onReportGenerated?.();
-        setPrintMessage("Informe generado (modo alternativo).");
+        setPrintMessage(Capacitor.isNativePlatform() ? "Informe generado. Elige dónde guardarlo o compartirlo." : "Informe generado mediante captura visual alternativa.");
       } catch (e2) {
-        console.error("Error en PDF fallback:", e2);
-        setPrintError("No se ha podido generar el informe. Contacte con soporte técnico.");
+        console.error("Error al generar PDF:", e2);
+        setPrintError("No se ha podido generar o compartir el informe. Revisa permisos, espacio disponible y vuelve a intentarlo.");
       }
     } finally {
       setIsExporting(false);
     }
   };
 
-  // Captura visual página a página — genera un PDF idéntico a la vista previa en pantalla
+  // Captura visual página a página: respaldo si el PDF directo falla.
   const downloadFinalPdfVisual = async () => {
     const slug = (data.name || "inspeccion").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const fileName = `isivolt-${reportMode === "draft" ? "borrador" : "informe"}-${slug}.pdf`;
@@ -5784,7 +6389,7 @@ function ReportScreen({
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
     }
-    pdf.save(fileName);
+    await saveOrSharePdf(pdf, fileName);
   };
 
   // Mantener downloadFinalPdfLegacy como alias por si se referencia en otro sitio
@@ -5859,7 +6464,7 @@ function ReportScreen({
 
       <div className="absolute left-[-9999px] top-0 no-print report-capture-area" ref={captureRef}>
         <ReportDocument
-          data={data}
+          data={reportData}
           selectedBlocks={selectedBlocks}
           responses={reportResponses}
           measurements={measurements}
@@ -5881,7 +6486,7 @@ function ReportScreen({
         <div className="report-scaling-shell" style={{ width: `${794 * scale}px` }}>
           <div className="report-scaling-container" style={{ transform: `scale(${scale})` }}>
           <ReportDocument
-            data={data}
+            data={reportData}
             selectedBlocks={selectedBlocks}
             responses={reportResponses}
             measurements={measurements}
@@ -5940,7 +6545,7 @@ function ReportScreen({
       {/* VISTA PARA IMPRESIÓN DEL NAVEGADOR */}
       <div className="hidden print:block">
         <ReportDocument
-          data={data}
+          data={reportData}
           selectedBlocks={selectedBlocks}
           responses={reportResponses}
           measurements={measurements}
@@ -6290,9 +6895,9 @@ function ReportPhotoGrid({ photos = [], emptyText = "No hay fotografías asociad
     <div className="photo-grid report-photo-grid">
       {photos.map((photo, index) => (
         <figure className="report-photo-card" key={photo.fileId || `${photo.fileName}-${index}`}>
-          <img src={photo.dataUrl || photo.thumbnailUrl} alt={photo.fileName || `Fotografía ${index + 1}`} />
+          <img src={photo.dataUrl || photo.thumbnailUrl} alt={getAttachmentDisplayName(photo, `Fotografía ${index + 1}`)} />
           <figcaption>
-            Foto {index + 1}{photo.fileName ? ` · ${photo.fileName}` : ""}
+            Foto {index + 1} · {getAttachmentDisplayName(photo, "Sin nombre")}
           </figcaption>
         </figure>
       ))}
@@ -6319,27 +6924,14 @@ function DefectReportPage({ r, index, brand }) {
           ["Defecto sugerido", r?.item?.defectoSiNoCumple || "Defecto pendiente de describir"],
           ["ITC", r?.item?.itc || r?.item?.reference || "Sin indicar"],
           ["Apartado", r?.item?.apartado || "Sin indicar"],
-          ["Resumen normativo", r?.item?.normaResumen || r?.item?.reference || "Sin indicar"],
-          ["Criterio de inspección", r?.item?.criterioInspeccion || r?.item?.favorable || "Sin indicar"],
           ["Evidencia/foto/documento asociado", getEvidenceSummary(r)],
           ["Punto inspeccionado", r?.item?.question || "Sin indicar"],
-          ["Criterio favorable", r?.item?.favorableCriteria || r?.item?.favorable || "Sin indicar"],
           ["Zona / ubicación afectada", location],
           ["Observación del inspector", r?.observation || "Sin observación específica registrada"],
-          ["Mediciones requeridas", formatChecklistList(r?.item?.medicionesRequeridas, "Sin medición específica indicada")],
 
           ["Conclusión", "El punto inspeccionado no cumple el criterio favorable indicado."],
           ["Recomendación", "Revisar, corregir y documentar la subsanación antes de cerrar la inspección."],
         ]} />
-        <div className="defect-help-grid">
-          <div>
-            <h4>Criterios técnicos</h4>
-            <ul>{(r?.item?.help?.criteria || [r?.item?.criterioInspeccion || r?.item?.favorable || "Sin criterio especificado"]).map((item) => <li key={item}>{fixText(item)}</li>)}</ul>
-          </div>
-          <div className="visual-placeholder overflow-hidden p-0">
-            <TechnicalHelpImage image={r?.item?.help?.images?.[0] || "Ayuda visual técnica"} className="w-full h-full object-cover" />
-          </div>
-        </div>
 
         <h4 className="photo-title">Fotografías asociadas</h4>
         <ReportPhotoGrid photos={photos} emptyText="No hay fotografías asociadas a este defecto." />
@@ -7117,6 +7709,7 @@ function EmptyState({ title, text }) {
 }
 
 export default function IsiVoltProInspecciones() {
+  const { plan: accountPlan, user, openAuth } = useAuth();
   const [screen, setScreen] = useState("home");
   const [showFinalReview, setShowFinalReview] = useState(false);
   const [showLegalIntro, setShowLegalIntro] = useState(false);
@@ -7154,7 +7747,16 @@ export default function IsiVoltProInspecciones() {
   );
 
   const setPlan = (value) => {
-    setPlanState(normalizeSubscriptionPlan(value));
+    const normalizedPlan = normalizeSubscriptionPlan(value);
+    if (normalizedPlan === "pro") {
+      if (!user) {
+        openAuth("login");
+        return;
+      }
+      window.alert("El plan Pro debe activarse mediante Google Play Billing o una licencia validada en el servidor.");
+      return;
+    }
+    setPlanState("demo");
   };
 
   const setCompanySettings = (value) => {
@@ -7210,6 +7812,10 @@ export default function IsiVoltProInspecciones() {
   useEffect(() => {
     localStorage.setItem(PLAN_STORAGE_KEY, normalizeSubscriptionPlan(plan));
   }, [plan]);
+
+  useEffect(() => {
+    setPlanState(normalizeSubscriptionPlan(accountPlan));
+  }, [accountPlan]);
 
   useEffect(() => {
     localStorage.setItem(REPORT_COUNT_STORAGE_KEY, String(generatedReportsCount));
@@ -7386,6 +7992,20 @@ export default function IsiVoltProInspecciones() {
     setScreen("report");
   };
 
+  const onDocuments = (id) => {
+    const ins = inspections.find((i) => i.id === id);
+    if (!ins) return;
+    setCurrentId(id);
+    setData({ ...ins.data, attachments: ins.data?.attachments || [] });
+    setSelectedBlocks(ins.selectedBlocks);
+    setResponses(ins.responses);
+    setMeasurements(ins.measurements);
+    setFieldSheets(ins.fieldSheets || ins.data?.fieldSheets || []);
+    setSignatures(ins.signatures || EMPTY_SIGNATURES);
+    setCalculations(ins.calculations || INITIAL_INSPECTION.calculations);
+    setScreen("documents");
+  };
+
   const markReportGenerated = () => {
     if (reportMode !== "final" || !currentId) return;
     const current = inspections.find((inspection) => inspection.id === currentId);
@@ -7499,10 +8119,11 @@ export default function IsiVoltProInspecciones() {
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex justify-center print:block print:bg-white transition-colors duration-300">
       <div className="w-full max-w-md bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300">
         {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
-        {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDelete={deleteInspection} />}
+        {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDocuments={onDocuments} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
         {screen === "settings" && <SettingsScreen plan={plan} setPlan={setPlan} setScreen={setScreen} legalAccepted={legalAccepted} legalAcceptedAt={legalAcceptedAt} onAcceptLegal={acceptLegal} generatedReportsCount={generatedReportsCount} customReportTitle={customReportTitle} setCustomReportTitle={setCustomReportTitle} companySettings={companySettings} setCompanySettings={setCompanySettings} theme={theme} setTheme={setTheme} checklistOverrides={checklistOverrides} setChecklistOverrides={setChecklistOverrides} customChecklistItems={customChecklistItems} />}
         {screen === "data" && <DataScreen data={data} setData={setData} setScreen={setScreen} onReportClick={openReportReview} />}
+        {screen === "documents" && <InstallationDocumentsScreen data={data} setData={setData} currentId={currentId} setScreen={setScreen} responses={responses} fieldSheets={fieldSheets} onReportClick={openReportReview} />}
         {screen === "blocks" && <BlocksScreen data={data} selectedBlocks={selectedBlocks} setSelectedBlocks={setSelectedBlocks} setScreen={setScreen} onReportClick={openReportReview} />}
         {screen === "checklist" && <ChecklistScreen selectedBlocks={selectedBlocks} responses={responses} setResponses={setResponses} setScreen={setScreen} currentId={currentId} focusItemId={checklistFocusItemId} onFocusHandled={() => setChecklistFocusItemId("")} onReportClick={openReportReview} customItems={customChecklistItems} setCustomItems={setCustomChecklistItems} checklist={activeChecklistItems} />}
         {screen === "fieldSheet" && <FieldSheetsScreen fieldSheets={fieldSheets} setFieldSheets={setFieldSheets} calculations={calculations} setCalculations={setCalculations} setScreen={setScreen} currentId={currentId} onReportClick={openReportReview} />}

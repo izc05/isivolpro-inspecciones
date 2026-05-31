@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.plan == "demo"
+        && request.resource.data.proActive == false
+        && request.resource.data.keys().hasOnly([
+          "uid",
+          "email",
+          "plan",
+          "proActive",
+          "createdAt",
+          "updatedAt",
+          "subscriptionProvider",
+          "subscriptionProductId",
+          "subscriptionStatus",
+          "subscriptionExpiresAt"
+        ]);
+
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          "uid",
+          "email",
+          "plan",
+          "proActive",
+          "createdAt",
+          "updatedAt",
+          "subscriptionProvider",
+          "subscriptionProductId",
+          "subscriptionStatus",
+          "subscriptionExpiresAt"
+        ])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "email",
+          "updatedAt"
+        ]);
+    }
+  }
+}

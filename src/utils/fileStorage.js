@@ -29,6 +29,9 @@ function openFileDb() {
   });
 }
 
+const IMAGE_LOAD_TIMEOUT_MS = 12000;
+const COMPRESSED_IMAGE_TYPE = "image/jpeg";
+
 function runStore(mode, callback) {
   return openFileDb().then((db) => new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, mode);
@@ -36,7 +39,7 @@ function runStore(mode, callback) {
     const result = callback(store);
     tx.oncomplete = () => resolve(result);
     tx.onerror = () => reject(tx.error || new Error("Error de IndexedDB"));
-    tx.onabort = () => reject(tx.error || new Error("Operacion de IndexedDB cancelada"));
+    tx.onabort = () => reject(tx.error || new Error("Operación de IndexedDB cancelada"));
   }));
 }
 
@@ -55,8 +58,15 @@ async function loadImage(file) {
     const image = new Image();
     image.decoding = "async";
     await new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = reject;
+      const timer = window.setTimeout(() => reject(new Error("La imagen tarda demasiado en cargarse")), IMAGE_LOAD_TIMEOUT_MS);
+      image.onload = () => {
+        window.clearTimeout(timer);
+        resolve();
+      };
+      image.onerror = () => {
+        window.clearTimeout(timer);
+        reject(new Error("No se pudo leer la imagen"));
+      };
       image.src = url;
     });
     return image;
@@ -67,6 +77,7 @@ async function loadImage(file) {
 
 export async function compressImage(file, maxSize = 1600, quality = 0.8) {
   if (!file?.type?.startsWith("image/")) return file;
+  if (file.type === "image/svg+xml") return file;
 
   const image = await loadImage(file);
   const ratio = Math.min(1, maxSize / Math.max(image.width, image.height));
@@ -76,14 +87,14 @@ export async function compressImage(file, maxSize = 1600, quality = 0.8) {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
   ctx.drawImage(image, 0, 0, width, height);
 
-  const preferredType = file.type === "image/png" ? "image/png" : "image/jpeg";
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, preferredType, quality));
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, COMPRESSED_IMAGE_TYPE, quality));
   if (!blob) return file;
-  const extension = preferredType === "image/png" ? "png" : "jpg";
   const cleanName = file.name.replace(/\.[^.]+$/, "") || "foto";
-  return new File([blob], `${cleanName}.${extension}`, { type: preferredType, lastModified: Date.now() });
+  return new File([blob], `${cleanName}.jpg`, { type: COMPRESSED_IMAGE_TYPE, lastModified: Date.now() });
 }
 
 export async function createImageThumbnail(file, maxSize = 360, quality = 0.72) {
@@ -120,6 +131,14 @@ export function getFile(fileId) {
   }));
 }
 
+export function listAllFiles() {
+  return runStore("readonly", (store) => new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error || new Error("No se pudieron listar los archivos"));
+  }));
+}
+
 export function deleteFile(fileId) {
   return runStore("readwrite", (store) => store.delete(fileId));
 }
@@ -141,5 +160,28 @@ export async function getFileDataUrl(fileId) {
   const record = await getFile(fileId);
   if (!record?.data) return "";
   return fileToDataUrl(record.data);
+}
+
+export async function restoreFileFromBackup(record) {
+  if (!record?.id || !record?.dataUrl) return null;
+  const response = await fetch(record.dataUrl);
+  const blob = await response.blob();
+  const file = new File([blob], record.fileName || "archivo", {
+    type: record.mimeType || blob.type || "application/octet-stream",
+    lastModified: record.createdAt ? new Date(record.createdAt).getTime() : Date.now(),
+  });
+  return saveFile(file, {
+    id: record.id,
+    inspectionId: record.inspectionId || "",
+    linkedType: record.linkedType || "inspectionGeneral",
+    linkedId: record.linkedId || "",
+    linkedPointCode: record.linkedPointCode || "",
+    linkedBlockId: record.linkedBlockId || "",
+    fileName: record.fileName || file.name || "archivo",
+    fileType: record.fileType || (file.type?.startsWith("image/") ? "image" : "document"),
+    mimeType: record.mimeType || file.type || "application/octet-stream",
+    size: record.size || file.size || 0,
+    createdAt: record.createdAt || new Date().toISOString(),
+  });
 }
 
