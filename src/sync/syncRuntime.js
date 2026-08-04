@@ -5,6 +5,7 @@ import {
   getSyncAccessToken,
 } from "./syncAuth.js";
 import { processSyncQueue } from "./syncEngine.js";
+import { refreshInspectionListSyncMetadata } from "./inspectionRecord.js";
 import {
   getLastPullTimestamp,
   mergeRemoteInspectionRecords,
@@ -91,9 +92,12 @@ export async function syncInspectionWorkspace({
 
   const execute = async () => {
     const push = await processSyncQueue({ client, signal, onProgress });
+    const refreshedInspections = push.synced > 0
+      ? refreshInspectionListSyncMetadata(inspections)
+      : inspections;
     const since = getLastPullTimestamp();
     const response = await client.pullInspections({ since, signal });
-    const merged = mergeRemoteInspectionRecords(inspections, response?.items || [], {
+    const merged = mergeRemoteInspectionRecords(refreshedInspections, response?.items || [], {
       activeLocalId,
     });
     if (response?.serverTime) setLastPullTimestamp(response.serverTime);
