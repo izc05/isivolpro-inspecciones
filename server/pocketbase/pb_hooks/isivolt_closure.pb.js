@@ -1,13 +1,13 @@
 const CLOSURE_DEFAULTS = {
-  allowCloseFromWeb: true,
-  requireMobileClose: false,
-  requireLocation: false,
+  allowCloseFromWeb: false,
+  requireMobileClose: true,
+  requireLocation: true,
   allowedRadiusMeters: 100,
   maximumAccuracyMeters: 50,
   requireInspectorSignature: true,
   requireClientSignature: false,
-  minimumPhotoCount: 0,
-  requireServerSyncBeforeClose: false,
+  minimumPhotoCount: 1,
+  requireServerSyncBeforeClose: true,
   allowAdminOverride: true,
 };
 
@@ -44,7 +44,32 @@ function mergeClosurePolicy(companyPolicy, installationPolicy) {
 
 function closureFinite(value) {
   const number = Number(value);
-  return Number.isFinite(number) ? number : null;
+  return isFinite(number) ? number : null;
+}
+
+function installationValue(installation, key) {
+  if (!installation) return null;
+  if (typeof installation.get === "function") return installation.get(key);
+  return installation[key];
+}
+
+function buildTrustedInspectionInstallation(inspection) {
+  const latitude = inspection.get("closureLatitude");
+  const longitude = inspection.get("closureLongitude");
+  const allowedRadiusMeters = inspection.get("closureRadiusMeters");
+  const policy = closureObject(inspection.get("closurePolicy"));
+
+  if (latitude === null && longitude === null) return null;
+  return {
+    latitude: latitude,
+    longitude: longitude,
+    allowedRadiusMeters: allowedRadiusMeters,
+    closurePolicy: policy,
+  };
+}
+
+function closureNullable(value) {
+  return value === undefined || value === null ? null : value;
 }
 
 function validLatitude(value) {
@@ -67,8 +92,10 @@ function distanceMeters(pointA, pointB) {
   const latB = radians(Number(pointB.latitude));
   const latDelta = radians(Number(pointB.latitude) - Number(pointA.latitude));
   const lonDelta = radians(Number(pointB.longitude) - Number(pointA.longitude));
-  const haversine = Math.sin(latDelta / 2) ** 2 +
-    Math.cos(latA) * Math.cos(latB) * Math.sin(lonDelta / 2) ** 2;
+  const sinLatitude = Math.sin(latDelta / 2);
+  const sinLongitude = Math.sin(lonDelta / 2);
+  const haversine = sinLatitude * sinLatitude +
+    Math.cos(latA) * Math.cos(latB) * sinLongitude * sinLongitude;
   return earthRadius * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
@@ -80,7 +107,7 @@ function countPayloadPhotos(payload) {
       ? responses[key].photos
       : [];
     photos.forEach((photo, index) => {
-      const id = String((photo && (photo.fileId || photo.id || photo.fileName)) || `${key}-${index}`);
+      const id = String((photo && (photo.fileId || photo.id || photo.fileName)) || (key + "-" + index));
       ids[id] = true;
     });
   });
@@ -89,7 +116,7 @@ function countPayloadPhotos(payload) {
   fieldSheets.forEach((sheet, index) => {
     if (!sheet || !sheet.photo) return;
     const photo = sheet.photo;
-    const id = String(photo.fileId || photo.id || photo.fileName || `field-${index}`);
+    const id = String(photo.fileId || photo.id || photo.fileName || ("field-" + index));
     ids[id] = true;
   });
 
@@ -98,8 +125,8 @@ function countPayloadPhotos(payload) {
     : [];
   attachments.forEach((file, index) => {
     const mime = String((file && file.mimeType) || "");
-    if (!mime.startsWith("image/")) return;
-    const id = String(file.fileId || file.id || file.fileName || `attachment-${index}`);
+    if (mime.indexOf("image/") !== 0) return;
+    const id = String(file.fileId || file.id || file.fileName || ("attachment-" + index));
     ids[id] = true;
   });
 
@@ -153,8 +180,8 @@ function validateClosureLocation(policy, installation, evidence) {
     };
   }
 
-  const installationLatitude = closureFinite(installation.get("latitude"));
-  const installationLongitude = closureFinite(installation.get("longitude"));
+  const installationLatitude = closureFinite(installationValue(installation, "latitude"));
+  const installationLongitude = closureFinite(installationValue(installation, "longitude"));
   const latitude = closureFinite(evidence.latitude);
   const longitude = closureFinite(evidence.longitude);
   const accuracyMeters = Math.max(0, closureFinite(evidence.accuracyMeters) || 0);
@@ -178,7 +205,7 @@ function validateClosureLocation(policy, installation, evidence) {
 
   const allowedRadiusMeters = Math.max(
     1,
-    Number(installation.get("allowedRadiusMeters") || policy.allowedRadiusMeters || 100),
+    Number(installationValue(installation, "allowedRadiusMeters") || policy.allowedRadiusMeters || 100),
   );
   const maximumAccuracyMeters = Math.max(1, Number(policy.maximumAccuracyMeters || 50));
   const distance = distanceMeters(
@@ -265,18 +292,26 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
   }
 
   const company = e.app.findRecordById("companies", auth.companyId);
+  const payload = closureObject(inspection.get("payload"));
   const installationId = inspection.getString("installation");
-  const installation = installationId
+  const installationRecord = installationId
     ? e.app.findRecordById("installations", installationId)
     : null;
+  const trustedInstallation = buildTrustedInspectionInstallation(inspection);
+  const installation = installationRecord || trustedInstallation;
+  const installationPolicy = installationRecord
+    ? installationRecord.get("closurePolicy")
+    : trustedInstallation
+      ? trustedInstallation.closurePolicy
+      : {};
   const policy = mergeClosurePolicy(
     company.get("closurePolicy"),
-    installation ? installation.get("closurePolicy") : {},
+    installationPolicy,
   );
-  const platform = ["android", "ios", "web"].includes(String(body.platform))
-    ? String(body.platform)
+  const requestedPlatform = String(body.platform);
+  const platform = ["android", "ios", "web"].indexOf(requestedPlatform) >= 0
+    ? requestedPlatform
     : "web";
-  const payload = closureObject(inspection.get("payload"));
   const requirements = checkClosureRequirements(payload, policy, platform);
   const location = validateClosureLocation(policy, installation, closureObject(body.evidence));
   const overrideReason = String(body.overrideReason || "").trim();
@@ -342,14 +377,14 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
     closure.set("closedBy", auth.userId);
     closure.set("deviceId", String(body.deviceId).slice(0, 160));
     closure.set("platform", platform);
-    closure.set("latitude", evidence.latitude ?? null);
-    closure.set("longitude", evidence.longitude ?? null);
-    closure.set("accuracyMeters", evidence.accuracyMeters ?? null);
-    closure.set("installationLatitude", evidence.installationLatitude ?? null);
-    closure.set("installationLongitude", evidence.installationLongitude ?? null);
-    closure.set("distanceMeters", evidence.distanceMeters ?? null);
-    closure.set("allowedRadiusMeters", evidence.allowedRadiusMeters ?? null);
-    closure.set("maximumAccuracyMeters", evidence.maximumAccuracyMeters ?? null);
+    closure.set("latitude", closureNullable(evidence.latitude));
+    closure.set("longitude", closureNullable(evidence.longitude));
+    closure.set("accuracyMeters", closureNullable(evidence.accuracyMeters));
+    closure.set("installationLatitude", closureNullable(evidence.installationLatitude));
+    closure.set("installationLongitude", closureNullable(evidence.installationLongitude));
+    closure.set("distanceMeters", closureNullable(evidence.distanceMeters));
+    closure.set("allowedRadiusMeters", closureNullable(evidence.allowedRadiusMeters));
+    closure.set("maximumAccuracyMeters", closureNullable(evidence.maximumAccuracyMeters));
     closure.set("result", finalResult);
     closure.set("requirements", requirements);
     closure.set("evidence", evidence);

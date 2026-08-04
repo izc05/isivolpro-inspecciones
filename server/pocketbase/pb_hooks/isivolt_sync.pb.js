@@ -153,6 +153,14 @@ function serializeInspection(record) {
     clientUpdatedAt: record.getString("clientUpdatedAt"),
     lastSyncedAt: record.getString("lastSyncedAt"),
     deletedAt: record.getString("deletedAt"),
+    closureConfig: {
+      latitude: record.get("closureLatitude"),
+      longitude: record.get("closureLongitude"),
+      allowedRadiusMeters: record.get("closureRadiusMeters"),
+      policy: record.get("closurePolicy"),
+      configuredBy: record.getString("closureConfiguredBy"),
+      configuredAt: record.getString("closureConfiguredAt")
+    },
     created: record.getString("created"),
     updated: record.getString("updated"),
   };

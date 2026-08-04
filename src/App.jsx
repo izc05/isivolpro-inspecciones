@@ -64,6 +64,7 @@ import {
 } from "./utils/fileStorage";
 import { useAuth } from "./context/AuthContext";
 import { CHECKLIST } from "./data/checklistRebt2002";
+import ConnectedInspectionBridge from "./integration/ConnectedInspectionBridge.jsx";
 import {
   buildInspectionSyncPayload,
   createLocalInspectionRecord,
@@ -7889,67 +7890,8 @@ export default function IsiVoltProInspecciones() {
     localStorage.setItem("isivolt_inspecciones", JSON.stringify(inspections));
   }, [inspections]);
 
-  // Sincronizar la cola después de un breve periodo sin cambios y al recuperar Internet.
-  useEffect(() => {
-    if (!user || !isSyncConfigured()) return undefined;
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      setSyncRuntimeState((current) => ({
-        ...current,
-        status: "offline",
-        message: "Sin conexión. Los cambios quedan pendientes en el dispositivo.",
-      }));
-      return undefined;
-    }
+  // La sincronización bidireccional se gestiona en ConnectedInspectionBridge.
 
-    window.clearTimeout(syncTimerRef.current);
-    const controller = new AbortController();
-    syncTimerRef.current = window.setTimeout(async () => {
-      if (syncInFlightRef.current) return;
-      syncInFlightRef.current = true;
-      setSyncRuntimeState((current) => ({ ...current, status: "syncing", message: "Sincronizando..." }));
-
-      try {
-        const result = await syncPendingInspections({
-          firebaseUser: user,
-          signal: controller.signal,
-        });
-        if (result.synced > 0) {
-          setInspections((previous) => refreshInspectionListSyncMetadata(previous));
-        }
-        setSyncRuntimeState({
-          status: result.conflicts > 0 ? "conflict" : result.errors > 0 ? "error" : "synced",
-          total: result.total,
-          synced: result.synced,
-          conflicts: result.conflicts,
-          errors: result.errors,
-          message: result.conflicts > 0
-            ? "Hay cambios que necesitan revisión."
-            : result.errors > 0
-              ? "No se pudieron enviar todos los cambios."
-              : result.total > 0
-                ? "Cambios sincronizados."
-                : "Todo está al día.",
-        });
-      } catch (error) {
-        if (error?.name !== "AbortError") {
-          console.warn("No se pudo completar la sincronización", error);
-          setSyncRuntimeState((current) => ({
-            ...current,
-            status: "error",
-            errors: Math.max(1, current.errors || 0),
-            message: error?.message || "Error de sincronización",
-          }));
-        }
-      } finally {
-        syncInFlightRef.current = false;
-      }
-    }, 1200);
-
-    return () => {
-      window.clearTimeout(syncTimerRef.current);
-      controller.abort();
-    };
-  }, [inspections, user, syncTrigger]);
 
   // Actualizar automáticamente la inspección actual y dejar el cambio en la cola offline.
   useEffect(() => {
@@ -8290,6 +8232,20 @@ export default function IsiVoltProInspecciones() {
           />
         )}
 
+                <ConnectedInspectionBridge
+          screen={screen}
+          currentId={currentId}
+          inspections={inspections}
+          setInspections={setInspections}
+          data={data}
+          setData={setData}
+          selectedBlocks={selectedBlocks}
+          responses={responses}
+          measurements={measurements}
+          fieldSheets={fieldSheets}
+          signatures={signatures}
+          calculations={calculations}
+        />
         {screen !== "report" && <BottomNav screen={screen} setScreen={setScreen} onReportClick={openReportReview} />}
         {showFinalReview && (
           <FinalReviewModal
