@@ -19,6 +19,7 @@ import {
 } from "./syncQueue.js";
 import {
   getSyncMetadata,
+  markLocalInspectionSynced,
   resetSyncMetadataStore,
 } from "./localSyncStore.js";
 import { processSyncQueue } from "./syncEngine.js";
@@ -64,6 +65,8 @@ test("migra una inspección antigua sin cambiar su id local", () => {
   assert.equal(firstMigration.sync.inspectionId, secondMigration.sync.inspectionId);
   assert.equal(firstMigration.sync.syncStatus, SYNC_STATUS.LOCAL_ONLY);
   assert.equal(firstMigration.sync.ownerUserId, "user-1");
+  assert.equal(firstMigration.sync.localRevision, 1);
+  assert.equal(firstMigration.sync.serverRevision, 0);
 });
 
 test("marca cambios pendientes conservando el inspectionId", () => {
@@ -77,11 +80,12 @@ test("marca cambios pendientes conservando el inspectionId", () => {
 
   assert.equal(pending.sync.inspectionId, created.sync.inspectionId);
   assert.equal(pending.sync.syncStatus, SYNC_STATUS.PENDING);
-  assert.equal(pending.sync.revision, 2);
+  assert.equal(pending.sync.localRevision, 2);
+  assert.equal(pending.sync.serverRevision, 0);
   assert.equal(pending.updatedAt, pending.sync.updatedAt);
 });
 
-test("genera un paquete sincronizable con revisión y dispositivo", () => {
+test("genera un paquete con revisión local y revisión base del servidor", () => {
   resetStores();
   const pending = markInspectionRecordPending(createLocalInspectionRecord({
     id: "local-2",
@@ -91,10 +95,29 @@ test("genera un paquete sincronizable con revisión y dispositivo", () => {
   const payload = buildInspectionSyncPayload(pending, { deviceId: "android-test" });
 
   assert.equal(payload.inspectionId, pending.sync.inspectionId);
-  assert.equal(payload.revision, pending.sync.revision);
+  assert.equal(payload.revision, pending.sync.localRevision);
+  assert.equal(payload.baseRevision, 0);
   assert.equal(payload.deviceId, "android-test");
   assert.equal(payload.inspection.id, "local-2");
   assert.equal(payload.inspection.sync, undefined);
+});
+
+test("una edición sin conexión conserva la última revisión confirmada", () => {
+  resetStores();
+  const created = createLocalInspectionRecord({ id: "local-revisions", data: {} });
+  markLocalInspectionSynced(created.id, { serverRevision: 4 });
+
+  const firstPending = markInspectionRecordPending({
+    ...created,
+    sync: getSyncMetadata(created.id),
+  });
+  const secondPending = markInspectionRecordPending(firstPending);
+  const payload = buildInspectionSyncPayload(secondPending);
+
+  assert.equal(secondPending.sync.serverRevision, 4);
+  assert.equal(secondPending.sync.localRevision, 6);
+  assert.equal(payload.baseRevision, 4);
+  assert.equal(payload.revision, 6);
 });
 
 test("la cola offline sustituye operaciones repetidas de la misma revisión", () => {
@@ -147,7 +170,7 @@ test("el motor confirma una operación aceptada por el servidor", async () => {
   enqueueSyncOperation({
     inspectionId: pending.sync.inspectionId,
     localInspectionId: pending.id,
-    revision: pending.sync.revision,
+    revision: pending.sync.localRevision,
     payload: buildInspectionSyncPayload(pending, { deviceId: "android-1" }),
   });
 
@@ -155,6 +178,7 @@ test("el motor confirma una operación aceptada por el servidor", async () => {
     client: {
       async pushInspection(payload) {
         assert.equal(payload.inspectionId, pending.sync.inspectionId);
+        assert.equal(payload.baseRevision, 0);
         return { revision: 7, syncedAt: "2026-08-04T20:00:00.000Z" };
       },
     },
@@ -164,7 +188,7 @@ test("el motor confirma una operación aceptada por el servidor", async () => {
   assert.equal(result.errors, 0);
   assert.equal(getSyncQueue().length, 0);
   assert.equal(getSyncMetadata(pending.id).syncStatus, SYNC_STATUS.SYNCED);
-  assert.equal(getSyncMetadata(pending.id).revision, 7);
+  assert.equal(getSyncMetadata(pending.id).serverRevision, 7);
 });
 
 test("el motor conserva en cola un conflicto de revisión", async () => {
@@ -176,7 +200,7 @@ test("el motor conserva en cola un conflicto de revisión", async () => {
   enqueueSyncOperation({
     inspectionId: pending.sync.inspectionId,
     localInspectionId: pending.id,
-    revision: pending.sync.revision,
+    revision: pending.sync.localRevision,
     payload: buildInspectionSyncPayload(pending),
   });
 
