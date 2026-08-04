@@ -2,6 +2,7 @@ import { buildSyncEnvelope, createStableInspectionId } from "./contracts.js";
 import {
   ensureSyncMetadata,
   getDeviceId,
+  getSyncMetadata,
   markLocalInspectionPending,
   removeSyncMetadata,
 } from "./localSyncStore.js";
@@ -38,12 +39,12 @@ export function normalizeInspectionRecord(
 
   const sync = inspection?.sync?.inspectionId
     ? {
-        ...storedMetadata,
         ...inspection.sync,
-        inspectionId: inspection.sync.inspectionId,
-        companyId: inspection.sync.companyId || storedMetadata.companyId || companyId,
-        ownerUserId: inspection.sync.ownerUserId || storedMetadata.ownerUserId || ownerUserId,
-        assignedUserId: inspection.sync.assignedUserId ?? storedMetadata.assignedUserId ?? assignedUserId,
+        ...storedMetadata,
+        inspectionId: storedMetadata.inspectionId || inspection.sync.inspectionId,
+        companyId: storedMetadata.companyId || inspection.sync.companyId || companyId,
+        ownerUserId: storedMetadata.ownerUserId || inspection.sync.ownerUserId || ownerUserId,
+        assignedUserId: storedMetadata.assignedUserId ?? inspection.sync.assignedUserId ?? assignedUserId,
       }
     : storedMetadata;
 
@@ -57,6 +58,17 @@ export function normalizeInspectionRecord(
 export function migrateInspectionRecords(inspections, options = {}) {
   if (!Array.isArray(inspections)) return [];
   return inspections.map((inspection) => normalizeInspectionRecord(inspection, options));
+}
+
+export function refreshInspectionSyncMetadata(inspection) {
+  assertInspection(inspection);
+  const metadata = getSyncMetadata(inspection.id);
+  return metadata ? { ...inspection, sync: metadata } : inspection;
+}
+
+export function refreshInspectionListSyncMetadata(inspections) {
+  if (!Array.isArray(inspections)) return [];
+  return inspections.map(refreshInspectionSyncMetadata);
 }
 
 export function createLocalInspectionRecord(
