@@ -44,6 +44,75 @@ function requireActiveUser(e) {
   };
 }
 
+function verifyFirebaseIdToken(idToken) {
+  const apiKey = String($os.getenv("FIREBASE_WEB_API_KEY") || "").trim();
+  if (!apiKey) {
+    throw new InternalServerError("Falta FIREBASE_WEB_API_KEY en el servidor");
+  }
+  if (!String(idToken || "").trim()) {
+    throw new BadRequestError("Falta el token de Firebase", { code: "FIREBASE_TOKEN_REQUIRED" });
+  }
+
+  let response;
+  try {
+    response = $http.send({
+      method: "POST",
+      url: `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: String(idToken) }),
+      timeout: 15,
+    });
+  } catch (error) {
+    throw new InternalServerError("No se pudo validar la cuenta Firebase", {
+      code: "FIREBASE_LOOKUP_UNAVAILABLE",
+      detail: String(error),
+    });
+  }
+
+  if (response.statusCode !== 200 || !response.json?.users?.length) {
+    throw new UnauthorizedError("La sesión Firebase no es válida o ha caducado", {
+      code: "INVALID_FIREBASE_TOKEN",
+    });
+  }
+
+  const firebaseUser = response.json.users[0];
+  if (firebaseUser.disabled) {
+    throw new ForbiddenError("La cuenta Firebase está desactivada", {
+      code: "FIREBASE_USER_DISABLED",
+    });
+  }
+
+  return {
+    uid: String(firebaseUser.localId || ""),
+    email: String(firebaseUser.email || "").trim().toLowerCase(),
+    displayName: String(firebaseUser.displayName || "").trim(),
+    emailVerified: Boolean(firebaseUser.emailVerified),
+  };
+}
+
+function findProvisionedSyncUser(app, firebaseUser) {
+  let records = app.findRecordsByFilter(
+    "users",
+    "firebaseUid = {:uid}",
+    "",
+    1,
+    0,
+    { uid: firebaseUser.uid },
+  );
+  if (records.length) return records[0];
+
+  if (!firebaseUser.email) return null;
+  records = app.findRecordsByFilter(
+    "users",
+    "email = {:email}",
+    "",
+    1,
+    0,
+    { email: firebaseUser.email },
+  );
+  return records.length ? records[0] : null;
+}
+
 function validateSyncBody(body) {
   if (Number(body.contractVersion || 0) !== ISIVOLT_SYNC_CONTRACT_VERSION) {
     throw new BadRequestError("Versión de sincronización no compatible", {
@@ -86,6 +155,41 @@ function serializeInspection(record) {
     updated: record.getString("updated"),
   };
 }
+
+routerAdd("POST", "/api/isivolt/v1/auth/firebase", (e) => {
+  const body = new DynamicModel({ idToken: "" });
+  e.bindBody(body);
+  const firebaseUser = verifyFirebaseIdToken(body.idToken);
+  const record = findProvisionedSyncUser(e.app, firebaseUser);
+
+  if (!record) {
+    throw new ForbiddenError("La cuenta todavía no está habilitada en IsiVoltPro", {
+      code: "SYNC_USER_NOT_PROVISIONED",
+      email: firebaseUser.email,
+    });
+  }
+  if (!record.getBool("active")) {
+    throw new ForbiddenError("La cuenta de sincronización está desactivada", {
+      code: "SYNC_USER_DISABLED",
+    });
+  }
+
+  const linkedUid = record.getString("firebaseUid");
+  if (linkedUid && linkedUid !== firebaseUser.uid) {
+    throw new ForbiddenError("La cuenta está vinculada a otro usuario Firebase", {
+      code: "FIREBASE_UID_MISMATCH",
+    });
+  }
+  if (!linkedUid) {
+    record.set("firebaseUid", firebaseUser.uid);
+    if (!record.getString("name") && firebaseUser.displayName) {
+      record.set("name", firebaseUser.displayName);
+    }
+    e.app.save(record);
+  }
+
+  return $apis.recordAuthResponse(e, record, "firebase");
+});
 
 routerAdd("POST", "/api/isivolt/v1/inspections/sync", (e) => {
   const auth = requireActiveUser(e);
