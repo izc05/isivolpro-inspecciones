@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
@@ -64,6 +64,17 @@ import {
 } from "./utils/fileStorage";
 import { useAuth } from "./context/AuthContext";
 import { CHECKLIST } from "./data/checklistRebt2002";
+import {
+  buildInspectionSyncPayload,
+  createLocalInspectionRecord,
+  deleteInspectionSyncRecord,
+  markInspectionRecordPending,
+  migrateInspectionRecords,
+} from "./sync/inspectionRecord.js";
+import {
+  enqueueSyncOperation,
+  removeInspectionQueueItems,
+} from "./sync/syncQueue.js";
 
 const DEFAULT_REPORT_TITLE = "Informe de inspección eléctrica";
 const EMPTY_SIGNATURES = { inspector: null, client: null };
@@ -7741,6 +7752,7 @@ export default function IsiVoltProInspecciones() {
   // Gestión de múltiples inspecciones y persistencia
   const [inspections, setInspections] = useState([]);
   const [currentId, setCurrentId] = useState(null);
+  const skipNextAutoSaveRef = useRef(false);
   const activeChecklistItems = useMemo(
     () => [...applyChecklistOverrides(CHECKLIST, checklistOverrides), ...customChecklistItems],
     [checklistOverrides, customChecklistItems]
@@ -7770,7 +7782,10 @@ export default function IsiVoltProInspecciones() {
     const saved = localStorage.getItem("isivolt_inspecciones");
     if (saved) {
       try {
-        setInspections(JSON.parse(saved));
+        const parsedInspections = JSON.parse(saved);
+        setInspections(migrateInspectionRecords(parsedInspections, {
+          ownerUserId: user?.uid || "",
+        }));
       } catch (e) {
         console.error("Error cargando inspecciones", e);
       }
@@ -7847,42 +7862,54 @@ export default function IsiVoltProInspecciones() {
     localStorage.setItem("isivolt_inspecciones", JSON.stringify(inspections));
   }, [inspections]);
 
-  // Actualizar automáticamente la inspección actual en la lista cuando cambien sus datos
+  // Actualizar automáticamente la inspección actual y dejar el cambio en la cola offline.
   useEffect(() => {
     if (!currentId) return;
+    if (skipNextAutoSaveRef.current) {
+      skipNextAutoSaveRef.current = false;
+      return;
+    }
+
+    const currentInspection = inspections.find((inspection) => inspection.id === currentId);
+    if (!currentInspection) return;
 
     const completion = getInspectionCompletion(selectedBlocks, responses, activeChecklistItems);
     const verdict = calculateVerdict(responses, completion.isComplete);
     const defectCount = getDefectEntriesFromResponses(responses).length;
 
-    setInspections((prev) =>
-      prev.map((ins) => {
-        if (ins.id === currentId) {
-          return {
-            ...ins,
-            data,
-            selectedBlocks,
-            responses,
-            measurements,
-            fieldSheets,
-            signatures,
-            calculations,
-            updatedAt: new Date().toISOString(),
+    const pendingInspection = markInspectionRecordPending({
+      ...currentInspection,
+      data,
+      selectedBlocks,
+      responses,
+      measurements,
+      fieldSheets,
+      signatures,
+      calculations,
+      status: verdict.label,
+      progress: completion.percent,
+      defects: defectCount,
+    }, {
+      ownerUserId: user?.uid || "",
+    });
 
-            status: verdict.label,
-            progress: completion.percent,
-            defects: defectCount,
-          };
-        }
-        return ins;
-      })
-    );
+    setInspections((previous) => previous.map((inspection) =>
+      inspection.id === currentId ? pendingInspection : inspection
+    ));
+
+    enqueueSyncOperation({
+      inspectionId: pendingInspection.sync.inspectionId,
+      localInspectionId: pendingInspection.id,
+      revision: pendingInspection.sync.revision,
+      payload: buildInspectionSyncPayload(pendingInspection),
+    });
   }, [data, selectedBlocks, responses, measurements, fieldSheets, signatures, calculations, currentId, activeChecklistItems]);
 
   const createInspection = () => {
-    const newId = Date.now().toString(); // ID simple basado en tiempo
+    const newId = Date.now().toString();
+    const now = new Date().toISOString();
     const initialData = { ...INITIAL_INSPECTION, attachments: [] };
-    const newInspection = {
+    const initialRecord = createLocalInspectionRecord({
       id: newId,
       data: initialData,
       selectedBlocks: getRecommendedBlockIds(INITIAL_INSPECTION),
@@ -7891,14 +7918,28 @@ export default function IsiVoltProInspecciones() {
       fieldSheets: [],
       signatures: EMPTY_SIGNATURES,
       calculations: INITIAL_INSPECTION.calculations,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
       status: "Borrador",
       progress: 0,
       defects: 0,
       reportGenerated: false,
-    };
-    setInspections((prev) => [newInspection, ...prev]);
+    }, {
+      ownerUserId: user?.uid || "",
+    });
+    const newInspection = markInspectionRecordPending(initialRecord, {
+      ownerUserId: user?.uid || "",
+    });
+
+    enqueueSyncOperation({
+      inspectionId: newInspection.sync.inspectionId,
+      localInspectionId: newInspection.id,
+      revision: newInspection.sync.revision,
+      payload: buildInspectionSyncPayload(newInspection),
+    });
+
+    skipNextAutoSaveRef.current = true;
+    setInspections((previous) => [newInspection, ...previous]);
     setCurrentId(newId);
     setData(newInspection.data);
     setSelectedBlocks(newInspection.selectedBlocks);
@@ -7913,6 +7954,7 @@ export default function IsiVoltProInspecciones() {
   const loadInspection = (id) => {
     const ins = inspections.find((i) => i.id === id);
     if (ins) {
+      skipNextAutoSaveRef.current = true;
       setCurrentId(id);
       setData(ins.data);
       setSelectedBlocks(ins.selectedBlocks);
@@ -7927,6 +7969,11 @@ export default function IsiVoltProInspecciones() {
 
   const deleteInspection = async (id) => {
     if (window.confirm("¿Seguro que quieres borrar esta inspección?")) {
+      const deletedInspection = inspections.find((inspection) => inspection.id === id);
+      if (deletedInspection?.sync?.inspectionId) {
+        removeInspectionQueueItems(deletedInspection.sync.inspectionId);
+      }
+      deleteInspectionSyncRecord(id);
       setInspections((prev) => prev.filter((i) => i.id !== id));
       try {
         await deleteFilesByInspection(id);
@@ -7949,6 +7996,7 @@ export default function IsiVoltProInspecciones() {
   const onEdit = (id) => {
     const ins = inspections.find((i) => i.id === id);
     if (ins) {
+      skipNextAutoSaveRef.current = true;
       setCurrentId(id);
       setData(ins.data);
       setSelectedBlocks(ins.selectedBlocks);
