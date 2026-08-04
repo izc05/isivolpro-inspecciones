@@ -7,6 +7,7 @@ on:
     paths:
       - src/App.jsx
       - src/sync/**
+      - server/pocketbase/**
       - scripts/integrate-sync-app.mjs
       - package.json
       - package-lock.json
@@ -39,6 +40,9 @@ jobs:
 
       - name: Test synchronization contracts
         run: npm run test:sync
+
+      - name: Validate PocketBase scripts
+        run: npm run test:server
 
       - name: Build application
         run: npm run build
