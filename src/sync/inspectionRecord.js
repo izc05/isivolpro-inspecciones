@@ -1,10 +1,10 @@
-import { buildSyncEnvelope, createStableInspectionId } from "./contracts";
+import { buildSyncEnvelope, createStableInspectionId } from "./contracts.js";
 import {
   ensureSyncMetadata,
   getDeviceId,
   markLocalInspectionPending,
   removeSyncMetadata,
-} from "./localSyncStore";
+} from "./localSyncStore.js";
 
 function assertInspection(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
