@@ -1,0 +1,6 @@
+# Añadir esta regla al túnel de IsiVoltPro antes de la regla final http_status:404.
+# El hostname debe existir en Cloudflare y apuntar al túnel correspondiente.
+ingress:
+  - hostname: bt-api.isivoltpro.com
+    service: http://127.0.0.1:8091
+  - service: http_status:404
