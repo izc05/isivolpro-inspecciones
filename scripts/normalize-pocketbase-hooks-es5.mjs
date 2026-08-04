@@ -7,8 +7,10 @@ const closurePath = path.join(hooksDir, "isivolt_closure.pb.js");
 let closure = fs.readFileSync(closurePath, "utf8");
 
 function replaceExact(label, before, after) {
+  // El bloque normalizado puede contener parte del texto original. Comprobar
+  // primero el resultado evita aplicar dos veces transformaciones idempotentes.
+  if (closure.includes(after)) return;
   if (!closure.includes(before)) {
-    if (closure.includes(after)) return;
     throw new Error(`No se encontró el bloque esperado para normalizar: ${label}`);
   }
   closure = closure.replace(before, after);
