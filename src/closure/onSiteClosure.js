@@ -49,7 +49,10 @@ export function normalizeDevicePosition(position) {
   const coords = position?.coords || position || {};
   const latitude = toFiniteNumber(coords.latitude);
   const longitude = toFiniteNumber(coords.longitude);
-  const accuracyMeters = Math.max(0, toFiniteNumber(coords.accuracy) ?? 0);
+  const accuracyMeters = Math.max(
+    0,
+    toFiniteNumber(coords.accuracy ?? coords.accuracyMeters) ?? 0,
+  );
 
   if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
     throw new TypeError("La ubicación capturada no contiene coordenadas válidas");
@@ -59,7 +62,9 @@ export function normalizeDevicePosition(position) {
     latitude,
     longitude,
     accuracyMeters,
-    capturedAtDevice: new Date(position?.timestamp || Date.now()).toISOString(),
+    capturedAtDevice: new Date(
+      position?.timestamp || position?.capturedAtDevice || Date.now(),
+    ).toISOString(),
   };
 }
 
