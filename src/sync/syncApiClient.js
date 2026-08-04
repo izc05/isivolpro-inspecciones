@@ -125,6 +125,36 @@ export function createSyncApiClient({
       return request(`/api/isivolt/v1/inspections${query ? `?${query}` : ""}`, { signal });
     },
 
+    getClosurePolicy(options = {}) {
+      return request("/api/isivolt/v1/admin/closure-policy", {
+        signal: options.signal,
+      });
+    },
+
+    updateClosurePolicy(policy, options = {}) {
+      return request("/api/isivolt/v1/admin/closure-policy", {
+        method: "PUT",
+        body: { policy },
+        signal: options.signal,
+      });
+    },
+
+    getInspectionClosureConfig(inspectionId, options = {}) {
+      if (!inspectionId) throw new Error("inspectionId es obligatorio para consultar el cierre");
+      return request(`/api/isivolt/v1/inspections/${encodeURIComponent(inspectionId)}/closure-config`, {
+        signal: options.signal,
+      });
+    },
+
+    updateInspectionClosureConfig(inspectionId, config, options = {}) {
+      if (!inspectionId) throw new Error("inspectionId es obligatorio para configurar el cierre");
+      return request(`/api/isivolt/v1/inspections/${encodeURIComponent(inspectionId)}/closure-config`, {
+        method: "PUT",
+        body: config,
+        signal: options.signal,
+      });
+    },
+
     closeInspection(inspectionId, closure, options = {}) {
       if (!inspectionId) throw new Error("inspectionId es obligatorio para cerrar");
       return request(`/api/isivolt/v1/inspections/${encodeURIComponent(inspectionId)}/close`, {
