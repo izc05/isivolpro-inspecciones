@@ -3,6 +3,7 @@ import {
   markLocalInspectionSyncError,
   markLocalInspectionSynced,
   markLocalInspectionSyncing,
+  updateSyncMetadata,
 } from "./localSyncStore.js";
 import {
   QUEUE_ITEM_STATUS,
@@ -73,6 +74,12 @@ export async function processSyncQueue({
         serverRevision: response?.revision || item.revision,
         syncedAt: response?.syncedAt || new Date().toISOString(),
       });
+      if (response?.recordId) {
+        updateSyncMetadata(item.localInspectionId, (current) => ({
+          ...current,
+          serverRecordId: response.recordId,
+        }));
+      }
       removeQueueItem(item.queueId);
       result.synced += 1;
       onProgress({ phase: "success", index, item, response, result: { ...result } });

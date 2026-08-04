@@ -29,6 +29,7 @@ import {
   isSyncConfigured,
   syncInspectionWorkspace,
 } from "../sync/syncRuntime.js";
+import { syncWorkspaceFiles } from "../sync/fileSyncRuntime.js";
 import {
   AdminClosurePolicyModal,
   InspectionClosureModal,
@@ -234,29 +235,44 @@ export default function ConnectedInspectionBridge({
           activeLocalId: currentId,
           signal: controller.signal,
         });
-        if (result.inspections !== workspace) {
-          setInspections(result.inspections);
+        const structuredInspections = result.inspections || workspace;
+        const fileTransfer = await syncWorkspaceFiles({
+          inspections: structuredInspections,
+          activeLocalId: currentId,
+          firebaseUser: user,
+          signal: controller.signal,
+        });
+        if (fileTransfer.inspections !== workspace) {
+          setInspections(fileTransfer.inspections);
         }
 
         const pullConflicts = Number(result.pull?.conflicts || 0);
         const totalConflicts = Number(result.conflicts || 0) + pullConflicts;
         const received = Number(result.pull?.received || 0);
         const imported = Number(result.pull?.added || 0) + Number(result.pull?.updated || 0);
+        const fileErrors = Number(fileTransfer.summary.errors.length || 0);
+        const transferredFiles = Number(fileTransfer.summary.uploaded || 0) + Number(fileTransfer.summary.downloaded || 0);
         setSyncState({
-          status: totalConflicts > 0 ? "conflict" : result.errors > 0 ? "error" : "synced",
-          total: Number(result.total || 0) + received,
-          synced: Number(result.synced || 0),
+          status: totalConflicts > 0
+            ? "conflict"
+            : Number(result.errors || 0) + fileErrors > 0
+              ? "error"
+              : "synced",
+          total: Number(result.total || 0) + received + Number(fileTransfer.summary.inspected || 0),
+          synced: Number(result.synced || 0) + transferredFiles,
           conflicts: totalConflicts,
-          errors: Number(result.errors || 0),
+          errors: Number(result.errors || 0) + fileErrors,
           message: totalConflicts > 0
             ? "Hay cambios de otro dispositivo que necesitan revisión."
-            : result.errors > 0
-              ? "No se pudieron sincronizar todos los cambios."
-              : imported > 0
-                ? `${imported} cambio${imported === 1 ? "" : "s"} recibido${imported === 1 ? "" : "s"} de otro dispositivo.`
-                : result.total > 0
-                  ? "Cambios sincronizados."
-                  : "Todo está al día.",
+            : Number(result.errors || 0) + fileErrors > 0
+              ? "No se pudieron sincronizar todos los datos o archivos."
+              : transferredFiles > 0
+                ? `${transferredFiles} archivo${transferredFiles === 1 ? "" : "s"} sincronizado${transferredFiles === 1 ? "" : "s"}.`
+                : imported > 0
+                  ? `${imported} cambio${imported === 1 ? "" : "s"} recibido${imported === 1 ? "" : "s"} de otro dispositivo.`
+                  : result.total > 0
+                    ? "Cambios sincronizados."
+                    : "Todo está al día.",
         });
       } catch (error) {
         if (error?.name !== "AbortError") {
@@ -457,6 +473,21 @@ export default function ConnectedInspectionBridge({
       if (Number(syncResult.errors || 0) > 0) throw new Error("No se sincronizaron todos los cambios antes del cierre.");
 
       let synchronizedList = syncResult.inspections || nextInspections;
+      const closureFileTransfer = await syncWorkspaceFiles({
+        inspections: synchronizedList,
+        activeLocalId: null,
+        firebaseUser: user,
+      });
+      if (closureFileTransfer.summary.errors.length > 0) {
+        throw Object.assign(
+          new Error("No se pudieron sincronizar todas las fotografías o documentos antes del cierre."),
+          {
+            code: "FILE_SYNC_BEFORE_CLOSE_FAILED",
+            fileErrors: closureFileTransfer.summary.errors,
+          },
+        );
+      }
+      synchronizedList = closureFileTransfer.inspections;
       setInspections(synchronizedList);
       let synchronizedInspection = getCurrentInspection(synchronizedList, currentId);
       if (!synchronizedInspection) throw new Error("No se recuperó la preinspección sincronizada.");

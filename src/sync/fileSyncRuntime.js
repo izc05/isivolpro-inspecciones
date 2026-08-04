@@ -285,8 +285,17 @@ export async function syncInspectionFiles({
 
       const mapped = getLocalFileMapping(inspectionId, remote.syncFileId);
       const existingLocal = localBySyncId.get(remote.syncFileId);
-      if (mapped?.localFileId || existingLocal?.id) {
-        const localFileId = mapped?.localFileId || existingLocal.id;
+      let mappedLocalRecord = null;
+      if (mapped?.localFileId) {
+        try {
+          mappedLocalRecord = await fileStorage.getFile(mapped.localFileId);
+        } catch {
+          mappedLocalRecord = null;
+        }
+      }
+      const confirmedLocal = mappedLocalRecord?.id ? mappedLocalRecord : existingLocal;
+      if (confirmedLocal?.id) {
+        const localFileId = confirmedLocal.id;
         saveLocalFileMapping(inspectionId, remote.syncFileId, {
           localFileId,
           serverFileId: remote.serverFileId,

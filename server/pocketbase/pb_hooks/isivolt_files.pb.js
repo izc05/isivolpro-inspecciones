@@ -54,7 +54,7 @@ onRecordCreateRequest((e) => {
     { company: auth.companyId, syncFileId: syncFileId },
   );
   if (duplicates.length) {
-    throw new ConflictError("El archivo ya está sincronizado", {
+    throw new BadRequestError("El archivo ya está sincronizado", {
       code: "SYNC_FILE_ALREADY_EXISTS",
       recordId: duplicates[0].id,
     });

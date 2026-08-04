@@ -78,6 +78,7 @@ function applyRemoteMetadata(localId, remote) {
   return updateSyncMetadata(localId, (current) => ({
     ...current,
     inspectionId,
+    serverRecordId: remote.id || current.serverRecordId || "",
     status: remote.status || current.status,
     syncStatus: SYNC_STATUS.SYNCED,
     serverRevision,

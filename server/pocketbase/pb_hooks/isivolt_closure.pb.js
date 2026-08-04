@@ -133,11 +133,27 @@ function countPayloadPhotos(payload) {
   return Object.keys(ids).length;
 }
 
-function checkClosureRequirements(payload, policy, platform) {
+function countUploadedInspectionPhotos(app, inspectionRecordId, companyId) {
+  const records = app.findRecordsByFilter(
+    "inspection_files",
+    "inspection = {:inspection} && company = {:company} && fileType = 'image'",
+    "",
+    500,
+    0,
+    { inspection: inspectionRecordId, company: companyId },
+  );
+  return records.length;
+}
+
+function checkClosureRequirements(payload, policy, platform, uploadedPhotoCount) {
   const signatures = closureObject(payload.signatures);
   const inspectorSigned = Boolean(signatures.inspector);
   const clientSigned = Boolean(signatures.client);
-  const photoCount = countPayloadPhotos(payload);
+  const payloadPhotoCount = countPayloadPhotos(payload);
+  const synchronizedPhotoCount = Math.max(0, Number(uploadedPhotoCount || 0));
+  const photoCount = policy.requireServerSyncBeforeClose
+    ? synchronizedPhotoCount
+    : Math.max(payloadPhotoCount, synchronizedPhotoCount);
   const missing = [];
 
   if (policy.requireMobileClose && platform !== "android" && platform !== "ios") {
@@ -312,7 +328,17 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
   const platform = ["android", "ios", "web"].indexOf(requestedPlatform) >= 0
     ? requestedPlatform
     : "web";
-  const requirements = checkClosureRequirements(payload, policy, platform);
+  const uploadedPhotoCount = countUploadedInspectionPhotos(
+    e.app,
+    inspection.id,
+    auth.companyId,
+  );
+  const requirements = checkClosureRequirements(
+    payload,
+    policy,
+    platform,
+    uploadedPhotoCount,
+  );
   const location = validateClosureLocation(policy, installation, closureObject(body.evidence));
   const overrideReason = String(body.overrideReason || "").trim();
   const wantsOverride = Boolean(overrideReason);
