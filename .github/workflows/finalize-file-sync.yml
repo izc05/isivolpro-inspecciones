@@ -1,0 +1,122 @@
+name: Finalize protected file synchronization
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - .github/workflows/finalize-file-sync.yml
+  workflow_dispatch:
+
+concurrency:
+  group: isivoltpro-bt-final-file-sync
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Retain PocketBase inspection record identifiers
+        run: node scripts/integrate-server-record-id.mjs
+
+      - name: Harden local file mapping recovery
+        run: node scripts/harden-file-sync-runtime.mjs
+
+      - name: Integrate file transfers in the connected workspace
+        run: node scripts/integrate-file-sync-bridge.mjs
+
+      - name: Harden PocketBase file hooks and closure evidence
+        run: node scripts/harden-pocketbase-file-sync.mjs
+
+      - name: Normalize PocketBase hooks for ES5 runtime
+        run: node scripts/normalize-pocketbase-hooks-es5.mjs
+
+      - name: Test synchronization, files, administration and GPS closure
+        run: npm run test:sync
+
+      - name: Validate all PocketBase migrations, hooks and deployment scripts
+        run: npm run test:server
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Synchronize Capacitor Android
+        run: npx cap sync android
+
+      - name: Build Android debug APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug
+
+      - name: Check generated diff
+        run: git diff --check
+
+      - name: Write file sync validation marker
+        shell: bash
+        run: |
+          cat > docs/final-file-sync-validation.md <<'EOF'
+          # Validación final · Evidencias conectadas
+
+          Estado: **SUPERADA**
+
+          La rama ha superado conjuntamente:
+
+          - subida de fotografías y documentos desde IndexedDB;
+          - descarga protegida hacia otro dispositivo;
+          - identificadores de archivo estables entre APK y PC;
+          - deduplicación y recuperación de referencias locales obsoletas;
+          - comprobación SHA-256;
+          - transferencia multipart a PocketBase;
+          - conteo servidor de fotografías realmente sincronizadas antes del cierre;
+          - pruebas unitarias de referencias, API y runtime de archivos;
+          - validación de migraciones y hooks PocketBase;
+          - compilación web de producción;
+          - sincronización Capacitor Android;
+          - construcción de APK Android de depuración.
+
+          La publicación en el mini PC sigue requiriendo configurar el servidor real y el dominio.
+          EOF
+
+      - name: Commit validated file synchronization
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/integration/ConnectedInspectionBridge.jsx \
+            src/sync/syncEngine.js \
+            src/sync/remoteMerge.js \
+            src/sync/fileSyncRuntime.js \
+            server/pocketbase/pb_hooks/*.js \
+            android \
+            docs/final-file-sync-validation.md
+          if git diff --cached --quiet; then
+            echo "Protected file synchronization was already fully integrated."
+            exit 0
+          fi
+          git commit -m "feat: finalize protected inspection file synchronization"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close
