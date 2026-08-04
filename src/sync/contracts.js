@@ -1,4 +1,4 @@
-export const SYNC_CONTRACT_VERSION = 1;
+export const SYNC_CONTRACT_VERSION = 2;
 
 export const INSPECTION_STATUS = Object.freeze({
   DRAFT: "DRAFT",
@@ -68,6 +68,8 @@ export function buildInitialSyncMetadata({
     assignedUserId,
     status: INSPECTION_STATUS.DRAFT,
     syncStatus: SYNC_STATUS.LOCAL_ONLY,
+    localRevision: 1,
+    serverRevision: 0,
     revision: 1,
     createdAt: now,
     updatedAt: now,
@@ -77,12 +79,26 @@ export function buildInitialSyncMetadata({
   };
 }
 
-export function markInspectionPending(metadata, now = new Date().toISOString()) {
+export function normalizeSyncMetadata(metadata = {}) {
+  const localRevision = Math.max(1, Number(metadata.localRevision || metadata.revision || 1));
+  const serverRevision = Math.max(0, Number(metadata.serverRevision || 0));
   return {
     ...metadata,
     contractVersion: SYNC_CONTRACT_VERSION,
+    localRevision,
+    serverRevision,
+    revision: localRevision,
+  };
+}
+
+export function markInspectionPending(metadata, now = new Date().toISOString()) {
+  const normalized = normalizeSyncMetadata(metadata);
+  const localRevision = normalized.localRevision + 1;
+  return {
+    ...normalized,
     syncStatus: SYNC_STATUS.PENDING,
-    revision: Math.max(1, Number(metadata?.revision || 1)) + 1,
+    localRevision,
+    revision: localRevision,
     updatedAt: now,
     lastSyncError: null,
   };
@@ -110,16 +126,15 @@ export function buildSyncEnvelope({ inspection, metadata, deviceId = "", now = n
     throw new Error("La preinspección necesita un inspectionId estable antes de sincronizar");
   }
 
+  const normalized = normalizeSyncMetadata(metadata);
   return {
     contractVersion: SYNC_CONTRACT_VERSION,
-    inspectionId: metadata.inspectionId,
-    revision: Number(metadata.revision || 1),
+    inspectionId: normalized.inspectionId,
+    revision: normalized.localRevision,
+    baseRevision: normalized.serverRevision,
     deviceId,
     sentAt: now,
-    metadata: {
-      ...metadata,
-      contractVersion: SYNC_CONTRACT_VERSION,
-    },
+    metadata: normalized,
     inspection,
   };
 }
