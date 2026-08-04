@@ -17,7 +17,11 @@ import {
   removeQueueItem,
   retryQueueItem,
 } from "./syncQueue.js";
-import { resetSyncMetadataStore } from "./localSyncStore.js";
+import {
+  getSyncMetadata,
+  resetSyncMetadataStore,
+} from "./localSyncStore.js";
+import { processSyncQueue } from "./syncEngine.js";
 
 function createMemoryStorage() {
   const values = new Map();
@@ -132,4 +136,63 @@ test("una operación fallida puede reintentarse y eliminarse al confirmar", () =
 
   assert.equal(removeQueueItem(item.queueId), true);
   assert.equal(getSyncQueue().length, 0);
+});
+
+test("el motor confirma una operación aceptada por el servidor", async () => {
+  resetStores();
+  const pending = markInspectionRecordPending(createLocalInspectionRecord({
+    id: "local-engine-ok",
+    data: { name: "Instalación sincronizada" },
+  }));
+  enqueueSyncOperation({
+    inspectionId: pending.sync.inspectionId,
+    localInspectionId: pending.id,
+    revision: pending.sync.revision,
+    payload: buildInspectionSyncPayload(pending, { deviceId: "android-1" }),
+  });
+
+  const result = await processSyncQueue({
+    client: {
+      async pushInspection(payload) {
+        assert.equal(payload.inspectionId, pending.sync.inspectionId);
+        return { revision: 7, syncedAt: "2026-08-04T20:00:00.000Z" };
+      },
+    },
+  });
+
+  assert.equal(result.synced, 1);
+  assert.equal(result.errors, 0);
+  assert.equal(getSyncQueue().length, 0);
+  assert.equal(getSyncMetadata(pending.id).syncStatus, SYNC_STATUS.SYNCED);
+  assert.equal(getSyncMetadata(pending.id).revision, 7);
+});
+
+test("el motor conserva en cola un conflicto de revisión", async () => {
+  resetStores();
+  const pending = markInspectionRecordPending(createLocalInspectionRecord({
+    id: "local-engine-conflict",
+    data: { name: "Instalación con conflicto" },
+  }));
+  enqueueSyncOperation({
+    inspectionId: pending.sync.inspectionId,
+    localInspectionId: pending.id,
+    revision: pending.sync.revision,
+    payload: buildInspectionSyncPayload(pending),
+  });
+
+  const result = await processSyncQueue({
+    client: {
+      async pushInspection() {
+        throw Object.assign(new Error("Existe una revisión más reciente"), {
+          status: 409,
+          code: "REVISION_CONFLICT",
+        });
+      },
+    },
+  });
+
+  assert.equal(result.conflicts, 1);
+  assert.equal(getSyncQueue().length, 1);
+  assert.equal(getSyncQueue()[0].status, "ERROR");
+  assert.equal(getSyncMetadata(pending.id).syncStatus, SYNC_STATUS.CONFLICT);
 });
