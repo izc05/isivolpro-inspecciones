@@ -31,6 +31,12 @@ async function parseResponseBody(response) {
   }
 }
 
+function getResponseErrorCode(responseBody, status) {
+  return responseBody?.data?.code ||
+    responseBody?.code ||
+    (status === 409 ? "REVISION_CONFLICT" : "SYNC_REQUEST_FAILED");
+}
+
 export function createSyncApiClient({
   baseUrl = import.meta.env.VITE_SYNC_API_URL || "",
   getAccessToken = () => "",
@@ -77,7 +83,7 @@ export function createSyncApiClient({
           responseBody?.message || `Error del servidor de sincronización (${response.status})`,
           {
             status: response.status,
-            code: responseBody?.code || (response.status === 409 ? "REVISION_CONFLICT" : "SYNC_REQUEST_FAILED"),
+            code: getResponseErrorCode(responseBody, response.status),
             details: responseBody,
           },
         );
