@@ -21,8 +21,17 @@ if [[ -z "${POCKETBASE_BINARY}" || ! -f "${POCKETBASE_BINARY}" ]]; then
   exit 1
 fi
 
+if ! getent group "${APP_GROUP}" >/dev/null 2>&1; then
+  groupadd --system "${APP_GROUP}"
+fi
+
 if ! id "${APP_USER}" >/dev/null 2>&1; then
-  useradd --system --home-dir "${APP_DIR}" --shell /usr/sbin/nologin "${APP_USER}"
+  useradd \
+    --system \
+    --gid "${APP_GROUP}" \
+    --home-dir "${APP_DIR}" \
+    --shell /usr/sbin/nologin \
+    "${APP_USER}"
 fi
 
 install -d -o "${APP_USER}" -g "${APP_GROUP}" -m 0750 "${APP_DIR}"
@@ -44,7 +53,10 @@ fi
 install -o root -g root -m 0644 "${SCRIPT_DIR}/isivoltpro-pocketbase-bt.service" "/etc/systemd/system/${SERVICE_NAME}"
 systemctl daemon-reload
 
-sudo -u "${APP_USER}" "${APP_DIR}/pocketbase" migrate up --dir "${APP_DIR}/pb_migrations"
+(
+  cd "${APP_DIR}"
+  runuser -u "${APP_USER}" -- ./pocketbase migrate up
+)
 
 echo "Instalación preparada. Revisa ${ENV_DIR}/pocketbase-bt.env y después ejecuta:"
 echo "  sudo systemctl enable --now ${SERVICE_NAME}"
