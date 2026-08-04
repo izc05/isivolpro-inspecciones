@@ -8,7 +8,7 @@
     "dev:pc": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "test:sync": "node --test src/sync/*.test.js src/closure/*.test.js",
-    "test:server": "node --check server/pocketbase/pb_migrations/1785880000_create_isivolt_sync_core.js && node --check server/pocketbase/pb_hooks/isivolt_sync.pb.js && bash -n server/pocketbase/deploy/install-local.sh",
+    "test:server": "for file in server/pocketbase/pb_migrations/*.js server/pocketbase/pb_hooks/*.js; do node --check \"$file\"; done && bash -n server/pocketbase/deploy/install-local.sh",
     "test:integration": "npm run test:sync && npm run test:server && npm run build",
     "smoke:sync-server": "node scripts/smoke-sync-server.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
