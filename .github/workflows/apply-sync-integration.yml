@@ -9,6 +9,7 @@ on:
       - src/sync/**
       - server/pocketbase/**
       - scripts/integrate-sync-app.mjs
+      - scripts/integrate-sync-runtime.mjs
       - package.json
       - package-lock.json
       - .github/workflows/apply-sync-integration.yml
@@ -35,8 +36,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Apply guarded integration
+      - name: Apply guarded local metadata integration
         run: node scripts/integrate-sync-app.mjs
+
+      - name: Apply guarded automatic sync integration
+        run: node scripts/integrate-sync-runtime.mjs
 
       - name: Test synchronization contracts
         run: npm run test:sync
@@ -59,5 +63,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/App.jsx
-          git commit -m "feat: integrate local inspection sync metadata"
+          git commit -m "feat: integrate automatic inspection sync"
           git push origin HEAD:feat/apk-pc-sync-gps-close
