@@ -92,7 +92,7 @@ jobs:
           - transferencia multipart a PocketBase;
           - conteo servidor de fotografías realmente sincronizadas antes del cierre;
           - pruebas unitarias de referencias, API y runtime de archivos;
-          - validación de migraciones y hooks PocketBase;
+          - validación estricta de todas las migraciones y hooks PocketBase;
           - compilación web de producción;
           - sincronización Capacitor Android;
           - construcción de APK Android de depuración.
@@ -106,8 +106,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
+            package.json \
+            scripts/normalize-pocketbase-hooks-es5.mjs \
             src/App.jsx \
-            src/connected/ConnectedInspectionBridge.jsx \
+            src/integration/ConnectedInspectionBridge.jsx \
             src/sync/inspectionRecord.js \
             src/sync/localSyncStore.js \
             src/sync/syncEngine.js \
