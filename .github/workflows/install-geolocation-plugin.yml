@@ -32,7 +32,7 @@ jobs:
           cache: npm
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -60,7 +60,7 @@ jobs:
 
       - name: Build Android debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Check diff
         run: git diff --check
@@ -75,4 +75,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json android
           git commit -m "feat: install native geolocation support"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
           git push origin HEAD:feat/apk-pc-sync-gps-close
