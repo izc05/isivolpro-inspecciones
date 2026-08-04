@@ -5,7 +5,11 @@ on:
     branches:
       - feat/apk-pc-sync-gps-close
     paths:
+      - src/App.jsx
+      - src/sync/**
       - scripts/integrate-sync-app.mjs
+      - package.json
+      - package-lock.json
       - .github/workflows/apply-sync-integration.yml
 
 permissions:
