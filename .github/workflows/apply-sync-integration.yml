@@ -13,6 +13,7 @@ on:
       - scripts/integrate-sync-runtime.mjs
       - scripts/integrate-sync-pull.mjs
       - scripts/integrate-sync-status-ui.mjs
+      - scripts/extend-pocketbase-closure-location.mjs
       - scripts/normalize-pocketbase-hooks-es5.mjs
       - package.json
       - package-lock.json
@@ -55,6 +56,9 @@ jobs:
 
       - name: Apply guarded sync status UI integration
         run: node scripts/integrate-sync-status-ui.mjs
+
+      - name: Add inspection payload location fallback
+        run: node scripts/extend-pocketbase-closure-location.mjs
 
       - name: Normalize PocketBase hooks for ES5 runtime
         run: node scripts/normalize-pocketbase-hooks-es5.mjs
