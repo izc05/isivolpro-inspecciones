@@ -6,13 +6,17 @@ import {
 } from "./syncAuth.js";
 import { processSyncQueue } from "./syncEngine.js";
 
-export function isSyncConfigured(baseUrl = import.meta.env.VITE_SYNC_API_URL || "") {
+const DEFAULT_SYNC_API_URL = typeof import.meta.env !== "undefined"
+  ? import.meta.env.VITE_SYNC_API_URL || ""
+  : "";
+
+export function isSyncConfigured(baseUrl = DEFAULT_SYNC_API_URL) {
   return Boolean(String(baseUrl || "").trim());
 }
 
 export async function syncPendingInspections({
   firebaseUser,
-  baseUrl = import.meta.env.VITE_SYNC_API_URL || "",
+  baseUrl = DEFAULT_SYNC_API_URL,
   fetchImpl = globalThis.fetch,
   signal,
   onProgress,
