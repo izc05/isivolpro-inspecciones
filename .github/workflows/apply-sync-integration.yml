@@ -7,11 +7,13 @@ on:
     paths:
       - src/App.jsx
       - src/sync/**
+      - src/closure/**
       - server/pocketbase/**
       - scripts/integrate-sync-app.mjs
       - scripts/integrate-sync-runtime.mjs
       - scripts/integrate-sync-pull.mjs
       - scripts/integrate-sync-status-ui.mjs
+      - scripts/normalize-pocketbase-hooks-es5.mjs
       - package.json
       - package-lock.json
       - .github/workflows/apply-sync-integration.yml
@@ -54,7 +56,10 @@ jobs:
       - name: Apply guarded sync status UI integration
         run: node scripts/integrate-sync-status-ui.mjs
 
-      - name: Test synchronization contracts
+      - name: Normalize PocketBase hooks for ES5 runtime
+        run: node scripts/normalize-pocketbase-hooks-es5.mjs
+
+      - name: Test synchronization and GPS contracts
         run: npm run test:sync
 
       - name: Validate PocketBase scripts
@@ -74,6 +79,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.jsx
-          git commit -m "feat: integrate bidirectional inspection sync UI"
+          git add src/App.jsx server/pocketbase/pb_hooks/*.js
+          git commit -m "feat: integrate bidirectional sync and GPS validation"
           git push origin HEAD:feat/apk-pc-sync-gps-close
