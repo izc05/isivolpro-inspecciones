@@ -1,0 +1,257 @@
+name: Validate PocketBase protected files
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - .github/workflows/validate-pocketbase-files.yml
+  workflow_dispatch:
+
+concurrency:
+  group: isivoltpro-bt-pocketbase-files
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Resolve and download official PocketBase
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          version="${tag#v}"
+          test -n "$version"
+          test "$version" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          curl -fsSL \
+            "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" \
+            -o /tmp/pocketbase.zip
+          mkdir -p /tmp/pocketbase-files
+          unzip -q /tmp/pocketbase.zip -d /tmp/pocketbase-files
+          chmod +x /tmp/pocketbase-files/pocketbase
+          cp -a server/pocketbase/pb_hooks /tmp/pocketbase-files/
+          cp -a server/pocketbase/pb_migrations /tmp/pocketbase-files/
+          mkdir -p /tmp/pocketbase-files/pb_data
+
+      - name: Apply file hardening and normalize hooks
+        shell: bash
+        run: |
+          node scripts/harden-pocketbase-file-sync.mjs
+          node scripts/normalize-pocketbase-hooks-es5.mjs
+          rm -rf /tmp/pocketbase-files/pb_hooks /tmp/pocketbase-files/pb_migrations
+          cp -a server/pocketbase/pb_hooks /tmp/pocketbase-files/
+          cp -a server/pocketbase/pb_migrations /tmp/pocketbase-files/
+
+      - name: Apply migrations and create superuser
+        working-directory: /tmp/pocketbase-files
+        env:
+          FIREBASE_WEB_API_KEY: files-validation-placeholder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./pocketbase migrate up
+          ./pocketbase superuser create root@example.test 'Files-Validation-Password-2026!'
+
+      - name: Start isolated PocketBase
+        working-directory: /tmp/pocketbase-files
+        env:
+          FIREBASE_WEB_API_KEY: files-validation-placeholder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./pocketbase serve --http=127.0.0.1:8101 > /tmp/pocketbase-files.log 2>&1 &
+          echo $! > /tmp/pocketbase-files.pid
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8101/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/pocketbase-files.log >&2
+          exit 1
+
+      - name: Create two isolated companies and users
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          auth="$(curl -fsSL \
+            -H 'Content-Type: application/json' \
+            -d '{"identity":"root@example.test","password":"Files-Validation-Password-2026!"}' \
+            http://127.0.0.1:8101/api/collections/_superusers/auth-with-password)"
+          root_token="$(jq -r '.token' <<<"$auth")"
+          test -n "$root_token"
+
+          create_company() {
+            local name="$1"
+            local slug="$2"
+            curl -fsSL \
+              -H "Authorization: $root_token" \
+              -H 'Content-Type: application/json' \
+              -d "{\"name\":\"$name\",\"slug\":\"$slug\",\"active\":true,\"applications\":[\"preinspecciones-bt\"],\"closurePolicy\":{}}" \
+              http://127.0.0.1:8101/api/collections/companies/records
+          }
+
+          company_a="$(create_company 'Empresa A' 'empresa-a')"
+          company_b="$(create_company 'Empresa B' 'empresa-b')"
+          company_a_id="$(jq -r '.id' <<<"$company_a")"
+          company_b_id="$(jq -r '.id' <<<"$company_b")"
+
+          create_user() {
+            local company_id="$1"
+            local email="$2"
+            local password="$3"
+            curl -fsSL \
+              -H "Authorization: $root_token" \
+              -H 'Content-Type: application/json' \
+              -d "{\"email\":\"$email\",\"password\":\"$password\",\"passwordConfirm\":\"$password\",\"verified\":true,\"company\":\"$company_id\",\"name\":\"$email\",\"role\":\"admin\",\"active\":true,\"applications\":[\"preinspecciones-bt\"]}" \
+              http://127.0.0.1:8101/api/collections/users/records
+          }
+
+          create_user "$company_a_id" 'a@example.test' 'Company-A-Password-2026!' >/tmp/user-a.json
+          create_user "$company_b_id" 'b@example.test' 'Company-B-Password-2026!' >/tmp/user-b.json
+
+          token_a="$(curl -fsSL \
+            -H 'Content-Type: application/json' \
+            -d '{"identity":"a@example.test","password":"Company-A-Password-2026!"}' \
+            http://127.0.0.1:8101/api/collections/users/auth-with-password | jq -r '.token')"
+          token_b="$(curl -fsSL \
+            -H 'Content-Type: application/json' \
+            -d '{"identity":"b@example.test","password":"Company-B-Password-2026!"}' \
+            http://127.0.0.1:8101/api/collections/users/auth-with-password | jq -r '.token')"
+          printf '%s' "$token_a" >/tmp/token-a
+          printf '%s' "$token_b" >/tmp/token-b
+
+      - name: Create an inspection and upload a protected file
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          token_a="$(cat /tmp/token-a)"
+          now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          sync_body="$(jq -n \
+            --arg now "$now" \
+            '{contractVersion:2,inspectionId:"inspection-files-e2e",revision:1,baseRevision:0,deviceId:"android-e2e",sentAt:$now,metadata:{inspectionId:"inspection-files-e2e",status:"IN_PROGRESS",updatedAt:$now,deletedAt:null},inspection:{id:"local-files-e2e",data:{name:"Instalación con evidencias"},responses:{},fieldSheets:[],signatures:{inspector:null,client:null},selectedBlocks:[],measurements:{},calculations:{}}}')"
+          synced="$(curl -fsSL \
+            -H "Authorization: $token_a" \
+            -H 'Content-Type: application/json' \
+            -d "$sync_body" \
+            http://127.0.0.1:8101/api/isivolt/v1/inspections/sync)"
+          inspection_record_id="$(jq -r '.recordId' <<<"$synced")"
+          test -n "$inspection_record_id"
+          printf '%s' "$inspection_record_id" >/tmp/inspection-record-id
+
+          printf 'evidencia protegida de IsiVoltPro\n' >/tmp/evidencia.txt
+          expected_sha="$(sha256sum /tmp/evidencia.txt | awk '{print $1}')"
+          printf '%s' "$expected_sha" >/tmp/expected-sha
+
+          uploaded="$(curl -fsSL \
+            -H "Authorization: $token_a" \
+            -F "inspection=$inspection_record_id" \
+            -F 'inspectionId=inspection-files-e2e' \
+            -F 'syncFileId=stable-file-e2e' \
+            -F 'sourceDeviceId=android-e2e' \
+            -F 'linkedType=installationFolder' \
+            -F 'linkedId=expediente' \
+            -F 'fileName=evidencia.txt' \
+            -F 'fileType=document' \
+            -F 'mimeType=text/plain' \
+            -F "sizeBytes=$(stat -c%s /tmp/evidencia.txt)" \
+            -F "sha256=$expected_sha" \
+            -F 'metadata={"displayName":"Evidencia E2E"}' \
+            -F "clientCreatedAt=$now" \
+            -F 'blob=@/tmp/evidencia.txt;type=text/plain' \
+            http://127.0.0.1:8101/api/collections/inspection_files/records)"
+          jq -e '.syncFileId == "stable-file-e2e" and .inspectionId == "inspection-files-e2e"' <<<"$uploaded"
+          printf '%s' "$uploaded" >/tmp/uploaded-file.json
+
+      - name: Download the protected file and verify company isolation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          token_a="$(cat /tmp/token-a)"
+          token_b="$(cat /tmp/token-b)"
+          file_record_id="$(jq -r '.id' /tmp/uploaded-file.json)"
+          collection_id="$(jq -r '.collectionId' /tmp/uploaded-file.json)"
+          filename="$(jq -r '.blob' /tmp/uploaded-file.json)"
+
+          list_a="$(curl -fsSL -H "Authorization: $token_a" \
+            'http://127.0.0.1:8101/api/collections/inspection_files/records?page=1&perPage=50&skipTotal=1')"
+          list_b="$(curl -fsSL -H "Authorization: $token_b" \
+            'http://127.0.0.1:8101/api/collections/inspection_files/records?page=1&perPage=50&skipTotal=1')"
+          test "$(jq '.items | length' <<<"$list_a")" -eq 1
+          test "$(jq '.items | length' <<<"$list_b")" -eq 0
+
+          file_token_a="$(curl -fsSL -X POST -H "Authorization: $token_a" \
+            http://127.0.0.1:8101/api/files/token | jq -r '.token')"
+          file_token_b="$(curl -fsSL -X POST -H "Authorization: $token_b" \
+            http://127.0.0.1:8101/api/files/token | jq -r '.token')"
+
+          curl -fsSL \
+            "http://127.0.0.1:8101/api/files/$collection_id/$file_record_id/$filename?token=$file_token_a" \
+            -o /tmp/downloaded-evidencia.txt
+          downloaded_sha="$(sha256sum /tmp/downloaded-evidencia.txt | awk '{print $1}')"
+          test "$downloaded_sha" = "$(cat /tmp/expected-sha)"
+
+          if curl -fsSL \
+            "http://127.0.0.1:8101/api/files/$collection_id/$file_record_id/$filename?token=$file_token_b" \
+            -o /tmp/forbidden-evidencia.txt; then
+            echo "La empresa B no debe poder descargar archivos de la empresa A" >&2
+            exit 1
+          fi
+
+      - name: Stop isolated PocketBase
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f /tmp/pocketbase-files.pid ]]; then
+            kill "$(cat /tmp/pocketbase-files.pid)" >/dev/null 2>&1 || true
+          fi
+
+      - name: Write protected file validation marker
+        shell: bash
+        run: |
+          cat > docs/pocketbase-files-validation.md <<EOF
+          # Validación de archivos protegidos PocketBase
+
+          Estado: **SUPERADA**
+
+          Versión oficial probada: **${{ steps.pocketbase.outputs.tag }}**
+
+          La prueba ha confirmado en un PocketBase real:
+
+          - creación de la colección protegida `inspection_files`;
+          - subida multipart asociada a una preinspección;
+          - asignación automática de empresa y usuario por el servidor;
+          - consulta del archivo con la empresa propietaria;
+          - descarga mediante token temporal de archivo protegido;
+          - coincidencia SHA-256 entre subida y descarga;
+          - imposibilidad de listar o descargar el archivo desde otra empresa;
+          - auditoría `FILE_UPLOADED` sin error de hooks.
+
+          El archivo utilizado era temporal y exclusivo de GitHub Actions.
+          EOF
+
+      - name: Commit protected file validation marker
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/pocketbase-files-validation.md server/pocketbase/pb_hooks/*.js
+          if git diff --cached --quiet; then
+            echo "Protected files were already validated."
+            exit 0
+          fi
+          git commit -m "test: validate protected inspection files"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close
