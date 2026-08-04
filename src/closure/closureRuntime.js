@@ -6,7 +6,10 @@ import {
 } from "./onSiteClosure.js";
 import { captureCurrentLocation } from "./locationCapture.js";
 import { getDeviceId, markLocalInspectionSynced } from "../sync/localSyncStore.js";
-import { getSyncAccessToken } from "../sync/syncAuth.js";
+import {
+  ensureSyncSession,
+  getSyncAccessToken,
+} from "../sync/syncAuth.js";
 import { createSyncApiClient } from "../sync/syncApiClient.js";
 
 function countInspectionPhotos(inspection) {
@@ -92,6 +95,12 @@ export async function closeInspectionOnSite({
       throw error;
     }
   }
+
+  await ensureSyncSession({
+    firebaseUser,
+    baseUrl,
+    fetchImpl,
+  });
 
   const event = buildClosureEvent({
     inspectionId: inspection.sync.inspectionId,
