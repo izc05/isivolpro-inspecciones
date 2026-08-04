@@ -106,7 +106,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            src/integration/ConnectedInspectionBridge.jsx \
+            src/App.jsx \
+            src/connected/ConnectedInspectionBridge.jsx \
+            src/sync/inspectionRecord.js \
+            src/sync/localSyncStore.js \
             src/sync/syncEngine.js \
             src/sync/remoteMerge.js \
             src/sync/fileSyncRuntime.js \
