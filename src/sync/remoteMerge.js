@@ -48,6 +48,12 @@ function getRemotePayload(remote) {
     : {};
 }
 
+function getRemoteClosureConfig(remote) {
+  return remote?.closureConfig && typeof remote.closureConfig === "object" && !Array.isArray(remote.closureConfig)
+    ? remote.closureConfig
+    : null;
+}
+
 function findLocalByInspectionId(inspections, inspectionId) {
   return inspections.find((inspection) =>
     inspection?.sync?.inspectionId === inspectionId ||
@@ -92,12 +98,33 @@ function applyRemoteMetadata(localId, remote) {
   }));
 }
 
+function mergeClosureConfigIntoData(data, closureConfig) {
+  if (!closureConfig) return data || {};
+  const nextData = { ...(data || {}) };
+  if (closureConfig.latitude !== null && closureConfig.latitude !== undefined) {
+    nextData.installationLatitude = closureConfig.latitude;
+  }
+  if (closureConfig.longitude !== null && closureConfig.longitude !== undefined) {
+    nextData.installationLongitude = closureConfig.longitude;
+  }
+  if (closureConfig.allowedRadiusMeters !== null && closureConfig.allowedRadiusMeters !== undefined) {
+    nextData.closureAllowedRadiusMeters = closureConfig.allowedRadiusMeters;
+  }
+  if (closureConfig.policy && typeof closureConfig.policy === "object") {
+    nextData.closurePolicy = closureConfig.policy;
+  }
+  return nextData;
+}
+
 function buildRemoteLocalRecord(localId, remote) {
   const payload = getRemotePayload(remote);
+  const closureConfig = getRemoteClosureConfig(remote);
   const sync = applyRemoteMetadata(localId, remote);
   return {
     ...payload,
     id: localId,
+    data: mergeClosureConfigIntoData(payload.data, closureConfig),
+    closureConfig,
     sync,
     updatedAt: payload.updatedAt || remote.clientUpdatedAt || remote.updated,
   };
