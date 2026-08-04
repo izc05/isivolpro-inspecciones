@@ -1,5 +1,8 @@
 const SYNC_SESSION_STORAGE_KEY = "isivolt_sync_session_v1";
 const DEFAULT_SESSION_SKEW_SECONDS = 90;
+const DEFAULT_SYNC_API_URL = typeof import.meta.env !== "undefined"
+  ? import.meta.env.VITE_SYNC_API_URL || ""
+  : "";
 
 function canUseLocalStorage() {
   try {
@@ -75,7 +78,7 @@ export function getSyncAccessToken() {
 
 export async function exchangeFirebaseSession({
   firebaseUser,
-  baseUrl = import.meta.env.VITE_SYNC_API_URL || "",
+  baseUrl = DEFAULT_SYNC_API_URL,
   fetchImpl = globalThis.fetch,
 } = {}) {
   if (!firebaseUser?.getIdToken) {
