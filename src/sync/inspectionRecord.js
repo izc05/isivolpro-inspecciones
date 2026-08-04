@@ -41,6 +41,9 @@ export function normalizeInspectionRecord(
         ...storedMetadata,
         ...inspection.sync,
         inspectionId: inspection.sync.inspectionId,
+        companyId: inspection.sync.companyId || storedMetadata.companyId || companyId,
+        ownerUserId: inspection.sync.ownerUserId || storedMetadata.ownerUserId || ownerUserId,
+        assignedUserId: inspection.sync.assignedUserId ?? storedMetadata.assignedUserId ?? assignedUserId,
       }
     : storedMetadata;
 
