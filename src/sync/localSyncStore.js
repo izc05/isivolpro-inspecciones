@@ -3,7 +3,7 @@ import {
   buildInitialSyncMetadata,
   createStableInspectionId,
   markInspectionPending,
-} from "./contracts";
+} from "./contracts.js";
 
 const SYNC_METADATA_STORAGE_KEY = "isivolt_sync_metadata_v1";
 const DEVICE_ID_STORAGE_KEY = "isivolt_device_id_v1";
