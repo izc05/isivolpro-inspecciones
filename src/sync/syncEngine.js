@@ -22,6 +22,10 @@ function isRevisionConflict(error) {
   return error?.status === 409 || error?.code === "REVISION_CONFLICT";
 }
 
+function isAuthenticationFailure(error) {
+  return error?.status === 401 || ["SYNC_AUTH_FAILED", "INVALID_FIREBASE_TOKEN"].includes(error?.code);
+}
+
 export async function processSyncQueue({
   client,
   signal,
@@ -86,6 +90,11 @@ export async function processSyncQueue({
       markQueueItemError(item.queueId, error);
       result.errors += 1;
       onProgress({ phase: "error", index, item, error, result: { ...result } });
+
+      if (isAuthenticationFailure(error)) {
+        result.interrupted = true;
+        throw error;
+      }
 
       if (stopOnNetworkError && isNetworkFailure(error)) {
         result.interrupted = true;
