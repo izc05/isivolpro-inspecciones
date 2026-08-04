@@ -166,7 +166,36 @@ curl -fsSL https://bt-api.isivoltpro.com/api/health
 
 No publicar el puerto `8091` en el router.
 
-## 9. Configurar web y APK
+## 9. Ejecutar el preflight operativo
+
+Después de configurar el servicio y el túnel, ejecutar:
+
+```bash
+sudo PUBLIC_URL=https://bt-api.isivoltpro.com \
+  bash server/pocketbase/deploy/preflight.sh
+```
+
+El preflight comprueba sin mostrar secretos:
+
+- usuario, grupo, directorios y binario;
+- propietario y permisos de `pb_data` y del archivo de variables;
+- que `FIREBASE_WEB_API_KEY` no esté vacía;
+- endurecimiento básico de la unidad `systemd`;
+- servicio habilitado y activo;
+- escucha exclusivamente en `127.0.0.1:8091`;
+- salud de la API local;
+- salud HTTPS mediante Cloudflare Tunnel;
+- espacio libre mínimo recomendado.
+
+Para revisar solo los archivos antes de iniciar el servicio:
+
+```bash
+sudo bash server/pocketbase/deploy/preflight.sh --static
+```
+
+No continuar con la prueba E2E si el resultado indica algún fallo.
+
+## 10. Configurar web y APK
 
 Crear el archivo de entorno de compilación:
 
@@ -190,7 +219,7 @@ npm run cap:android
 
 Para Android release será necesario configurar posteriormente la firma de la APK/AAB.
 
-## 10. Ejecutar la prueba E2E real
+## 11. Ejecutar la prueba E2E real
 
 Obtener temporalmente un token Firebase válido de la cuenta de prueba y ejecutar:
 
@@ -210,7 +239,7 @@ La prueba verifica:
 
 No conservar el token en el historial del terminal.
 
-## 11. Copias de seguridad
+## 12. Copias de seguridad
 
 Respaldar como mínimo:
 
@@ -226,6 +255,7 @@ El archivo de variables debe cifrarse o almacenarse en un gestor seguro. La copi
 No fusionar la PR hasta completar:
 
 - servidor activo en el mini PC;
+- preflight sin fallos;
 - Cloudflare Tunnel funcionando por HTTPS;
 - empresa y administrador creados;
 - APK y PC usando la misma cuenta;
