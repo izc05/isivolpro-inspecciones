@@ -13,6 +13,7 @@ on:
       - scripts/integrate-sync-runtime.mjs
       - scripts/integrate-sync-pull.mjs
       - scripts/integrate-sync-status-ui.mjs
+      - scripts/integrate-closure-ui.mjs
       - scripts/extend-pocketbase-closure-location.mjs
       - scripts/normalize-pocketbase-hooks-es5.mjs
       - package.json
@@ -57,6 +58,9 @@ jobs:
       - name: Apply guarded sync status UI integration
         run: node scripts/integrate-sync-status-ui.mjs
 
+      - name: Apply guarded administrator and GPS closure UI
+        run: node scripts/integrate-closure-ui.mjs
+
       - name: Add inspection payload location fallback
         run: node scripts/extend-pocketbase-closure-location.mjs
 
@@ -84,5 +88,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/App.jsx server/pocketbase/pb_hooks/*.js
-          git commit -m "feat: integrate bidirectional sync and GPS validation"
+          git commit -m "feat: integrate bidirectional sync and GPS closure UI"
           git push origin HEAD:feat/apk-pc-sync-gps-close
