@@ -40,7 +40,7 @@ function requireActiveUser(e) {
 
   return {
     userId: e.auth.id,
-    companyId,
+    companyId: companyId,
   };
 }
 
@@ -57,7 +57,7 @@ function verifyFirebaseIdToken(idToken) {
   try {
     response = $http.send({
       method: "POST",
-      url: `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+      url: "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + encodeURIComponent(apiKey),
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idToken: String(idToken) }),
       timeout: 15,
@@ -69,13 +69,15 @@ function verifyFirebaseIdToken(idToken) {
     });
   }
 
-  if (response.statusCode !== 200 || !response.json?.users?.length) {
+  const responseJson = response && response.json ? response.json : {};
+  const responseUsers = responseJson && Array.isArray(responseJson.users) ? responseJson.users : [];
+  if (!response || response.statusCode !== 200 || !responseUsers.length) {
     throw new UnauthorizedError("La sesión Firebase no es válida o ha caducado", {
       code: "INVALID_FIREBASE_TOKEN",
     });
   }
 
-  const firebaseUser = response.json.users[0];
+  const firebaseUser = responseUsers[0];
   if (firebaseUser.disabled) {
     throw new ForbiddenError("La cuenta Firebase está desactivada", {
       code: "FIREBASE_USER_DISABLED",
@@ -136,7 +138,7 @@ function validateSyncBody(body) {
 
 function normalizeStatus(value) {
   const status = String(value || "DRAFT").toUpperCase();
-  return VALID_INSPECTION_STATUS.includes(status) ? status : "DRAFT";
+  return VALID_INSPECTION_STATUS.indexOf(status) >= 0 ? status : "DRAFT";
 }
 
 function serializeInspection(record) {
@@ -213,7 +215,7 @@ routerAdd("POST", "/api/isivolt/v1/inspections/sync", (e) => {
       "",
       1,
       0,
-      { inspectionId, company: auth.companyId },
+      { inspectionId: inspectionId, company: auth.companyId },
     );
     const existing = records.length ? records[0] : null;
     const currentServerRevision = existing ? existing.getInt("revision") : 0;
@@ -254,8 +256,8 @@ routerAdd("POST", "/api/isivolt/v1/inspections/sync", (e) => {
     event.set("eventType", existing ? "UPDATED" : "CREATED");
     event.set("revision", nextServerRevision);
     event.set("details", {
-      baseRevision,
-      localRevision,
+      baseRevision: baseRevision,
+      localRevision: localRevision,
       contractVersion: Number(body.contractVersion),
     });
     event.set("clientCreatedAt", String(body.sentAt || now));
@@ -265,12 +267,12 @@ routerAdd("POST", "/api/isivolt/v1/inspections/sync", (e) => {
       conflict: false,
       recordId: record.id,
       revision: nextServerRevision,
-      localRevision,
+      localRevision: localRevision,
       syncedAt: now,
     };
   });
 
-  if (result?.conflict) {
+  if (result && result.conflict) {
     return e.json(409, {
       code: "REVISION_CONFLICT",
       message: "Existe una revisión más reciente en el servidor",
@@ -290,7 +292,7 @@ routerAdd("GET", "/api/isivolt/v1/inspections", (e) => {
     ? "company = {:company} && updated > {:since}"
     : "company = {:company}";
   const params = since
-    ? { company: auth.companyId, since }
+    ? { company: auth.companyId, since: since }
     : { company: auth.companyId };
 
   const records = e.app.findRecordsByFilter(
