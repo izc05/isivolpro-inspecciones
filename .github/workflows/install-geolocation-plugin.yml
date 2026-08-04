@@ -46,7 +46,7 @@ jobs:
       - name: Configure Android location permissions
         run: node scripts/configure-android-geolocation.mjs
 
-      - name: Test synchronization and GPS contracts
+      - name: Test synchronization, closure and GPS contracts
         run: npm run test:sync
 
       - name: Validate server scripts
