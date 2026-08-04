@@ -1,4 +1,7 @@
 const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_SYNC_API_URL = typeof import.meta.env !== "undefined"
+  ? import.meta.env.VITE_SYNC_API_URL || ""
+  : "";
 
 export class SyncApiError extends Error {
   constructor(message, { status = 0, code = "SYNC_API_ERROR", details = null } = {}) {
@@ -38,7 +41,7 @@ function getResponseErrorCode(responseBody, status) {
 }
 
 export function createSyncApiClient({
-  baseUrl = import.meta.env.VITE_SYNC_API_URL || "",
+  baseUrl = DEFAULT_SYNC_API_URL,
   getAccessToken = () => "",
   fetchImpl = globalThis.fetch,
   timeoutMs = DEFAULT_TIMEOUT_MS,
