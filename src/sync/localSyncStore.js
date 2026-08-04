@@ -3,6 +3,7 @@ import {
   buildInitialSyncMetadata,
   createStableInspectionId,
   markInspectionPending,
+  normalizeSyncMetadata,
 } from "./contracts.js";
 
 const SYNC_METADATA_STORAGE_KEY = "isivolt_sync_metadata_v1";
@@ -61,12 +62,14 @@ export function getDeviceId() {
 }
 
 export function getAllSyncMetadata() {
-  return readMetadataMap();
+  const map = readMetadataMap();
+  return Object.fromEntries(Object.entries(map).map(([key, value]) => [key, normalizeSyncMetadata(value)]));
 }
 
 export function getSyncMetadata(localInspectionId) {
   if (!localInspectionId) return null;
-  return readMetadataMap()[String(localInspectionId)] || null;
+  const value = readMetadataMap()[String(localInspectionId)] || null;
+  return value ? normalizeSyncMetadata(value) : null;
 }
 
 export function ensureSyncMetadata(localInspectionId, options = {}) {
@@ -76,7 +79,12 @@ export function ensureSyncMetadata(localInspectionId, options = {}) {
 
   const key = String(localInspectionId);
   const map = readMetadataMap();
-  if (map[key]?.inspectionId) return map[key];
+  if (map[key]?.inspectionId) {
+    const normalized = normalizeSyncMetadata(map[key]);
+    map[key] = normalized;
+    writeMetadataMap(map);
+    return normalized;
+  }
 
   const metadata = buildInitialSyncMetadata(options);
   map[key] = metadata;
@@ -91,8 +99,9 @@ export function updateSyncMetadata(localInspectionId, updater) {
 
   const key = String(localInspectionId);
   const map = readMetadataMap();
-  const current = map[key] || buildInitialSyncMetadata();
-  const next = typeof updater === "function" ? updater(current) : { ...current, ...updater };
+  const current = normalizeSyncMetadata(map[key] || buildInitialSyncMetadata());
+  const nextValue = typeof updater === "function" ? updater(current) : { ...current, ...updater };
+  const next = normalizeSyncMetadata(nextValue);
   map[key] = next;
   writeMetadataMap(map);
   return next;
@@ -115,13 +124,18 @@ export function markLocalInspectionSynced(
   localInspectionId,
   { serverRevision, syncedAt = new Date().toISOString() } = {},
 ) {
-  return updateSyncMetadata(localInspectionId, (current) => ({
-    ...current,
-    syncStatus: SYNC_STATUS.SYNCED,
-    revision: Math.max(Number(current.revision || 1), Number(serverRevision || 1)),
-    lastSyncedAt: syncedAt,
-    lastSyncError: null,
-  }));
+  return updateSyncMetadata(localInspectionId, (current) => {
+    const confirmedRevision = Math.max(1, Number(serverRevision || current.serverRevision || 1));
+    return {
+      ...current,
+      syncStatus: SYNC_STATUS.SYNCED,
+      serverRevision: confirmedRevision,
+      localRevision: Math.max(Number(current.localRevision || 1), confirmedRevision),
+      revision: Math.max(Number(current.localRevision || 1), confirmedRevision),
+      lastSyncedAt: syncedAt,
+      lastSyncError: null,
+    };
+  });
 }
 
 export function markLocalInspectionConflict(localInspectionId, message = "Conflicto de sincronización") {
