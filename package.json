@@ -8,6 +8,8 @@
     "dev:pc": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "test:sync": "node --test src/sync/*.test.js",
+    "test:server": "node --check server/pocketbase/pb_migrations/1785880000_create_isivolt_sync_core.js && node --check server/pocketbase/pb_hooks/isivolt_sync.pb.js",
+    "test:integration": "npm run test:sync && npm run test:server && npm run build",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
     "cap:sync": "npm run build && cap sync",
     "cap:android": "npm run build && cap sync android",
