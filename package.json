@@ -8,7 +8,7 @@
     "dev:pc": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "test:sync": "node --test src/sync/*.test.js src/closure/*.test.js",
-    "test:server": "for file in server/pocketbase/pb_migrations/*.js server/pocketbase/pb_hooks/*.js; do node --check \"$file\"; done && bash -n server/pocketbase/deploy/install-local.sh",
+    "test:server": "set -e; for file in server/pocketbase/pb_migrations/*.js server/pocketbase/pb_hooks/*.js; do node --check \"$file\"; done; bash -n server/pocketbase/deploy/install-local.sh",
     "test:integration": "npm run test:sync && npm run test:server && npm run build",
     "smoke:sync-server": "node scripts/smoke-sync-server.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
