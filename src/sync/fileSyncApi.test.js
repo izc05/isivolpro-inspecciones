@@ -31,8 +31,10 @@ test("lista archivos de una inspección usando autorización PocketBase", async 
   const items = await api.listInspectionFiles("inspection-1");
 
   assert.equal(items.length, 1);
-  assert.match(request.url, /^https:\/\/bt-api\.isivoltpro\.com\/api\/collections\/inspection_files\/records\?/);
-  assert.match(decodeURIComponent(request.url), /inspectionId = "inspection-1"/);
+  const requestUrl = new URL(request.url);
+  assert.equal(requestUrl.origin, "https://bt-api.isivoltpro.com");
+  assert.equal(requestUrl.pathname, "/api/collections/inspection_files/records");
+  assert.equal(requestUrl.searchParams.get("filter"), 'inspectionId = "inspection-1"');
   assert.equal(request.options.headers.Authorization, "Bearer pb-token");
 });
 
