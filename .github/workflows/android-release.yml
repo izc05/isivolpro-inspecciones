@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -63,6 +65,30 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Block vulnerable runtime releases
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate release tag and Android version
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName "\([^"]*\)"/\1/p' android/app/build.gradle | head -n 1)"
+          VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode \([0-9][0-9]*\)/\1/p' android/app/build.gradle | head -n 1)"
+          test -n "$VERSION_NAME"
+          test -n "$VERSION_CODE"
+          case "$RELEASE_TAG" in
+            "v${VERSION_NAME}"|"v${VERSION_NAME}-"*|"v${VERSION_NAME}."*) ;;
+            *)
+              echo "Release tag ${RELEASE_TAG} does not match Android version ${VERSION_NAME}." >&2
+              exit 1
+              ;;
+          esac
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
 
       - name: Run connected application checks
         run: npm run test:integration
@@ -98,24 +124,22 @@ jobs:
           "$APKSIGNER" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk
 
       - name: Prepare release files and checksums
-        id: release_files
         shell: bash
         run: |
           set -Eeuo pipefail
-          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName "\([^"]*\)"/\1/p' android/app/build.gradle | head -n 1)"
-          test -n "$VERSION_NAME"
+          VERSION_NAME="${{ steps.version.outputs.version_name }}"
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
           install -d release-output
-          APK="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}.apk"
-          AAB="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}.aab"
+          APK="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}-${VERSION_CODE}.apk"
+          AAB="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}-${VERSION_CODE}.aab"
           cp android/app/build/outputs/apk/release/app-release.apk "$APK"
           cp android/app/build/outputs/bundle/release/app-release.aab "$AAB"
           (cd release-output && sha256sum *.apk *.aab > SHA256SUMS.txt)
-          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: isivoltpro-preinspecciones-bt-${{ steps.release_files.outputs.version_name }}
+          name: isivoltpro-preinspecciones-bt-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}
           path: release-output/*
           if-no-files-found: error
           retention-days: 30
@@ -125,7 +149,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
-          VERSION_NAME: ${{ steps.release_files.outputs.version_name }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -133,12 +157,17 @@ jobs:
             echo "The tag or release ${RELEASE_TAG} already exists." >&2
             exit 1
           fi
+          NOTES_FILE="docs/release-notes-v${VERSION_NAME}-beta.md"
+          notes_args=(--generate-notes)
+          if [[ -f "$NOTES_FILE" ]]; then
+            notes_args=(--notes-file "$NOTES_FILE")
+          fi
           gh release create "$RELEASE_TAG" \
             release-output/* \
             --target "$GITHUB_SHA" \
             --title "IsiVoltPro Preinspecciones BT ${VERSION_NAME}" \
-            --generate-notes \
-            --draft
+            --draft \
+            "${notes_args[@]}"
 
       - name: Remove keystore
         if: always()
