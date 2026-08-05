@@ -8,6 +8,7 @@ on:
     paths:
       - server/pocketbase/pb_hooks/isivolt_closure.pb.js
       - server/pocketbase/pb_hooks/closure_utils.js
+      - scripts/normalize-closure-policy-reader.mjs
       - scripts/smoke-closure-role-access.mjs
       - .github/workflows/validate-closure-role-access.yml
 
@@ -47,6 +48,11 @@ jobs:
 
       - name: Require clean runtime audit
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Normalize closure policy reader idempotently
+        run: |
+          node scripts/normalize-closure-policy-reader.mjs
+          node scripts/normalize-closure-policy-reader.mjs
 
       - name: Validate application and server
         run: npm run test:integration
@@ -122,7 +128,8 @@ jobs:
           grep -Fq 'sync.assertCanWriteInspection(inspection, auth)' server/pocketbase/pb_hooks/isivolt_closure.pb.js
           grep -Fq 'auth.role !== "admin"' server/pocketbase/pb_hooks/isivolt_closure.pb.js
           grep -Fq 'record.unmarshalJSONField("payload", result)' server/pocketbase/pb_hooks/closure_utils.js
-          grep -Fq 'record.unmarshalJSONField(fieldName, result)' server/pocketbase/pb_hooks/closure_utils.js
+          grep -Fq 'record.unmarshalJSONField(fieldName, first)' server/pocketbase/pb_hooks/closure_utils.js
+          grep -Fq 'record.unmarshalJSONField(fieldName, second)' server/pocketbase/pb_hooks/closure_utils.js
           grep -Fq 'Técnico ajeno y consulta: cierre bloqueado' scripts/smoke-closure-role-access.mjs
           test -s android/app/build/outputs/apk/debug/app-debug.apk
           git diff --check
@@ -145,20 +152,21 @@ jobs:
           - una excepción de cierre solo puede autorizarla un administrador;
           - un expediente ya cerrado o cancelado queda bloqueado;
           - la revisión se comprueba de nuevo dentro de la transacción;
+          - los valores false y 0 de la política se distinguen de opciones ausentes;
           - la política y el expediente se leen con unmarshalJSONField;
           - los cierres y eventos quedan auditados y visibles según los permisos del expediente;
           - auditoría del runtime, pruebas, compilación web y APK Android debug superadas.
           EOF
 
-      - name: Commit validation marker
+      - name: Commit validated closure access
         shell: bash
         run: |
           set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/closure-role-access-validation.md
+          git add server/pocketbase/pb_hooks/closure_utils.js docs/closure-role-access-validation.md
           if git diff --cached --quiet; then
-            echo 'Closure role access marker already exists.'
+            echo 'Closure role access is already validated.'
             exit 0
           fi
           git commit -m "test: certify closure access by role"
