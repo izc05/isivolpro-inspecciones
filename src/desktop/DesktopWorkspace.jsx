@@ -34,8 +34,10 @@ import TechnicianAdminPanel from "../admin/TechnicianAdminPanel.jsx";
 import AdminActivityPanel from "../admin/AdminActivityPanel.jsx";
 import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";
 import { readSyncSession } from "../sync/syncAuth.js";
+import { getDesktopSyncPresentation } from "./desktopSyncState.js";
 import "./desktop-workspace.css";
 import "./readonly-workspace.css";
+import "./desktop-sync.css";
 
 const WORKSPACE_SCREENS = new Set(["home", "inspections", "settings", "plan"]);
 
@@ -388,6 +390,10 @@ export default function DesktopWorkspace({
   plan,
   user,
   generatedReportsCount,
+  syncState,
+  syncConfigured = false,
+  syncAuthenticated = false,
+  onSync,
   onNavigate,
   onCreate,
   onContinue,
@@ -412,6 +418,11 @@ export default function DesktopWorkspace({
   const canCreate = !readOnlyWorkspace;
   const canManageAssignments = currentRole === "admin" || currentRole === "coordinator";
   const visibleNavItems = NAV_ITEMS.filter((item) => item.id !== "admin" || currentRole === "admin");
+  const syncPresentation = getDesktopSyncPresentation({
+    state: syncState,
+    configured: syncConfigured,
+    authenticated: syncAuthenticated,
+  });
 
   useEffect(() => {
     if (screen === "inspections") setActiveSection("inspections");
@@ -512,7 +523,18 @@ export default function DesktopWorkspace({
           </div>
           <div>
             <label className="isivolt-global-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar cliente, dirección, CUPS..." /></label>
-            <button type="button" className="isivolt-icon-button" title="Sincronizar"><RefreshCw size={18} /></button>
+            <button
+              type="button"
+              className={`isivolt-desktop-sync is-${syncPresentation.tone}`}
+              onClick={onSync}
+              disabled={syncPresentation.disabled}
+              title={syncPresentation.detail}
+              aria-label={`${syncPresentation.label}. ${syncPresentation.detail}`}
+              aria-live="polite"
+            >
+              <RefreshCw size={17} className={syncPresentation.spinning ? "is-spinning" : ""} />
+              <span><strong>{syncPresentation.label}</strong><small>{syncPresentation.detail}</small></span>
+            </button>
             {canCreate && <button type="button" className="isivolt-button isivolt-button--primary" onClick={onCreate}><Plus size={17} /> Nueva preinspección</button>}
           </div>
         </header>

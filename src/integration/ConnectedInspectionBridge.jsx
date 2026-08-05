@@ -164,6 +164,8 @@ export default function ConnectedInspectionBridge({
   fieldSheets,
   signatures,
   calculations,
+  manualSyncTrigger = 0,
+  onSyncStateChange,
 }) {
   const { user, profile, openAuth } = useAuth();
   const [syncState, setSyncState] = useState(EMPTY_SYNC_STATE);
@@ -194,6 +196,10 @@ export default function ConnectedInspectionBridge({
   useEffect(() => {
     latestInspectionsRef.current = inspections;
   }, [inspections]);
+
+  useEffect(() => {
+    onSyncStateChange?.(syncState);
+  }, [syncState, onSyncStateChange]);
 
   useEffect(() => {
     if (!user) clearSyncSession();
@@ -293,7 +299,7 @@ export default function ConnectedInspectionBridge({
       window.clearTimeout(syncTimerRef.current);
       controller.abort();
     };
-  }, [inspections, user, currentId, configured, syncTrigger, setInspections]);
+  }, [inspections, user, currentId, configured, syncTrigger, manualSyncTrigger, setInspections]);
 
   useEffect(() => {
     if (!user || !configured) return undefined;

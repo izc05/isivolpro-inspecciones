@@ -8206,6 +8206,16 @@ export default function IsiVoltProInspecciones() {
           plan={plan}
           user={user}
           generatedReportsCount={generatedReportsCount}
+          syncState={syncRuntimeState}
+          syncConfigured={isSyncConfigured()}
+          syncAuthenticated={Boolean(user)}
+          onSync={() => {
+            if (!user) {
+              openAuth("login");
+              return;
+            }
+            setSyncTrigger((value) => value + 1);
+          }}
           onNavigate={setScreen}
           onCreate={createInspection}
           onContinue={onContinue}
@@ -8257,6 +8267,8 @@ export default function IsiVoltProInspecciones() {
           currentId={currentId}
           inspections={inspections}
           setInspections={setInspections}
+          manualSyncTrigger={syncTrigger}
+          onSyncStateChange={setSyncRuntimeState}
           data={data}
           setData={setData}
           selectedBlocks={selectedBlocks}
