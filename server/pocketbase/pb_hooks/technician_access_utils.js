@@ -1,7 +1,34 @@
 const ALLOWED_ROLES = ["inspector", "coordinator", "viewer"];
 
 function objectValue(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  if (!value) return {};
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+  if (typeof value === "object" && !Array.isArray(value)) {
+    try {
+      const serialized = JSON.parse(JSON.stringify(value));
+      if (serialized && typeof serialized === "object" && !Array.isArray(serialized)) {
+        return serialized;
+      }
+    } catch (error) {
+      return value;
+    }
+    return value;
+  }
+  return {};
+}
+
+function booleanSetting(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (value === false || value === 0 || String(value).toLowerCase() === "false") return false;
+  if (value === true || value === 1 || String(value).toLowerCase() === "true") return true;
+  return Boolean(value);
 }
 
 function normalizeEmail(value) {
@@ -13,14 +40,13 @@ function normalizeText(value, maximum) {
 }
 
 function applications(value) {
-  let enabled;
-  if (value && typeof value.get === "function") {
+  const source = objectValue(value);
+  let enabled = source.preinspectionsBt;
+  if (enabled === undefined && value && typeof value.get === "function") {
     enabled = value.get("preinspectionsBt");
-  } else {
-    enabled = objectValue(value).preinspectionsBt;
   }
   return {
-    preinspectionsBt: enabled === undefined || enabled === null ? true : Boolean(enabled),
+    preinspectionsBt: booleanSetting(enabled, true),
   };
 }
 
@@ -35,6 +61,9 @@ function requireAdmin(event) {
   }
   if (!event.auth.getBool("active")) {
     throw new ForbiddenError("La cuenta está desactivada");
+  }
+  if (applications(event.auth.get("applications")).preinspectionsBt === false) {
+    throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado");
   }
   if (event.auth.getString("role") !== "admin") {
     throw new ForbiddenError("Solo un administrador puede gestionar accesos técnicos");
