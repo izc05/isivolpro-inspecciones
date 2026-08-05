@@ -2,6 +2,23 @@
 
 La APK de depuración sirve para pruebas internas. Para distribuir IsiVoltPro Preinspecciones BT de forma estable se debe generar una APK o un AAB **release firmado** con una clave privada permanente.
 
+## Versión preparada actualmente
+
+La rama conectada utiliza:
+
+```gradle
+versionCode 14
+versionName "1.5.8"
+```
+
+Tag de beta previsto:
+
+```text
+v1.5.8-beta.1
+```
+
+La prueba automática exige que `package.json`, `versionName`, la versión visible de la aplicación y las notas de beta coincidan.
+
 ## Principios de seguridad
 
 - El archivo `.jks` no se guarda en GitHub ni dentro del repositorio.
@@ -88,6 +105,8 @@ Desde GitHub Actions:
 El flujo:
 
 - valida que existen los cuatro secretos;
+- bloquea vulnerabilidades altas o críticas del runtime;
+- comprueba que tag, `versionName` y `versionCode` son coherentes;
 - ejecuta las pruebas y compilación web;
 - sincroniza Capacitor;
 - restaura temporalmente el keystore;
@@ -101,8 +120,8 @@ El flujo:
 ## Archivos resultantes
 
 ```text
-IsiVoltPro-Preinspecciones-BT-<version>.apk
-IsiVoltPro-Preinspecciones-BT-<version>.aab
+IsiVoltPro-Preinspecciones-BT-<version>-<versionCode>.apk
+IsiVoltPro-Preinspecciones-BT-<version>-<versionCode>.aab
 SHA256SUMS.txt
 ```
 
@@ -110,7 +129,7 @@ La APK permite instalación directa controlada. El AAB es el formato preparado p
 
 ## Control de versiones
 
-Antes de una distribución real se deben actualizar conjuntamente:
+Antes de la siguiente distribución se deberán actualizar conjuntamente, por ejemplo:
 
 ```gradle
 versionCode 15
@@ -123,6 +142,7 @@ Reglas:
 - `versionName` identifica la versión visible.
 - El tag de la release debe coincidir con `versionName`.
 - No reutilizar un tag ni sobrescribir una versión ya distribuida.
+- Crear las notas `docs/release-notes-v<version>-beta.md` antes de compilar.
 
 ## Prueba mínima antes de entregar
 
