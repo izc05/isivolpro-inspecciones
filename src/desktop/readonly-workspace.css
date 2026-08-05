@@ -1,0 +1,33 @@
+.isivolt-readonly-label,
+.isivolt-readonly-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #31546f;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.isivolt-readonly-label {
+  padding: 9px 12px;
+  border: 1px solid #bfd7e6;
+  border-radius: 999px;
+  background: #edf7fc;
+}
+
+.isivolt-readonly-notice {
+  width: fit-content;
+  margin: 0 0 11px;
+  padding: 9px 11px;
+  border: 1px solid #c7dbe8;
+  border-radius: 10px;
+  background: #f4f9fc;
+  line-height: 1.35;
+}
+
+@media print {
+  .isivolt-readonly-label,
+  .isivolt-readonly-notice {
+    display: none !important;
+  }
+}
