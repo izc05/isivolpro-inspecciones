@@ -7,6 +7,8 @@ Se ha comprobado automáticamente:
 - configuración Gradle compatible con firma condicional mediante variables de entorno;
 - ausencia de almacenes de claves dentro del repositorio;
 - pruebas de sincronización, PocketBase y compilación web;
+- identidad coherente `IsiVoltPro Preinspecciones BT` en web, PWA, Capacitor y Android;
+- acceso responsive y accesible desde la app hacia el ecosistema IsiVoltPro;
 - sincronización del proyecto Capacitor Android;
 - construcción de APK release sin firma para validar el empaquetado;
 - construcción de AAB release;
