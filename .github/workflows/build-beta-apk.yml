@@ -11,7 +11,11 @@ on:
       - package.json
       - package-lock.json
       - scripts/run-gradle.mjs
+      - scripts/check-version-consistency.mjs
       - scripts/harden-preinspection-branding.mjs
+      - docs/android-release-signing.md
+      - docs/release-notes-v1.5.8-beta.md
+      - docs/install-beta-apk.md
       - src/App.jsx
       - src/main.jsx
       - src/components/EcosystemDock.jsx
