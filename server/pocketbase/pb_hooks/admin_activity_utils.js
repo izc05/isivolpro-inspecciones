@@ -54,6 +54,42 @@ function applicationsEnabled(record) {
   }
 }
 
+function eventDetails(record) {
+  if (!record) return {};
+  try {
+    const result = new DynamicModel({
+      assignedUserId: "",
+      previousAssignedUserId: "",
+      baseRevision: 0,
+      localRevision: 0,
+      contractVersion: 0,
+      role: "",
+      status: "",
+      previousStatus: "",
+      reason: "",
+      platform: "",
+      result: "",
+    });
+    record.unmarshalJSONField("details", result);
+    const fallback = objectValue(record.get("details"));
+    return Object.assign({}, fallback, {
+      assignedUserId: String(result.assignedUserId || fallback.assignedUserId || ""),
+      previousAssignedUserId: String(result.previousAssignedUserId || fallback.previousAssignedUserId || ""),
+      baseRevision: Number(result.baseRevision || fallback.baseRevision || 0),
+      localRevision: Number(result.localRevision || fallback.localRevision || 0),
+      contractVersion: Number(result.contractVersion || fallback.contractVersion || 0),
+      role: String(result.role || fallback.role || ""),
+      status: String(result.status || fallback.status || ""),
+      previousStatus: String(result.previousStatus || fallback.previousStatus || ""),
+      reason: String(result.reason || fallback.reason || ""),
+      platform: String(result.platform || fallback.platform || ""),
+      result: String(result.result || fallback.result || ""),
+    });
+  } catch (error) {
+    return objectValue(record.get("details"));
+  }
+}
+
 function requireAdmin(event) {
   if (!event.auth || event.auth.collection().name !== "users") {
     throw new UnauthorizedError("Se necesita una cuenta IsiVoltPro válida");
@@ -115,13 +151,13 @@ function accessItem(app, record) {
     actor: userSummary(app, record.getString("actorUser")),
     targetUser: userSummary(app, record.getString("targetUser")),
     inspection: null,
-    details: objectValue(record.get("details")),
+    details: eventDetails(record),
   };
 }
 
 function inspectionItem(app, record) {
   const type = record.getString("eventType");
-  const details = objectValue(record.get("details"));
+  const details = eventDetails(record);
   const inspectionRecord = findOptional(app, "inspections", record.getString("inspection"));
   const inspectionId = record.getString("inspectionId");
   const assignedUserId = String(details.assignedUserId || "");
@@ -179,6 +215,7 @@ function listActivity(app, companyId, limit) {
 
 module.exports = {
   accessItem: accessItem,
+  eventDetails: eventDetails,
   inspectionItem: inspectionItem,
   listActivity: listActivity,
   normalizedLimit: normalizedLimit,
