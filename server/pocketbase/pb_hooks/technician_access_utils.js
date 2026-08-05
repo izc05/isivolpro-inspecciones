@@ -50,6 +50,19 @@ function applications(value) {
   };
 }
 
+function recordApplications(record) {
+  if (!record) return { preinspectionsBt: true };
+  try {
+    const result = new DynamicModel({ preinspectionsBt: true });
+    record.unmarshalJSONField("applications", result);
+    return {
+      preinspectionsBt: booleanSetting(result.preinspectionsBt, true),
+    };
+  } catch (error) {
+    return recordApplications(record);
+  }
+}
+
 function role(value) {
   const normalized = String(value || "inspector").trim().toLowerCase();
   return ALLOWED_ROLES.indexOf(normalized) >= 0 ? normalized : "inspector";
@@ -62,7 +75,7 @@ function requireAdmin(event) {
   if (!event.auth.getBool("active")) {
     throw new ForbiddenError("La cuenta está desactivada");
   }
-  if (applications(event.auth.get("applications")).preinspectionsBt === false) {
+  if (recordApplications(event.auth).preinspectionsBt === false) {
     throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado");
   }
   if (event.auth.getString("role") !== "admin") {
@@ -93,7 +106,7 @@ function serialize(record) {
     specialty: record.getString("specialty"),
     role: record.getString("role"),
     active: record.getBool("active"),
-    applications: applications(record.get("applications")),
+    applications: recordApplications(record),
     linked: Boolean(record.getString("firebaseUid")),
     invitationStatus: invitationStatus(record),
     invitedAt: record.getString("invitedAt"),
@@ -152,6 +165,7 @@ function listForCompany(app, companyId) {
 
 module.exports = {
   applications: applications,
+  recordApplications: recordApplications,
   audit: audit,
   findByEmail: findByEmail,
   findById: findById,

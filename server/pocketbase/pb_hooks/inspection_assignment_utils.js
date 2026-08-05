@@ -40,6 +40,19 @@ function applications(value) {
   };
 }
 
+function recordApplications(record) {
+  if (!record) return { preinspectionsBt: true };
+  try {
+    const result = new DynamicModel({ preinspectionsBt: true });
+    record.unmarshalJSONField("applications", result);
+    return {
+      preinspectionsBt: booleanSetting(result.preinspectionsBt, true),
+    };
+  } catch (error) {
+    return recordApplications(record);
+  }
+}
+
 function requireManager(event) {
   if (!event.auth || event.auth.collection().name !== "users") {
     throw new UnauthorizedError("Se necesita una cuenta IsiVoltPro válida");
@@ -47,7 +60,7 @@ function requireManager(event) {
   if (!event.auth.getBool("active")) {
     throw new ForbiddenError("La cuenta está desactivada");
   }
-  if (applications(event.auth.get("applications")).preinspectionsBt === false) {
+  if (recordApplications(event.auth).preinspectionsBt === false) {
     throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado");
   }
   const role = event.auth.getString("role");
@@ -96,7 +109,7 @@ function serializeUser(record) {
 function isAssignable(record, companyId) {
   if (!record || record.getString("company") !== companyId) return false;
   if (!record.getBool("active")) return false;
-  if (applications(record.get("applications")).preinspectionsBt === false) return false;
+  if (recordApplications(record).preinspectionsBt === false) return false;
   const role = record.getString("role");
   return role === "inspector" || role === "coordinator";
 }
@@ -172,6 +185,7 @@ function audit(app, auth, inspection, previousUserId, nextUserId, revision) {
 
 module.exports = {
   applications: applications,
+  recordApplications: recordApplications,
   audit: audit,
   findAssignableUser: findAssignableUser,
   findInspection: findInspection,

@@ -10,7 +10,7 @@ routerAdd("POST", "/api/isivolt/v1/auth/firebase", (e) => {
   if (!record.getBool("active")) {
     throw new ForbiddenError("La cuenta de sincronización está desactivada");
   }
-  if (sync.applications(record.get("applications")).preinspectionsBt === false) {
+  if (sync.recordApplications(record).preinspectionsBt === false) {
     throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado");
   }
 

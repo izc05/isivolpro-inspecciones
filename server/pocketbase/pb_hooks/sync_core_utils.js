@@ -52,6 +52,19 @@ function applications(value) {
   };
 }
 
+function recordApplications(record) {
+  if (!record) return { preinspectionsBt: true };
+  try {
+    const result = new DynamicModel({ preinspectionsBt: true });
+    record.unmarshalJSONField("applications", result);
+    return {
+      preinspectionsBt: booleanSetting(result.preinspectionsBt, true),
+    };
+  } catch (error) {
+    return recordApplications(record);
+  }
+}
+
 function requireUser(event, options) {
   const settings = objectValue(options);
   if (!event.auth || event.auth.collection().name !== "users") {
@@ -60,7 +73,7 @@ function requireUser(event, options) {
   if (!event.auth.getBool("active")) {
     throw new ForbiddenError("La cuenta está desactivada");
   }
-  if (applications(event.auth.get("applications")).preinspectionsBt === false) {
+  if (recordApplications(event.auth).preinspectionsBt === false) {
     throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado");
   }
   const companyId = event.auth.getString("company");
