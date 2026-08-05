@@ -6,6 +6,10 @@ on:
       - feat/apk-pc-sync-gps-close
     paths:
       - android/app/build.gradle
+      - android/app/src/main/res/values/strings.xml
+      - capacitor.config.ts
+      - index.html
+      - public/manifest.webmanifest
       - .github/workflows/android-release.yml
       - .github/workflows/validate-android-release-tooling.yml
       - docs/android-release-signing.md
@@ -68,7 +72,7 @@ jobs:
             exit 1
           fi
 
-      - name: Check signing configuration and documentation
+      - name: Check signing, branding and documentation
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -77,6 +81,10 @@ jobs:
           grep -Fq "Verify APK signature" .github/workflows/android-release.yml
           grep -Fq "Remove keystore" .github/workflows/android-release.yml
           grep -Fq "No publicar una release definitiva" docs/android-release-signing.md
+          grep -Fq 'appName: "IsiVoltPro Preinspecciones BT"' capacitor.config.ts
+          grep -Fq '<title>IsiVoltPro Preinspecciones BT</title>' index.html
+          grep -Fq '"name": "IsiVoltPro Preinspecciones BT"' public/manifest.webmanifest
+          grep -Fq '<string name="app_name">IsiVoltPro Preinspecciones BT</string>' android/app/src/main/res/values/strings.xml
           git diff --check
 
       - name: Write release tooling validation marker
@@ -92,6 +100,7 @@ jobs:
           - configuración Gradle compatible con firma condicional mediante variables de entorno;
           - ausencia de almacenes de claves dentro del repositorio;
           - pruebas de sincronización, PocketBase y compilación web;
+          - identidad coherente `IsiVoltPro Preinspecciones BT` en web, PWA, Capacitor y Android;
           - sincronización del proyecto Capacitor Android;
           - construcción de APK release sin firma para validar el empaquetado;
           - construcción de AAB release;
