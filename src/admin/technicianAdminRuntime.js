@@ -101,11 +101,9 @@ export async function createTechnicianAccess({
   fetchImpl = globalThis.fetch,
   signal,
 } = {}) {
+  const payload = normalizePayload(technician, { creating: true });
   const client = await createAdminClient({ firebaseUser, baseUrl, fetchImpl });
-  const response = await client.createTechnician(
-    normalizePayload(technician, { creating: true }),
-    { signal },
-  );
+  const response = await client.createTechnician(payload, { signal });
   return normalizeTechnicianAccess(response?.technician || {});
 }
 
@@ -118,11 +116,8 @@ export async function updateTechnicianAccess({
   signal,
 } = {}) {
   if (!technicianId) throw new Error("Falta el identificador del técnico");
+  const payload = normalizePayload(technician);
   const client = await createAdminClient({ firebaseUser, baseUrl, fetchImpl });
-  const response = await client.updateTechnician(
-    technicianId,
-    normalizePayload(technician),
-    { signal },
-  );
+  const response = await client.updateTechnician(technicianId, payload, { signal });
   return normalizeTechnicianAccess(response?.technician || {});
 }
