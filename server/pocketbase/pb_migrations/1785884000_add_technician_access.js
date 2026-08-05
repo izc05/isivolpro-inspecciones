@@ -69,7 +69,7 @@ migrate((app) => {
     ],
     indexes: [
       "CREATE INDEX idx_technician_access_company_user ON technician_access_events (company, targetUser)",
-      "CREATE INDEX idx_technician_access_company_created ON technician_access_events (company, created)",
+      "CREATE INDEX idx_technician_access_company_occurred ON technician_access_events (company, occurredAt)",
     ],
   });
   app.save(accessEvents);
