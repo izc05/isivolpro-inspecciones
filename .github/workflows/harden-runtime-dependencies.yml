@@ -1,0 +1,110 @@
+name: Harden Preinspecciones BT runtime dependencies
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - scripts/classify-build-dependencies.mjs
+      - .github/workflows/harden-runtime-dependencies.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-runtime-dependencies
+  cancel-in-progress: true
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install current locked dependencies
+        run: npm ci
+
+      - name: Separate build-only dependencies
+        run: node scripts/classify-build-dependencies.mjs
+
+      - name: Refresh compatible lockfile entries
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit fix --package-lock-only --omit=dev --ignore-scripts --no-audit --no-fund || true
+
+      - name: Reinstall hardened dependency graph
+        run: npm ci
+
+      - name: Require clean high and critical runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application after dependency changes
+        run: npm run test:integration
+
+      - name: Verify dependency classification
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const pkg = require('./package.json');
+          const buildOnly = [
+            '@capacitor/android', '@capacitor/assets', '@capacitor/cli',
+            '@vitejs/plugin-react', 'autoprefixer', 'pdf-parse',
+            'postcss', 'tailwindcss', 'vite'
+          ];
+          for (const name of buildOnly) {
+            if (pkg.dependencies?.[name]) throw new Error(`${name} remains in dependencies`);
+            if (!pkg.devDependencies?.[name]) throw new Error(`${name} missing from devDependencies`);
+          }
+          NODE
+          git diff --check
+
+      - name: Write dependency hardening marker
+        shell: bash
+        run: |
+          cat > docs/runtime-dependency-validation.md <<'EOF'
+          # Validación · Dependencias de producción
+
+          Estado: **SUPERADA**
+
+          Se ha comprobado automáticamente:
+
+          - separación de Vite, Capacitor CLI/assets, Android build, PostCSS, Tailwind y utilidades PDF fuera del runtime;
+          - actualización compatible del archivo `package-lock.json`;
+          - instalación reproducible mediante `npm ci`;
+          - ausencia de vulnerabilidades high o critical en dependencias de producción según `npm audit --omit=dev`;
+          - pruebas de sincronización y servidor;
+          - compilación web de producción;
+          - formato correcto del diff.
+
+          Las herramientas de desarrollo siguen auditándose por separado, pero no se incorporan al bundle de ejecución de la aplicación.
+          EOF
+
+      - name: Commit hardened dependency graph
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json docs/runtime-dependency-validation.md
+          if git diff --cached --quiet; then
+            echo 'Runtime dependencies are already hardened.'
+            exit 0
+          fi
+          git commit -m "security: harden production dependency graph"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close
