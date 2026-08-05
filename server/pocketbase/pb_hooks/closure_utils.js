@@ -49,31 +49,62 @@ function numberValue(value, fallback) {
 function readPolicy(record, fieldName) {
   if (!record) return {};
   try {
-    const result = new DynamicModel({
-      allowCloseFromWeb: DEFAULTS.allowCloseFromWeb,
-      requireMobileClose: DEFAULTS.requireMobileClose,
-      requireLocation: DEFAULTS.requireLocation,
-      allowedRadiusMeters: DEFAULTS.allowedRadiusMeters,
-      maximumAccuracyMeters: DEFAULTS.maximumAccuracyMeters,
-      requireInspectorSignature: DEFAULTS.requireInspectorSignature,
-      requireClientSignature: DEFAULTS.requireClientSignature,
-      minimumPhotoCount: DEFAULTS.minimumPhotoCount,
-      requireServerSyncBeforeClose: DEFAULTS.requireServerSyncBeforeClose,
-      allowAdminOverride: DEFAULTS.allowAdminOverride,
+    const first = new DynamicModel({
+      allowCloseFromWeb: false,
+      requireMobileClose: false,
+      requireLocation: false,
+      allowedRadiusMeters: -900001,
+      maximumAccuracyMeters: -900002,
+      requireInspectorSignature: false,
+      requireClientSignature: false,
+      minimumPhotoCount: -900003,
+      requireServerSyncBeforeClose: false,
+      allowAdminOverride: false,
     });
-    record.unmarshalJSONField(fieldName, result);
-    return {
-      allowCloseFromWeb: booleanValue(result.allowCloseFromWeb, DEFAULTS.allowCloseFromWeb),
-      requireMobileClose: booleanValue(result.requireMobileClose, DEFAULTS.requireMobileClose),
-      requireLocation: booleanValue(result.requireLocation, DEFAULTS.requireLocation),
-      allowedRadiusMeters: numberValue(result.allowedRadiusMeters, DEFAULTS.allowedRadiusMeters),
-      maximumAccuracyMeters: numberValue(result.maximumAccuracyMeters, DEFAULTS.maximumAccuracyMeters),
-      requireInspectorSignature: booleanValue(result.requireInspectorSignature, DEFAULTS.requireInspectorSignature),
-      requireClientSignature: booleanValue(result.requireClientSignature, DEFAULTS.requireClientSignature),
-      minimumPhotoCount: numberValue(result.minimumPhotoCount, DEFAULTS.minimumPhotoCount),
-      requireServerSyncBeforeClose: booleanValue(result.requireServerSyncBeforeClose, DEFAULTS.requireServerSyncBeforeClose),
-      allowAdminOverride: booleanValue(result.allowAdminOverride, DEFAULTS.allowAdminOverride),
-    };
+    const second = new DynamicModel({
+      allowCloseFromWeb: true,
+      requireMobileClose: true,
+      requireLocation: true,
+      allowedRadiusMeters: -800001,
+      maximumAccuracyMeters: -800002,
+      requireInspectorSignature: true,
+      requireClientSignature: true,
+      minimumPhotoCount: -800003,
+      requireServerSyncBeforeClose: true,
+      allowAdminOverride: true,
+    });
+    record.unmarshalJSONField(fieldName, first);
+    record.unmarshalJSONField(fieldName, second);
+
+    const result = {};
+    const booleanFields = [
+      "allowCloseFromWeb",
+      "requireMobileClose",
+      "requireLocation",
+      "requireInspectorSignature",
+      "requireClientSignature",
+      "requireServerSyncBeforeClose",
+      "allowAdminOverride",
+    ];
+    const numberFields = [
+      "allowedRadiusMeters",
+      "maximumAccuracyMeters",
+      "minimumPhotoCount",
+    ];
+
+    for (let index = 0; index < booleanFields.length; index += 1) {
+      const field = booleanFields[index];
+      if (first[field] === second[field]) {
+        result[field] = booleanValue(first[field], DEFAULTS[field]);
+      }
+    }
+    for (let index = 0; index < numberFields.length; index += 1) {
+      const field = numberFields[index];
+      if (Number(first[field]) === Number(second[field])) {
+        result[field] = numberValue(first[field], DEFAULTS[field]);
+      }
+    }
+    return result;
   } catch (error) {
     return objectValue(record.get(fieldName));
   }
