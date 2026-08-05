@@ -1,7 +1,7 @@
 {
-  "name": "IsiVoltPro Inspecciones Eléctricas",
-  "short_name": "IsiVoltPro",
-  "description": "Aplicación de apoyo para inspecciones eléctricas de baja tensión.",
+  "name": "IsiVoltPro Preinspecciones BT",
+  "short_name": "IsiVoltPro BT",
+  "description": "Aplicación local-first para preinspecciones eléctricas de baja tensión, mediciones, evidencias e informes.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
