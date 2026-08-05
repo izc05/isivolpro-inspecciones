@@ -26,7 +26,7 @@ migrate((app) => {
       { name: "name", type: "text", required: true, max: 160 },
       { name: "legalName", type: "text", max: 200 },
       { name: "taxId", type: "text", max: 32 },
-      { name: "active", type: "bool", required: true },
+      { name: "active", type: "bool" },
       { name: "plan", type: "select", required: true, maxSelect: 1, values: ["demo", "pro", "enterprise"] },
       { name: "settings", type: "json" },
       { name: "closurePolicy", type: "json" },
@@ -72,13 +72,13 @@ migrate((app) => {
   }));
   isivoltEnsureField(users, new BoolField({
     name: "active",
-    required: true,
   }));
   isivoltEnsureField(users, new JSONField({ name: "applications" }));
   isivoltEnsureField(users, new TextField({
     name: "firebaseUid",
     max: 160,
   }));
+  users.fields.getByName("active").required = false;
   users.addIndex("idx_users_company", false, "company", "");
   users.addIndex("idx_users_firebase_uid", true, "firebaseUid", "firebaseUid != ''");
   app.save(users);
@@ -102,7 +102,7 @@ migrate((app) => {
       { name: "longitude", type: "number" },
       { name: "allowedRadiusMeters", type: "number", min: 1, max: 10000 },
       { name: "closurePolicy", type: "json" },
-      { name: "active", type: "bool", required: true },
+      { name: "active", type: "bool" },
     ],
     indexes: [
       "CREATE INDEX idx_installations_company ON installations (company)",
