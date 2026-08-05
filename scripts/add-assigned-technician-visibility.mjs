@@ -250,10 +250,10 @@ function insertBefore(source, marker, insertion, uniqueNeedle, label) {
     "colección visible de expedientes",
   );
   if (!source.includes("technician?.specialty].join")) {
-    const originalHaystack = "      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups].join(\" \ ").toLowerCase();".replace("\\ ", "");
+    const originalHaystack = '      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups].join(" ").toLowerCase();';
     const visibleHaystack = lines(
       "      const technician = assignedTechnician(inspection);",
-      "      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups, technician?.name, technician?.email, technician?.specialty].join(\" \ ").toLowerCase();".replace("\\ ", ""),
+      '      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups, technician?.name, technician?.email, technician?.specialty].join(" ").toLowerCase();',
     );
     if (!source.includes(originalHaystack)) throw new Error("No se encontró el buscador de expedientes");
     source = source.replace(originalHaystack, visibleHaystack);
