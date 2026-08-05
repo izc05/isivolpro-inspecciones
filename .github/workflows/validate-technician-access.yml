@@ -94,7 +94,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           cd /tmp/pocketbase-technicians
-          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --http=127.0.0.1:8099 > /tmp/pocketbase-technicians.log 2>&1 &
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8099 > /tmp/pocketbase-technicians.log 2>&1 &
           server_pid=$!
           cleanup() {
             kill "$server_pid" >/dev/null 2>&1 || true
