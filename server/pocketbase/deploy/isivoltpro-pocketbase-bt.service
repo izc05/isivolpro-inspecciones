@@ -1,0 +1,23 @@
+[Unit]
+Description=IsiVoltPro Preinspecciones BT - PocketBase
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=isivoltpro
+Group=isivoltpro
+WorkingDirectory=/opt/isivoltpro/pocketbase-bt
+EnvironmentFile=/etc/isivoltpro/pocketbase-bt.env
+ExecStart=/opt/isivoltpro/pocketbase-bt/pocketbase serve --http=127.0.0.1:8091
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/isivoltpro/pocketbase-bt/pb_data
+
+[Install]
+WantedBy=multi-user.target

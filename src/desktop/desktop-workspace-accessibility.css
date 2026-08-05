@@ -1,0 +1,13 @@
+@media (min-width: 1024px) {
+  .isivolt-desktop-workspace + * {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media print {
+  .isivolt-desktop-workspace + * {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}

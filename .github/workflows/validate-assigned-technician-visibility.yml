@@ -1,0 +1,78 @@
+name: Validate assigned technician visibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - scripts/add-assigned-technician-visibility.mjs
+      - server/pocketbase/pb_hooks/sync_core_utils.js
+      - server/pocketbase/pb_hooks/isivolt_sync.pb.js
+      - src/sync/remoteMerge.js
+      - src/sync/remoteMerge.test.js
+      - src/admin/InspectionAssignmentControl.jsx
+      - src/desktop/DesktopWorkspace.jsx
+      - .github/workflows/validate-assigned-technician-visibility.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isivoltpro-assigned-technician-visibility
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check patch syntax and application
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check scripts/add-assigned-technician-visibility.mjs
+          node scripts/add-assigned-technician-visibility.mjs
+          git diff --check
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Check validated visibility contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'function serializeAssignedUser(app, userId)' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'recordApplications: recordApplications' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'assignedUser: serializeAssignedUser(app, assignedUserId)' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'assignedUser: getRemoteAssignedUser(remote)' src/sync/remoteMerge.js
+          grep -Fq '<th>Técnico</th>' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'onAssignmentChange={handleAssignmentChange}' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'onAssignmentChange?.(next)' src/admin/InspectionAssignmentControl.jsx
+          grep -Fq 'Estado: **SUPERADA**' docs/assigned-technician-visibility-validation.md
+          git diff --check

@@ -1,0 +1,186 @@
+name: Validate role-based inspection access
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - server/pocketbase/pb_hooks/isivolt_sync.pb.js
+      - server/pocketbase/pb_hooks/sync_core_utils.js
+      - server/pocketbase/pb_hooks/technician_access_utils.js
+      - server/pocketbase/pb_hooks/inspection_assignment_utils.js
+      - scripts/normalize-pocketbase-json-fields.mjs
+      - scripts/smoke-role-access.mjs
+      - .github/workflows/validate-role-access.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-role-access
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Normalize PocketBase JSON access idempotently
+        run: |
+          node scripts/normalize-pocketbase-json-fields.mjs
+          node scripts/normalize-pocketbase-json-fields.mjs
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-roles.zip
+          mkdir -p /tmp/pocketbase-roles/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-roles.zip -d /tmp/pocketbase-roles
+          chmod +x /tmp/pocketbase-roles/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-roles/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-roles/pb_migrations/
+          cd /tmp/pocketbase-roles
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real role access lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8101
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-roles.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-roles
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8101 > /tmp/pocketbase-roles.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8101/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-roles.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-role-access.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-roles.log; then
+            cat /tmp/pocketbase-roles.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check role access contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'const sync = require(`${__hooks}/sync_core_utils.js`)' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          grep -Fq 'record.unmarshalJSONField("applications", result)' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'record.unmarshalJSONField("applications", result)' server/pocketbase/pb_hooks/technician_access_utils.js
+          grep -Fq 'record.unmarshalJSONField("applications", result)' server/pocketbase/pb_hooks/inspection_assignment_utils.js
+          grep -Fq 'role === "viewer"' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'record.getString("assignedUser") === auth.userId' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'record.set("assignedUser", auth.userId)' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          grep -Fq 'canViewAll' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write role access validation marker
+        shell: bash
+        run: |
+          cat > docs/role-access-validation.md <<EOF
+          # Validación · Permisos por rol y expediente
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - administrador y coordinador ven todos los expedientes de su empresa;
+          - el perfil Solo consulta ve todos, pero no puede sincronizar cambios;
+          - cada técnico recibe únicamente expedientes asignados o creados por él;
+          - un técnico no puede modificar el expediente de otro técnico;
+          - una preinspección nueva creada por técnico se autoasigna al creador;
+          - una cuenta sin acceso a Preinspecciones BT queda bloqueada;
+          - lectura nativa de campos JSON mediante unmarshalJSONField;
+          - la respuesta de descarga incluye permisos y asignación;
+          - el hook principal carga sus ayudantes dentro de cada handler, compatible con PocketBase moderno;
+          - auditoría de runtime, pruebas, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validated role access
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            server/pocketbase/pb_hooks/isivolt_sync.pb.js \
+            server/pocketbase/pb_hooks/sync_core_utils.js \
+            server/pocketbase/pb_hooks/technician_access_utils.js \
+            server/pocketbase/pb_hooks/inspection_assignment_utils.js \
+            docs/role-access-validation.md
+          if git diff --cached --quiet; then
+            echo 'Role access is already validated.'
+            exit 0
+          fi
+          git commit -m "feat: certify role-based inspection access"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

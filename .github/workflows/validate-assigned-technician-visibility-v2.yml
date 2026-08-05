@@ -1,0 +1,14 @@
+name: Archived assigned technician visibility validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Archived
+        run: echo 'Validation completed in docs/assigned-technician-visibility-validation.md. Use the canonical validate-assigned-technician-visibility.yml workflow for future changes.'

@@ -1,0 +1,141 @@
+name: Validate PocketBase runtime
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - .github/workflows/validate-pocketbase-runtime.yml
+  workflow_dispatch:
+
+concurrency:
+  group: isivoltpro-bt-pocketbase-runtime
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          if [[ -z "$tag" || "$tag" == "null" ]]; then
+            echo "No se pudo resolver la versión oficial de PocketBase" >&2
+            exit 1
+          fi
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "PocketBase oficial: $tag"
+
+      - name: Download official PocketBase binary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL \
+            "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" \
+            -o /tmp/pocketbase.zip
+          mkdir -p /tmp/pocketbase-runtime
+          unzip -q /tmp/pocketbase.zip -d /tmp/pocketbase-runtime
+          chmod +x /tmp/pocketbase-runtime/pocketbase
+          /tmp/pocketbase-runtime/pocketbase --version
+
+      - name: Prepare isolated runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p /tmp/pocketbase-runtime/pb_hooks
+          mkdir -p /tmp/pocketbase-runtime/pb_migrations
+          mkdir -p /tmp/pocketbase-runtime/pb_data
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-runtime/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-runtime/pb_migrations/
+
+      - name: Apply real PocketBase migrations
+        working-directory: /tmp/pocketbase-runtime
+        env:
+          FIREBASE_WEB_API_KEY: runtime-validation-placeholder
+        run: ./pocketbase migrate up
+
+      - name: Start PocketBase and validate health
+        working-directory: /tmp/pocketbase-runtime
+        env:
+          FIREBASE_WEB_API_KEY: runtime-validation-placeholder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./pocketbase serve --http=127.0.0.1:8099 > /tmp/pocketbase-runtime.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8099/api/health > /tmp/pocketbase-health.json; then
+              break
+            fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              echo "PocketBase terminó antes de responder" >&2
+              cat /tmp/pocketbase-runtime.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
+          jq -e '.code == 200 and .message == "API is healthy."' /tmp/pocketbase-health.json
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-runtime.log; then
+            echo "PocketBase registró un error durante el arranque" >&2
+            cat /tmp/pocketbase-runtime.log >&2
+            exit 1
+          fi
+          cat /tmp/pocketbase-health.json
+
+      - name: Write runtime validation marker
+        shell: bash
+        run: |
+          cat > docs/pocketbase-runtime-validation.md <<EOF
+          # Validación de runtime PocketBase
+
+          Estado: **SUPERADA**
+
+          Versión oficial probada: **${{ steps.pocketbase.outputs.tag }}**
+
+          La validación ha ejecutado realmente:
+
+          - descarga del binario oficial Linux AMD64;
+          - aplicación de todas las migraciones de `server/pocketbase/pb_migrations`;
+          - carga de todos los hooks de `server/pocketbase/pb_hooks`;
+          - arranque aislado del servidor en `127.0.0.1:8099`;
+          - comprobación satisfactoria de `/api/health`;
+          - revisión del log de arranque sin errores de hooks, migraciones, pánicos o fallos fatales.
+
+          Esta validación no crea usuarios reales ni publica el servidor en Internet.
+          EOF
+
+      - name: Commit runtime validation marker
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/pocketbase-runtime-validation.md
+          if git diff --cached --quiet; then
+            echo "PocketBase runtime was already validated."
+            exit 0
+          fi
+          git commit -m "test: validate PocketBase runtime"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close

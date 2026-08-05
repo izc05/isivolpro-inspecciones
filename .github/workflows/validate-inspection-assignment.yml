@@ -1,0 +1,183 @@
+name: Validate inspection assignment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - src/admin/InspectionAssignmentControl.jsx
+      - src/admin/inspectionAssignmentRuntime.js
+      - src/admin/inspection-assignment.css
+      - src/sync/inspectionAssignment.test.js
+      - server/pocketbase/pb_hooks/isivolt_assignments.pb.js
+      - server/pocketbase/pb_hooks/inspection_assignment_utils.js
+      - scripts/integrate-inspection-assignment.mjs
+      - scripts/smoke-inspection-assignment.mjs
+      - .github/workflows/validate-inspection-assignment.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-inspection-assignment
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Integrate assignment idempotently
+        run: |
+          node scripts/integrate-inspection-assignment.mjs
+          node scripts/integrate-inspection-assignment.mjs
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-assignment.zip
+          mkdir -p /tmp/pocketbase-assignment/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-assignment.zip -d /tmp/pocketbase-assignment
+          chmod +x /tmp/pocketbase-assignment/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-assignment/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-assignment/pb_migrations/
+          cd /tmp/pocketbase-assignment
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real assignment lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8100
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-assignment.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-assignment
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8100 > /tmp/pocketbase-assignment.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8100/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-assignment.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-inspection-assignment.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-assignment.log; then
+            cat /tmp/pocketbase-assignment.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check assignment contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'InspectionAssignmentControl' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'firebaseUser={user}' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'assignedByRole' server/pocketbase/pb_hooks/inspection_assignment_utils.js
+          grep -Fq 'currentStatus === "CLOSED"' server/pocketbase/pb_hooks/isivolt_assignments.pb.js
+          grep -Fq 'updateInspectionAssignment' src/admin/inspectionAssignmentRuntime.js
+          grep -Fq 'Sin asignar' src/admin/InspectionAssignmentControl.jsx
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write assignment validation marker
+        shell: bash
+        run: |
+          cat > docs/inspection-assignment-validation.md <<EOF
+          # Validación · Asignación de preinspecciones
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - selector de técnico dentro de la ficha de escritorio;
+          - estado sin asignar y listado de técnicos activos con acceso BT;
+          - asignación por administrador;
+          - reasignación por coordinador;
+          - rechazo del perfil Solo consulta;
+          - desasignación del expediente;
+          - cambio automático DRAFT → ASSIGNED y ASSIGNED → DRAFT;
+          - bloqueo de expedientes cerrados o cancelados;
+          - incremento de revisión del servidor;
+          - tres eventos ASSIGNED auditados en PocketBase real;
+          - parche visual idempotente;
+          - pruebas, auditoría de runtime, compilación web y APK Android debug.
+          EOF
+
+      - name: Commit validated desktop integration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/desktop/DesktopWorkspace.jsx docs/inspection-assignment-validation.md
+          if git diff --cached --quiet; then
+            echo 'Assignment UI is already integrated.'
+            exit 0
+          fi
+          git commit -m "feat: integrate desktop inspection assignment"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">IsiVoltPro Inspecciones</string>
-    <string name="title_activity_main">IsiVoltPro Inspecciones</string>
+    <string name="app_name">IsiVoltPro Preinspecciones BT</string>
+    <string name="title_activity_main">IsiVoltPro Preinspecciones BT</string>
     <string name="package_name">com.isivoltpro.inspecciones</string>
     <string name="custom_url_scheme">com.isivoltpro.inspecciones</string>
 </resources>

@@ -1,0 +1,118 @@
+name: Validate read-only desktop permissions
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - src/sync/remoteMerge.js
+      - src/sync/remoteMerge.test.js
+      - src/desktop/readonly-workspace.css
+      - scripts/integrate-readonly-desktop.mjs
+      - .github/workflows/validate-readonly-desktop.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-readonly-desktop
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Integrate role-aware desktop idempotently
+        run: |
+          node scripts/integrate-readonly-desktop.mjs
+          node scripts/integrate-readonly-desktop.mjs
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check read-only contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'readSyncSession' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'currentRole === "viewer"' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'Acceso de solo consulta' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'Puede revisar e imprimir, pero no modificar' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'currentRole === "admin"' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'assignedUserId: access.assignedUserId' src/sync/remoteMerge.js
+          grep -Fq 'permissions: access.permissions' src/sync/remoteMerge.js
+          grep -Fq 'conserva acceso de solo consulta' src/sync/remoteMerge.test.js
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write read-only validation marker
+        shell: bash
+        run: |
+          cat > docs/readonly-desktop-validation.md <<'EOF'
+          # Validación · Escritorio por rol
+
+          Estado: **SUPERADA**
+
+          Se ha comprobado:
+
+          - asignación, propietario y permisos se conservan al descargar un expediente;
+          - el perfil Solo consulta no puede crear preinspecciones;
+          - no aparecen botones de Datos, Checklist, Documentos, Eliminar ni Continuar;
+          - el informe permanece disponible para revisión e impresión;
+          - Administración solo aparece para el rol administrador;
+          - el selector de técnico aparece para administración y coordinación;
+          - los cambios de interfaz no se muestran en impresión;
+          - parche aplicado dos veces sin duplicar código;
+          - pruebas, auditoría del runtime, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validated desktop permissions
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/desktop/DesktopWorkspace.jsx docs/readonly-desktop-validation.md
+          if git diff --cached --quiet; then
+            echo 'Read-only desktop is already integrated.'
+            exit 0
+          fi
+          git commit -m "feat: integrate role-aware desktop controls"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

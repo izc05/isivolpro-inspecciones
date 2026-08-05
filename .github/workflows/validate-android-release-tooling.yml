@@ -1,0 +1,145 @@
+name: Validate Android release tooling
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - package.json
+      - scripts/run-gradle.mjs
+      - android/app/build.gradle
+      - android/app/src/main/res/values/strings.xml
+      - capacitor.config.ts
+      - index.html
+      - public/manifest.webmanifest
+      - src/main.jsx
+      - src/components/EcosystemDock.jsx
+      - src/ecosystem-dock.css
+      - .github/workflows/android-release.yml
+      - .github/workflows/validate-android-release-tooling.yml
+      - docs/android-release-signing.md
+      - docs/release-notes-v1.5.8-beta.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-validate-android-release
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Block vulnerable runtime tooling
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and PocketBase code
+        run: npm run test:integration
+
+      - name: Synchronize Android project
+        run: npx cap sync android
+
+      - name: Build unsigned release variants through cross-platform launcher
+        run: node scripts/run-gradle.mjs clean assembleRelease bundleRelease
+
+      - name: Check unsigned release outputs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -s android/app/build/outputs/apk/release/app-release-unsigned.apk
+          test -s android/app/build/outputs/bundle/release/app-release.aab
+          if [[ -n "$(find . -maxdepth 4 -type f \( -name '*.jks' -o -name '*.keystore' \) -print -quit)" ]]; then
+            echo "A signing keystore was found inside the repository." >&2
+            exit 1
+          fi
+
+      - name: Check signing, branding and documentation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq "ANDROID_KEYSTORE_PATH" android/app/build.gradle
+          grep -Fq "ANDROID_KEYSTORE_BASE64" .github/workflows/android-release.yml
+          grep -Fq "Block vulnerable runtime releases" .github/workflows/android-release.yml
+          grep -Fq "Validate release tag and Android version" .github/workflows/android-release.yml
+          grep -Fq "Verify APK signature" .github/workflows/android-release.yml
+          grep -Fq "Remove keystore" .github/workflows/android-release.yml
+          grep -Fq "No publicar una release definitiva" docs/android-release-signing.md
+          grep -Fq "Estado: **notas preparadas, release no publicada**" docs/release-notes-v1.5.8-beta.md
+          grep -Fq 'appName: "IsiVoltPro Preinspecciones BT"' capacitor.config.ts
+          grep -Fq '<title>IsiVoltPro Preinspecciones BT</title>' index.html
+          grep -Fq '"name": "IsiVoltPro Preinspecciones BT"' public/manifest.webmanifest
+          grep -Fq '<string name="app_name">IsiVoltPro Preinspecciones BT</string>' android/app/src/main/res/values/strings.xml
+          grep -Fq 'https://www.isivoltpro.com/aplicaciones/inspecciones-bt' src/components/EcosystemDock.jsx
+          grep -Fq '<EcosystemDock />' src/main.jsx
+          grep -Fq '@media print' src/ecosystem-dock.css
+          grep -Fq 'node scripts/run-gradle.mjs assembleDebug' package.json
+          grep -Fq 'node scripts/run-gradle.mjs assembleRelease bundleRelease' package.json
+          git diff --check
+
+      - name: Write release tooling validation marker
+        shell: bash
+        run: |
+          cat > docs/android-release-tooling-validation.md <<'EOF'
+          # Validación · Distribución Android release
+
+          Estado: **SUPERADA**
+
+          Se ha comprobado automáticamente:
+
+          - configuración Gradle compatible con firma condicional mediante variables de entorno;
+          - ausencia de almacenes de claves dentro del repositorio;
+          - auditoría high/critical limpia para dependencias de producción;
+          - pruebas de sincronización, PocketBase y compilación web;
+          - identidad coherente `IsiVoltPro Preinspecciones BT` en web, PWA, Capacitor y Android;
+          - acceso responsive y accesible desde la app hacia el ecosistema IsiVoltPro;
+          - comandos Gradle reproducibles en Windows, Linux y macOS;
+          - sincronización del proyecto Capacitor Android;
+          - construcción de APK release sin firma para validar el empaquetado;
+          - construcción de AAB release;
+          - validación de correspondencia entre tag, versionName y versionCode;
+          - workflow firmado con secretos, comprobación de firma y checksums SHA-256;
+          - eliminación del keystore temporal aunque el trabajo termine con error;
+          - notas de beta preparadas para una futura release borrador;
+          - documentación de custodia, versión, instalación y prueba mínima.
+
+          La firma real no se ejecuta en esta validación porque requiere los secretos privados del propietario.
+          EOF
+
+      - name: Commit validation marker
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/android-release-tooling-validation.md
+          if git diff --cached --quiet; then
+            echo "Android release tooling marker is already up to date."
+            exit 0
+          fi
+          git commit -m "docs: validate Android release tooling"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close

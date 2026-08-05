@@ -1,0 +1,1129 @@
+.isivolt-desktop-workspace,
+.isivolt-desktop-focus-header {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --isivolt-navy: #071e3d;
+    --isivolt-navy-2: #0b2b53;
+    --isivolt-gold: #ffc928;
+    --isivolt-surface: #f4f7fb;
+    --isivolt-line: #dfe7f1;
+    --isivolt-muted: #65758b;
+  }
+
+  .isivolt-desktop-workspace {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    background: var(--isivolt-surface);
+    color: #132238;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .isivolt-desktop-sidebar {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 22px 16px 18px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 201, 40, 0.13), transparent 26%),
+      linear-gradient(180deg, #071e3d 0%, #061830 100%);
+    color: #fff;
+    box-shadow: 16px 0 40px rgba(7, 30, 61, 0.08);
+  }
+
+  .isivolt-desktop-brand {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    border: 0;
+    padding: 4px 8px 24px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .isivolt-desktop-brand > span,
+  .isivolt-focus-brand > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--isivolt-gold);
+    color: var(--isivolt-navy);
+    box-shadow: 0 10px 26px rgba(255, 201, 40, 0.24);
+  }
+
+  .isivolt-desktop-brand div {
+    min-width: 0;
+  }
+
+  .isivolt-desktop-brand strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .isivolt-desktop-brand small {
+    display: block;
+    margin-top: 2px;
+    color: #9fb1c8;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .isivolt-desktop-sidebar nav {
+    display: grid;
+    gap: 6px;
+  }
+
+  .isivolt-desktop-sidebar nav button,
+  .isivolt-desktop-sidebar > a {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 11px;
+    border: 0;
+    border-radius: 13px;
+    padding: 11px 12px;
+    background: transparent;
+    color: #b7c4d5;
+    font-size: 13px;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 160ms ease;
+  }
+
+  .isivolt-desktop-sidebar nav button:hover,
+  .isivolt-desktop-sidebar > a:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+
+  .isivolt-desktop-sidebar nav button.is-active {
+    background: linear-gradient(90deg, rgba(255, 201, 40, 0.19), rgba(255, 201, 40, 0.07));
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--isivolt-gold);
+  }
+
+  .isivolt-desktop-sidebar nav button.is-active svg {
+    color: var(--isivolt-gold);
+  }
+
+  .isivolt-desktop-sidebar nav button small {
+    margin-left: auto;
+    border-radius: 999px;
+    padding: 2px 7px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 10px;
+  }
+
+  .isivolt-desktop-sidebar > a svg:last-child {
+    margin-left: auto;
+  }
+
+  .isivolt-sidebar-divider {
+    height: 1px;
+    margin: 18px 8px 12px;
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .isivolt-sidebar-account {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 15px;
+    padding: 11px;
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  .isivolt-sidebar-account > div {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 11px;
+    background: rgba(255, 201, 40, 0.15);
+    color: var(--isivolt-gold);
+  }
+
+  .isivolt-sidebar-account > span {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .isivolt-sidebar-account strong,
+  .isivolt-sidebar-account small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-sidebar-account strong {
+    color: #fff;
+    font-size: 11px;
+  }
+
+  .isivolt-sidebar-account small {
+    margin-top: 2px;
+    color: #93a5bc;
+    font-size: 9px;
+  }
+
+  .isivolt-desktop-main {
+    display: flex;
+    min-width: 0;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .isivolt-desktop-topbar {
+    display: flex;
+    height: 72px;
+    flex: 0 0 72px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border-bottom: 1px solid var(--isivolt-line);
+    padding: 0 28px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(18px);
+  }
+
+  .isivolt-desktop-topbar > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .isivolt-desktop-topbar > div:first-child span {
+    color: #8390a3;
+    font-size: 12px;
+  }
+
+  .isivolt-desktop-topbar > div:first-child strong {
+    color: var(--isivolt-navy);
+    font-size: 13px;
+  }
+
+  .isivolt-mobile-menu {
+    display: none;
+  }
+
+  .isivolt-global-search {
+    display: flex;
+    width: min(360px, 30vw);
+    align-items: center;
+    gap: 9px;
+    border: 1px solid #dce4ee;
+    border-radius: 13px;
+    padding: 9px 12px;
+    background: #f8fafc;
+    color: #718096;
+  }
+
+  .isivolt-global-search:focus-within {
+    border-color: rgba(7, 30, 61, 0.35);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(7, 30, 61, 0.07);
+  }
+
+  .isivolt-global-search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #1d2b3d;
+    font-size: 12px;
+  }
+
+  .isivolt-icon-button {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    background: #fff;
+    color: #607086;
+    cursor: pointer;
+    transition: 150ms ease;
+  }
+
+  .isivolt-icon-button:hover {
+    border-color: #bac8d8;
+    color: var(--isivolt-navy);
+    transform: translateY(-1px);
+  }
+
+  .isivolt-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: 160ms ease;
+  }
+
+  .isivolt-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .isivolt-button--primary {
+    background: var(--isivolt-navy);
+    color: #fff;
+    box-shadow: 0 9px 22px rgba(7, 30, 61, 0.14);
+  }
+
+  .isivolt-button--primary svg {
+    color: var(--isivolt-gold);
+  }
+
+  .isivolt-button--secondary {
+    border: 1px solid #d7e0eb;
+    background: #fff;
+    color: #34465e;
+  }
+
+  .isivolt-button--danger-ghost {
+    background: #fff2f2;
+    color: #b42318;
+  }
+
+  .isivolt-desktop-content {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    padding: 26px 28px 34px;
+  }
+
+  .isivolt-desktop-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+
+  .isivolt-desktop-welcome > div:first-child > span,
+  .isivolt-section-heading > div > span,
+  .isivolt-detail-panel__eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #67809e;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .isivolt-desktop-welcome h1 {
+    margin: 0;
+    color: var(--isivolt-navy);
+    font-size: clamp(24px, 2.2vw, 34px);
+    font-weight: 950;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+  }
+
+  .isivolt-desktop-welcome p,
+  .isivolt-section-heading p {
+    margin: 8px 0 0;
+    color: var(--isivolt-muted);
+    font-size: 12px;
+  }
+
+  .isivolt-welcome-badge {
+    display: flex;
+    min-width: 245px;
+    align-items: center;
+    gap: 11px;
+    border: 1px solid #d8e5f1;
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #fff, #f4f8fc);
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-welcome-badge > svg {
+    color: #18815d;
+  }
+
+  .isivolt-welcome-badge strong,
+  .isivolt-welcome-badge small {
+    display: block;
+  }
+
+  .isivolt-welcome-badge strong {
+    font-size: 12px;
+  }
+
+  .isivolt-welcome-badge small {
+    margin-top: 2px;
+    color: #708196;
+    font-size: 9px;
+  }
+
+  .isivolt-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 13px;
+    margin-bottom: 18px;
+  }
+
+  .isivolt-stat-card {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e0e7f0;
+    border-radius: 17px;
+    padding: 15px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(33, 49, 72, 0.045);
+  }
+
+  .isivolt-stat-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border-radius: 13px;
+    background: #edf3f9;
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-stat-card--blue .isivolt-stat-card__icon { background: #e9f3ff; color: #1769aa; }
+  .isivolt-stat-card--amber .isivolt-stat-card__icon { background: #fff6d9; color: #a56b00; }
+  .isivolt-stat-card--green .isivolt-stat-card__icon { background: #e9f8f1; color: #16825c; }
+
+  .isivolt-stat-card p,
+  .isivolt-stat-card strong,
+  .isivolt-stat-card span {
+    display: block;
+    margin: 0;
+  }
+
+  .isivolt-stat-card p {
+    color: #74849a;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .isivolt-stat-card strong {
+    margin-top: 2px;
+    color: #12243b;
+    font-size: 23px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+  }
+
+  .isivolt-stat-card span {
+    margin-top: 1px;
+    color: #8492a4;
+    font-size: 9px;
+  }
+
+  .isivolt-desktop-notice {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 17px;
+    border: 1px solid #f1d58a;
+    border-radius: 14px;
+    padding: 11px 13px;
+    background: #fff9e8;
+    color: #795500;
+  }
+
+  .isivolt-desktop-notice strong,
+  .isivolt-desktop-notice small {
+    display: block;
+  }
+
+  .isivolt-desktop-notice strong { font-size: 11px; }
+  .isivolt-desktop-notice small { margin-top: 2px; color: #927431; font-size: 9px; }
+
+  .isivolt-workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.68fr) minmax(310px, 0.72fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .isivolt-list-panel,
+  .isivolt-detail-panel,
+  .isivolt-admin-overview,
+  .isivolt-report-grid article,
+  .isivolt-backup-card {
+    border: 1px solid #e0e7f0;
+    background: #fff;
+    box-shadow: 0 12px 34px rgba(37, 55, 79, 0.045);
+  }
+
+  .isivolt-list-panel,
+  .isivolt-detail-panel,
+  .isivolt-admin-overview {
+    border-radius: 18px;
+  }
+
+  .isivolt-list-panel {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .isivolt-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .isivolt-section-heading--compact {
+    align-items: center;
+    margin: 0;
+    padding: 17px 18px;
+    border-bottom: 1px solid #e6ecf3;
+  }
+
+  .isivolt-section-heading h2 {
+    margin: 0;
+    color: var(--isivolt-navy);
+    font-size: 19px;
+    font-weight: 930;
+    letter-spacing: -0.025em;
+  }
+
+  .isivolt-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .isivolt-filter-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #dbe3ed;
+    border-radius: 10px;
+    padding: 7px 9px;
+    background: #f9fbfd;
+    color: #6e7e91;
+  }
+
+  .isivolt-filter-row select {
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #3f5065;
+    font-size: 10px;
+    font-weight: 750;
+  }
+
+  .isivolt-table-wrap {
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  .isivolt-inspection-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+
+  .isivolt-inspection-table th {
+    padding: 10px 13px;
+    border-bottom: 1px solid #e8edf3;
+    background: #f8fafc;
+    color: #7b899b;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .isivolt-inspection-table td {
+    padding: 12px 13px;
+    border-bottom: 1px solid #edf1f5;
+    color: #45566c;
+    vertical-align: middle;
+  }
+
+  .isivolt-inspection-table tr {
+    cursor: pointer;
+    transition: 130ms ease;
+  }
+
+  .isivolt-inspection-table tbody tr:hover,
+  .isivolt-inspection-table tbody tr.is-selected {
+    background: #f4f8fc;
+  }
+
+  .isivolt-inspection-table tbody tr.is-selected {
+    box-shadow: inset 3px 0 0 var(--isivolt-gold);
+  }
+
+  .isivolt-inspection-table td:first-child {
+    min-width: 205px;
+  }
+
+  .isivolt-inspection-table td:first-child strong,
+  .isivolt-inspection-table td:first-child span {
+    display: block;
+  }
+
+  .isivolt-inspection-table td:first-child strong {
+    max-width: 235px;
+    overflow: hidden;
+    color: #17273b;
+    font-size: 10px;
+    font-weight: 850;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-inspection-table td:first-child span {
+    max-width: 235px;
+    margin-top: 3px;
+    overflow: hidden;
+    color: #8a97a8;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-status,
+  .isivolt-regulation-tag,
+  .isivolt-sync-label,
+  .isivolt-defect-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 8px;
+    font-weight: 850;
+    white-space: nowrap;
+  }
+
+  .isivolt-status--draft { background: #eef2f6; color: #637287; }
+  .isivolt-status--progress { background: #e8f2ff; color: #1767a8; }
+  .isivolt-status--review { background: #fff3cc; color: #8a6200; }
+  .isivolt-status--favorable,
+  .isivolt-status--closed { background: #e8f7ef; color: #167451; }
+  .isivolt-status--negative { background: #ffeded; color: #ad2929; }
+  .isivolt-regulation-tag { background: #edf1f7; color: #43536a; }
+  .isivolt-sync-label--synced { color: #18785a; }
+  .isivolt-sync-label--pending { color: #9b6b00; }
+  .isivolt-sync-label--danger { color: #b62b2b; }
+  .isivolt-defect-count { min-width: 24px; justify-content: center; background: #edf2f6; color: #607086; }
+  .isivolt-defect-count.is-danger { background: #ffeded; color: #ae2525; }
+
+  .isivolt-progress-cell {
+    display: flex;
+    min-width: 88px;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .isivolt-progress-cell > span {
+    display: block;
+    width: 55px;
+    height: 5px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5ebf1;
+  }
+
+  .isivolt-progress-cell > span i,
+  .isivolt-detail-progress__track i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--isivolt-gold), #f4ab16);
+  }
+
+  .isivolt-progress-cell strong {
+    font-size: 8px;
+  }
+
+  .isivolt-detail-panel {
+    position: sticky;
+    top: 0;
+    padding: 18px;
+  }
+
+  .isivolt-detail-panel--empty,
+  .isivolt-desktop-empty {
+    display: grid;
+    min-height: 260px;
+    place-items: center;
+    align-content: center;
+    padding: 30px;
+    color: #7e8b9c;
+    text-align: center;
+  }
+
+  .isivolt-detail-panel--empty h3,
+  .isivolt-desktop-empty h3 {
+    margin: 10px 0 0;
+    color: #21344c;
+    font-size: 15px;
+  }
+
+  .isivolt-detail-panel--empty p,
+  .isivolt-desktop-empty p {
+    max-width: 430px;
+    margin: 7px 0 15px;
+    color: #7d8b9d;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  .isivolt-desktop-empty__icon {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 18px;
+    background: #edf3f8;
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-detail-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .isivolt-detail-panel__header h2 {
+    margin: 0;
+    color: var(--isivolt-navy);
+    font-size: 18px;
+    font-weight: 930;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .isivolt-detail-panel__header p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 7px 0 0;
+    color: #78889b;
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  .isivolt-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .isivolt-detail-progress {
+    margin-top: 15px;
+    border-radius: 14px;
+    padding: 13px;
+    background: #f6f9fc;
+  }
+
+  .isivolt-detail-progress > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #687b92;
+    font-size: 9px;
+    font-weight: 750;
+  }
+
+  .isivolt-detail-progress > div:first-child strong {
+    color: var(--isivolt-navy);
+    font-size: 13px;
+  }
+
+  .isivolt-detail-progress__track {
+    height: 7px;
+    margin-top: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #dfe7ef;
+  }
+
+  .isivolt-detail-progress small {
+    display: block;
+    margin-top: 7px;
+    color: #8995a5;
+    font-size: 8px;
+  }
+
+  .isivolt-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0 0;
+  }
+
+  .isivolt-detail-grid div {
+    min-width: 0;
+    border-bottom: 1px solid #edf1f5;
+    padding-bottom: 9px;
+  }
+
+  .isivolt-detail-grid dt {
+    color: #8a97a7;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .isivolt-detail-grid dd {
+    margin: 4px 0 0;
+    overflow: hidden;
+    color: #34465b;
+    font-size: 9px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-detail-actions {
+    margin-top: 15px;
+  }
+
+  .isivolt-detail-actions h3 {
+    margin: 0 0 9px;
+    color: #30435b;
+    font-size: 10px;
+  }
+
+  .isivolt-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .isivolt-quick-actions button {
+    display: grid;
+    min-width: 0;
+    place-items: center;
+    gap: 5px;
+    border: 1px solid #dee6ef;
+    border-radius: 11px;
+    padding: 9px 4px;
+    background: #fff;
+    color: #506279;
+    font-size: 8px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .isivolt-quick-actions button:hover {
+    border-color: #becbda;
+    background: #f7fafc;
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-detail-panel__footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .isivolt-detail-panel__footer .isivolt-button:first-child {
+    flex: 1;
+  }
+
+  .isivolt-admin-overview {
+    padding: 22px;
+  }
+
+  .isivolt-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .isivolt-admin-grid article {
+    border: 1px solid #e0e7f0;
+    border-radius: 15px;
+    padding: 17px;
+    background: #f9fbfd;
+  }
+
+  .isivolt-admin-grid article > svg {
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-admin-grid article span,
+  .isivolt-admin-grid article strong,
+  .isivolt-admin-grid article p {
+    display: block;
+  }
+
+  .isivolt-admin-grid article span {
+    margin-top: 16px;
+    color: #7c8999;
+    font-size: 9px;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .isivolt-admin-grid article strong {
+    margin-top: 3px;
+    color: var(--isivolt-navy);
+    font-size: 15px;
+  }
+
+  .isivolt-admin-grid article p {
+    margin: 7px 0 0;
+    color: #77869a;
+    font-size: 9px;
+    line-height: 1.55;
+  }
+
+  .isivolt-backup-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 14px;
+    border-radius: 15px;
+    padding: 16px;
+  }
+
+  .isivolt-backup-card > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .isivolt-backup-card strong,
+  .isivolt-backup-card small {
+    display: block;
+  }
+
+  .isivolt-backup-card strong {
+    color: #21344b;
+    font-size: 11px;
+  }
+
+  .isivolt-backup-card small {
+    margin-top: 3px;
+    color: #8190a1;
+    font-size: 9px;
+  }
+
+  .isivolt-report-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .isivolt-report-grid article {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 12px;
+    border-radius: 15px;
+    padding: 14px;
+  }
+
+  .isivolt-report-grid__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border-radius: 13px;
+    background: #eff4f9;
+    color: var(--isivolt-navy);
+  }
+
+  .isivolt-report-grid article > div:nth-child(2) {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .isivolt-report-grid strong,
+  .isivolt-report-grid span,
+  .isivolt-report-grid small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-report-grid strong { color: #263a52; font-size: 11px; }
+  .isivolt-report-grid span { margin-top: 3px; color: #7f8d9e; font-size: 9px; }
+  .isivolt-report-grid small { margin-top: 4px; color: #9aa5b3; font-size: 8px; }
+
+  .isivolt-report-grid button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 0;
+    background: transparent;
+    color: #345a82;
+    font-size: 9px;
+    font-weight: 850;
+    cursor: pointer;
+  }
+
+  .isivolt-desktop-focus-header {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) auto;
+    min-height: 68px;
+    align-items: center;
+    gap: 18px;
+    border-bottom: 1px solid #dce5ef;
+    padding: 9px 18px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #243850;
+    backdrop-filter: blur(18px);
+  }
+
+  .isivolt-focus-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    background: transparent;
+    color: var(--isivolt-navy);
+    cursor: pointer;
+  }
+
+  .isivolt-focus-brand > span {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .isivolt-focus-brand strong,
+  .isivolt-focus-brand small {
+    display: block;
+    text-align: left;
+  }
+
+  .isivolt-focus-brand strong { font-size: 13px; }
+  .isivolt-focus-brand small { color: #75869b; font-size: 9px; }
+
+  .isivolt-focus-context {
+    min-width: 0;
+  }
+
+  .isivolt-focus-context span,
+  .isivolt-focus-context strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .isivolt-focus-context span {
+    color: #8190a2;
+    font-size: 9px;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .isivolt-focus-context strong {
+    margin-top: 3px;
+    color: #263a51;
+    font-size: 12px;
+  }
+
+  .isivolt-focus-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .isivolt-focus-actions button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d7e0ea;
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: #fff;
+    color: #40546d;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .is-spinning {
+    animation: isivolt-spin 0.9s linear infinite;
+  }
+
+  @keyframes isivolt-spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .isivolt-desktop-workspace {
+    grid-template-columns: 224px minmax(0, 1fr);
+  }
+
+  .isivolt-desktop-sidebar {
+    padding-inline: 12px;
+  }
+
+  .isivolt-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .isivolt-workspace-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.75fr);
+  }
+
+  .isivolt-inspection-table th:nth-child(2),
+  .isivolt-inspection-table td:nth-child(2),
+  .isivolt-inspection-table th:nth-child(5),
+  .isivolt-inspection-table td:nth-child(5) {
+    display: none;
+  }
+
+  .isivolt-global-search {
+    width: 245px;
+  }
+}
+
+@media print {
+  .isivolt-desktop-workspace,
+  .isivolt-desktop-focus-header {
+    display: none !important;
+  }
+}

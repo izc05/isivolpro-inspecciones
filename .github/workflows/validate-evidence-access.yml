@@ -1,0 +1,167 @@
+name: Validate role-based evidence access
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - server/pocketbase/pb_hooks/isivolt_files.pb.js
+      - server/pocketbase/pb_migrations/1785884200_enforce_evidence_access_rules.js
+      - scripts/smoke-evidence-access.mjs
+      - .github/workflows/validate-evidence-access.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-evidence-access
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-evidence.zip
+          mkdir -p /tmp/pocketbase-evidence/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-evidence.zip -d /tmp/pocketbase-evidence
+          chmod +x /tmp/pocketbase-evidence/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-evidence/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-evidence/pb_migrations/
+          cd /tmp/pocketbase-evidence
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real evidence access lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8102
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-evidence.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-evidence
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8102 > /tmp/pocketbase-evidence.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8102/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-evidence.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-evidence-access.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-evidence.log; then
+            cat /tmp/pocketbase-evidence.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check evidence access contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'sync.assertCanWriteInspection(inspection, auth)' server/pocketbase/pb_hooks/isivolt_files.pb.js
+          grep -Fq "inspection.assignedUser = @request.auth.id" server/pocketbase/pb_migrations/1785884200_enforce_evidence_access_rules.js
+          grep -Fq "@request.auth.role != 'viewer'" server/pocketbase/pb_migrations/1785884200_enforce_evidence_access_rules.js
+          grep -Fq 'Técnico ajeno y consulta: subida bloqueada' scripts/smoke-evidence-access.mjs
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write evidence access validation marker
+        shell: bash
+        run: |
+          cat > docs/evidence-role-access-validation.md <<EOF
+          # Validación · Evidencias protegidas por rol y asignación
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - el técnico asignado puede subir y consultar sus fotografías y documentos;
+          - otro técnico de la misma empresa no puede listar, abrir ni subir evidencias de ese expediente;
+          - el perfil Solo consulta puede revisar y descargar evidencias autorizadas, pero no subirlas;
+          - administración puede consultar y subir evidencias en cualquier expediente de su empresa;
+          - las descargas protegidas requieren un token temporal de PocketBase;
+          - eventos y cierres heredan las mismas reglas de visibilidad por expediente;
+          - el hook de subida vuelve a validar la asignación y el permiso de escritura;
+          - auditoría del runtime, pruebas, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validation marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/evidence-role-access-validation.md
+          if git diff --cached --quiet; then
+            echo 'Evidence access marker already exists.'
+            exit 0
+          fi
+          git commit -m "test: certify evidence access by role"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

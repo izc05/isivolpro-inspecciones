@@ -1,0 +1,104 @@
+name: Audit Preinspecciones BT dependencies
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - package.json
+      - package-lock.json
+      - docs/runtime-dependency-validation.md
+      - .github/workflows/security-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isivoltpro-bt-security-audit
+  cancel-in-progress: true
+
+jobs:
+  production-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Record runtime and complete audit summaries
+        if: always()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require('node:child_process');
+          const fs = require('node:fs');
+
+          function readAudit(args) {
+            try {
+              return JSON.parse(execFileSync('npm', ['audit', '--json', ...args], {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'pipe'],
+              }) || '{}');
+            } catch (error) {
+              return JSON.parse(String(error.stdout || '{}'));
+            }
+          }
+
+          function counts(audit) {
+            const value = audit.metadata?.vulnerabilities || {};
+            return {
+              total: value.total || 0,
+              critical: value.critical || 0,
+              high: value.high || 0,
+              moderate: value.moderate || 0,
+              low: value.low || 0,
+            };
+          }
+
+          const runtime = counts(readAudit(['--omit=dev']));
+          const complete = counts(readAudit([]));
+          const summary = [
+            '# Auditoría de dependencias',
+            '',
+            '## Runtime distribuido',
+            `Total: ${runtime.total}`,
+            `Critical: ${runtime.critical}`,
+            `High: ${runtime.high}`,
+            `Moderate: ${runtime.moderate}`,
+            `Low: ${runtime.low}`,
+            '',
+            '## Herramientas y árbol completo',
+            `Total: ${complete.total}`,
+            `Critical: ${complete.critical}`,
+            `High: ${complete.high}`,
+            `Moderate: ${complete.moderate}`,
+            `Low: ${complete.low}`,
+            '',
+            'La compuerta de release bloquea vulnerabilidades high o critical del runtime distribuido.',
+          ].join('\n');
+          fs.writeFileSync('dependency-audit-summary.md', `${summary}\n`);
+          console.log(summary);
+          NODE
+
+      - name: Upload audit summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-summary
+          path: dependency-audit-summary.md
+          if-no-files-found: error
+          retention-days: 30

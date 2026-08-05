@@ -1,0 +1,118 @@
+name: Build isolated beta APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - android/app/build.gradle
+      - capacitor.config.ts
+      - package.json
+      - package-lock.json
+      - scripts/run-gradle.mjs
+      - scripts/check-version-consistency.mjs
+      - scripts/harden-preinspection-branding.mjs
+      - docs/android-release-signing.md
+      - docs/release-notes-v1.5.8-beta.md
+      - docs/install-beta-apk.md
+      - src/App.jsx
+      - src/main.jsx
+      - src/components/EcosystemDock.jsx
+      - src/ecosystem-dock.css
+      - .github/workflows/build-beta-apk.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isivoltpro-bt-beta-apk
+  cancel-in-progress: true
+
+jobs:
+  build-beta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout validated branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Apply current beta identity
+        run: node scripts/harden-preinspection-branding.mjs
+
+      - name: Validate application
+        run: npm run test:integration
+
+      - name: Synchronize Android
+        run: npx cap sync android
+
+      - name: Build debug-signed isolated beta APK
+        run: node scripts/run-gradle.mjs clean assembleDebug
+
+      - name: Verify isolated package and label
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          APK='android/app/build/outputs/apk/debug/app-debug.apk'
+          test -s "$APK"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          test -x "$AAPT"
+          BADGING="$($AAPT dump badging "$APK")"
+          printf '%s\n' "$BADGING" | grep -Fq "package: name='com.isivoltpro.inspecciones.beta'"
+          printf '%s\n' "$BADGING" | grep -Fq "application-label:'IsiVoltPro BT Beta'"
+
+      - name: Prepare beta artifact
+        id: beta
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName "\([^"]*\)"/\1/p' android/app/build.gradle | head -n 1)"
+          VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode \([0-9][0-9]*\)/\1/p' android/app/build.gradle | head -n 1)"
+          SHORT_SHA="${GITHUB_SHA:0:8}"
+          test -n "$VERSION_NAME"
+          test -n "$VERSION_CODE"
+          install -d beta-output
+          FILE="IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}-${VERSION_CODE}-beta-${SHORT_SHA}.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "beta-output/$FILE"
+          (cd beta-output && sha256sum "$FILE" > SHA256SUMS.txt)
+          cat > beta-output/BETA_BUILD_INFO.txt <<EOF
+          IsiVoltPro Preinspecciones BT · APK interna de pruebas
+          Version: ${VERSION_NAME}
+          Version code: ${VERSION_CODE}
+          Commit: ${GITHUB_SHA}
+          Package: com.isivoltpro.inspecciones.beta
+
+          Esta APK usa firma de depuración y un identificador separado.
+          Puede instalarse junto a la aplicación actual sin borrar sus datos.
+          No debe distribuirse como versión estable ni publicarse en Play Store.
+          EOF
+          echo "artifact_name=isivoltpro-preinspecciones-bt-${VERSION_NAME}-beta-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload beta APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.beta.outputs.artifact_name }}
+          path: beta-output/*
+          if-no-files-found: error
+          retention-days: 30

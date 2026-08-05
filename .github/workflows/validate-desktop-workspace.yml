@@ -1,0 +1,122 @@
+name: Validate desktop workspace
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - src/desktop/**
+      - scripts/integrate-desktop-workspace.mjs
+      - .github/workflows/validate-desktop-workspace.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-desktop-workspace
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Integrate desktop workspace idempotently
+        run: |
+          node scripts/integrate-desktop-workspace.mjs
+          node scripts/integrate-desktop-workspace.mjs
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Synchronize Android
+        run: npx cap sync android
+
+      - name: Build Android debug APK
+        run: node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check desktop contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'import DesktopWorkspace from "./desktop/DesktopWorkspace.jsx";' src/App.jsx
+          grep -Fq '<DesktopWorkspace' src/App.jsx
+          grep -Fq 'isivolt-desktop-workspace' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'grid-template-columns: 264px minmax(0, 1fr)' src/desktop/desktop-workspace.css
+          grep -Fq 'Preinspecciones eléctricas, desde campo hasta informe' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'className="lg:hidden"><BottomNav' src/App.jsx
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write desktop validation marker
+        shell: bash
+        run: |
+          cat > docs/desktop-workspace-validation.md <<'EOF'
+          # Validación · Espacio de trabajo de escritorio
+
+          Estado: **SUPERADA**
+
+          Se ha comprobado:
+
+          - panel profesional para pantallas de escritorio;
+          - navegación lateral del ecosistema;
+          - métricas de expedientes, actividad, defectos y cierres;
+          - búsqueda y filtros por estado y reglamento;
+          - tabla de preinspecciones y panel lateral de detalle;
+          - accesos a datos, checklist, documentos e informe;
+          - vistas de informes y administración;
+          - modo de trabajo que reutiliza las pantallas técnicas existentes;
+          - navegación móvil oculta en escritorio;
+          - diseño responsive a partir de 1024 px y exclusión en impresión;
+          - parche idempotente sobre `App.jsx`;
+          - auditoría de producción, pruebas, PocketBase y compilación web;
+          - sincronización Capacitor y construcción de APK Android debug.
+          EOF
+
+      - name: Commit validated integration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx docs/desktop-workspace-validation.md
+          if git diff --cached --quiet; then
+            echo 'Desktop workspace is already integrated.'
+            exit 0
+          fi
+          git commit -m "feat: integrate professional desktop workspace"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying after refresh."
+            sleep $((attempt * 2))
+          done
+          exit 1

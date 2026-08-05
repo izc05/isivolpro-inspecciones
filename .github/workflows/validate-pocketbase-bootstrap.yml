@@ -1,0 +1,159 @@
+name: Validate PocketBase bootstrap
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - .github/workflows/validate-pocketbase-bootstrap.yml
+  workflow_dispatch:
+
+concurrency:
+  group: isivoltpro-bt-pocketbase-bootstrap
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve and download official PocketBase
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          version="${tag#v}"
+          test -n "$version"
+          test "$version" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          curl -fsSL \
+            "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" \
+            -o /tmp/pocketbase.zip
+          mkdir -p /tmp/pocketbase-bootstrap
+          unzip -q /tmp/pocketbase.zip -d /tmp/pocketbase-bootstrap
+          chmod +x /tmp/pocketbase-bootstrap/pocketbase
+          cp -a server/pocketbase/pb_hooks /tmp/pocketbase-bootstrap/
+          cp -a server/pocketbase/pb_migrations /tmp/pocketbase-bootstrap/
+          mkdir -p /tmp/pocketbase-bootstrap/pb_data
+
+      - name: Apply migrations and create superuser
+        working-directory: /tmp/pocketbase-bootstrap
+        env:
+          FIREBASE_WEB_API_KEY: bootstrap-validation-placeholder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./pocketbase migrate up
+          ./pocketbase superuser create root@example.test 'Validation-Only-Password-2026!'
+
+      - name: Start isolated PocketBase
+        working-directory: /tmp/pocketbase-bootstrap
+        env:
+          FIREBASE_WEB_API_KEY: bootstrap-validation-placeholder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./pocketbase serve --http=127.0.0.1:8100 > /tmp/pocketbase-bootstrap.log 2>&1 &
+          echo $! > /tmp/pocketbase-bootstrap.pid
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8100/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/pocketbase-bootstrap.log >&2
+          exit 1
+
+      - name: Run bootstrap twice
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8100
+          POCKETBASE_SUPERUSER_EMAIL: root@example.test
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Only-Password-2026!
+          ISIVOLT_COMPANY_NAME: IsiVoltPro Validation
+          ISIVOLT_COMPANY_SLUG: isivoltpro-validation
+          ISIVOLT_ADMIN_EMAIL: admin@example.test
+          ISIVOLT_ADMIN_NAME: Administrador de validación
+        run: |
+          set -Eeuo pipefail
+          node scripts/bootstrap-pocketbase.mjs
+          node scripts/bootstrap-pocketbase.mjs
+
+      - name: Verify unique company and administrator
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          auth="$(curl -fsSL \
+            -H 'Content-Type: application/json' \
+            -d '{"identity":"root@example.test","password":"Validation-Only-Password-2026!"}' \
+            http://127.0.0.1:8100/api/collections/_superusers/auth-with-password)"
+          token="$(jq -r '.token' <<<"$auth")"
+          test -n "$token"
+          test "$token" != "null"
+
+          companies="$(curl -fsSL -H "Authorization: $token" \
+            'http://127.0.0.1:8100/api/collections/companies/records?page=1&perPage=200&skipTotal=1')"
+          users="$(curl -fsSL -H "Authorization: $token" \
+            'http://127.0.0.1:8100/api/collections/users/records?page=1&perPage=200&skipTotal=1')"
+
+          test "$(jq '[.items[] | select(.slug == "isivoltpro-validation")] | length' <<<"$companies")" -eq 1
+          test "$(jq '[.items[] | select(.email == "admin@example.test")] | length' <<<"$users")" -eq 1
+          jq -e '.items[] | select(.slug == "isivoltpro-validation") | .active == true' <<<"$companies"
+          jq -e '.items[] | select(.email == "admin@example.test") | .role == "admin" and .active == true' <<<"$users"
+
+      - name: Stop isolated PocketBase
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f /tmp/pocketbase-bootstrap.pid ]]; then
+            kill "$(cat /tmp/pocketbase-bootstrap.pid)" >/dev/null 2>&1 || true
+          fi
+
+      - name: Write bootstrap validation marker
+        shell: bash
+        run: |
+          cat > docs/pocketbase-bootstrap-validation.md <<EOF
+          # Validación de bootstrap PocketBase
+
+          Estado: **SUPERADA**
+
+          Versión oficial probada: **${{ steps.pocketbase.outputs.tag }}**
+
+          La prueba ha confirmado en un PocketBase real:
+
+          - creación de superusuario;
+          - creación de la empresa IsiVoltPro;
+          - creación del administrador de Preinspecciones BT;
+          - política segura inicial;
+          - relación usuario–empresa;
+          - ejecución repetida sin duplicar empresa ni usuario.
+
+          Los correos y contraseñas usados eran datos temporales exclusivos de GitHub Actions.
+          EOF
+
+      - name: Commit bootstrap validation marker
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/pocketbase-bootstrap-validation.md
+          if git diff --cached --quiet; then
+            echo "PocketBase bootstrap was already validated."
+            exit 0
+          fi
+          git commit -m "test: validate PocketBase bootstrap"
+          git pull --rebase origin feat/apk-pc-sync-gps-close
+          git push origin HEAD:feat/apk-pc-sync-gps-close

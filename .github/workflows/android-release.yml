@@ -1,0 +1,175 @@
+name: Build signed Android release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Tag for the optional draft release
+        required: true
+        default: v1.5.8-beta.1
+        type: string
+      publish_draft_release:
+        description: Create a draft GitHub Release with APK and AAB
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-android-release
+  cancel-in-progress: false
+
+jobs:
+  signed-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_SYNC_API_URL: ${{ vars.BT_SYNC_API_URL }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Validate signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          required=(KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD)
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing required GitHub secret: ${name}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Block vulnerable runtime releases
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate release tag and Android version
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName "\([^"]*\)"/\1/p' android/app/build.gradle | head -n 1)"
+          VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode \([0-9][0-9]*\)/\1/p' android/app/build.gradle | head -n 1)"
+          test -n "$VERSION_NAME"
+          test -n "$VERSION_CODE"
+          case "$RELEASE_TAG" in
+            "v${VERSION_NAME}"|"v${VERSION_NAME}-"*|"v${VERSION_NAME}."*) ;;
+            *)
+              echo "Release tag ${RELEASE_TAG} does not match Android version ${VERSION_NAME}." >&2
+              exit 1
+              ;;
+          esac
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Run connected application checks
+        run: npm run test:integration
+
+      - name: Build web application and synchronize Capacitor
+        run: |
+          npm run build
+          npx cap sync android
+
+      - name: Restore release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$RUNNER_TEMP/isivoltpro-signing"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/isivoltpro-signing/release.jks"
+          chmod 0600 "$RUNNER_TEMP/isivoltpro-signing/release.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/isivoltpro-signing/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build signed APK and AAB
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon clean assembleRelease bundleRelease
+
+      - name: Verify APK signature
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Prepare release files and checksums
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          VERSION_NAME="${{ steps.version.outputs.version_name }}"
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
+          install -d release-output
+          APK="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}-${VERSION_CODE}.apk"
+          AAB="release-output/IsiVoltPro-Preinspecciones-BT-${VERSION_NAME}-${VERSION_CODE}.aab"
+          cp android/app/build/outputs/apk/release/app-release.apk "$APK"
+          cp android/app/build/outputs/bundle/release/app-release.aab "$AAB"
+          (cd release-output && sha256sum *.apk *.aab > SHA256SUMS.txt)
+
+      - name: Upload signed Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: isivoltpro-preinspecciones-bt-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}
+          path: release-output/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create draft GitHub Release
+        if: ${{ inputs.publish_draft_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if git rev-parse "$RELEASE_TAG" >/dev/null 2>&1 || gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "The tag or release ${RELEASE_TAG} already exists." >&2
+            exit 1
+          fi
+          NOTES_FILE="docs/release-notes-v${VERSION_NAME}-beta.md"
+          notes_args=(--generate-notes)
+          if [[ -f "$NOTES_FILE" ]]; then
+            notes_args=(--notes-file "$NOTES_FILE")
+          fi
+          gh release create "$RELEASE_TAG" \
+            release-output/* \
+            --target "$GITHUB_SHA" \
+            --title "IsiVoltPro Preinspecciones BT ${VERSION_NAME}" \
+            --draft \
+            "${notes_args[@]}"
+
+      - name: Remove keystore
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/isivoltpro-signing"

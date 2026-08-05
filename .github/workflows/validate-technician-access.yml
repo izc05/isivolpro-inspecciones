@@ -1,0 +1,189 @@
+name: Validate technician access administration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - src/admin/**
+      - src/sync/technicianAdmin.test.js
+      - server/pocketbase/pb_hooks/**
+      - server/pocketbase/pb_migrations/**
+      - scripts/integrate-technician-access.mjs
+      - scripts/smoke-technician-access.mjs
+      - .github/workflows/validate-technician-access.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-technician-access
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Integrate technician access idempotently
+        run: |
+          node scripts/integrate-technician-access.mjs
+          node scripts/integrate-technician-access.mjs
+
+      - name: Validate application and server syntax
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare real PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase.zip
+          mkdir -p /tmp/pocketbase-technicians/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase.zip -d /tmp/pocketbase-technicians
+          chmod +x /tmp/pocketbase-technicians/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-technicians/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-technicians/pb_migrations/
+          cd /tmp/pocketbase-technicians
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real technician access lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8099
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-technicians
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8099 > /tmp/pocketbase-technicians.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8099/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-technicians.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-technician-access.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-technicians.log; then
+            cat /tmp/pocketbase-technicians.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check technician access contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'listTechnicians(options' src/sync/syncApiClient.js
+          grep -Fq '<TechnicianAdminPanel firebaseUser={user}' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'PREINSPECTIONS_ACCESS_DISABLED' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          grep -Fq 'record.set("invitationStatus", "linked")' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          grep -Fq 'record.setRandomPassword()' server/pocketbase/pb_hooks/isivolt_technicians.pb.js
+          grep -Fq 'technician_access_events' server/pocketbase/pb_migrations/1785884000_add_technician_access.js
+          grep -Fq 'active.required = false' server/pocketbase/pb_migrations/1785884100_allow_inactive_records.js
+          ! grep -Eq 'password|contraseña' src/admin/TechnicianAdminPanel.jsx || grep -Fq 'sin compartir ni conocer contraseñas' src/admin/TechnicianAdminPanel.jsx
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write technician access validation marker
+        shell: bash
+        run: |
+          cat > docs/technician-access-validation.md <<EOF
+          # Validación · Acceso de técnicos desde Administración
+
+          Estado: **SUPERADA**
+
+          Versión oficial de PocketBase probada: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - panel de técnicos dentro de Administración para escritorio;
+          - alta por correo, nombre, teléfono y especialidad;
+          - perfiles Técnico, Coordinador y Solo consulta;
+          - acceso independiente a Preinspecciones BT;
+          - estado pendiente, vinculado o suspendido;
+          - contraseña privada gestionada por Firebase y nunca expuesta al administrador;
+          - enlace automático en el primer acceso con el mismo correo;
+          - comprobación del permiso de aplicación en cada sincronización;
+          - creación de contraseña interna aleatoria de PocketBase no devuelta por la API;
+          - auditoría de invitación, actualización, suspensión, activación y vinculación;
+          - rechazo de correos duplicados;
+          - prueba real de alta, listado, suspensión y reactivación en PocketBase;
+          - pruebas unitarias, auditoría del runtime, compilación web y APK Android debug.
+
+          El envío automático de correos queda fuera de este hito; el panel permite copiar instrucciones de acceso para enviarlas al técnico.
+          EOF
+
+      - name: Commit validated integration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/sync/syncApiClient.js \
+            src/desktop/DesktopWorkspace.jsx \
+            server/pocketbase/pb_hooks/isivolt_sync.pb.js \
+            docs/technician-access-validation.md
+          if git diff --cached --quiet; then
+            echo 'Technician access is already integrated.'
+            exit 0
+          fi
+          git commit -m "feat: integrate administrator technician access"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

@@ -1,0 +1,130 @@
+.isivolt-assignment-card {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #d9e2ec;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #102a43;
+}
+
+.isivolt-assignment-card header,
+.isivolt-assignment-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.isivolt-assignment-card header > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.isivolt-assignment-card header div,
+.isivolt-assignment-summary span {
+  display: grid;
+  gap: 2px;
+}
+
+.isivolt-assignment-card header strong,
+.isivolt-assignment-summary strong {
+  font-size: 0.9rem;
+}
+
+.isivolt-assignment-card header small,
+.isivolt-assignment-summary small,
+.isivolt-assignment-card--pending span {
+  color: #627d98;
+  font-size: 0.76rem;
+}
+
+.isivolt-assignment-card label {
+  display: grid;
+  gap: 6px;
+}
+
+.isivolt-assignment-card label > span {
+  color: #486581;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.isivolt-assignment-card select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid #bcccdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #102a43;
+  font: inherit;
+}
+
+.isivolt-assignment-card select:focus-visible,
+.isivolt-assignment-card button:focus-visible {
+  outline: 3px solid rgba(14, 165, 233, 0.25);
+  outline-offset: 2px;
+}
+
+.isivolt-assignment-summary {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.isivolt-assignment-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #0f4c81;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.isivolt-assignment-card button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.isivolt-assignment-card--pending {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  background: #fff8e6;
+  border-color: #f8d57e;
+}
+
+.isivolt-assignment-card--pending div {
+  display: grid;
+  gap: 3px;
+}
+
+.isivolt-assignment-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #486581;
+  font-size: 0.82rem;
+}
+
+.isivolt-assignment-message {
+  margin: 0;
+  color: #334e68;
+  font-size: 0.78rem;
+}
+
+@media print {
+  .isivolt-assignment-card {
+    display: none !important;
+  }
+}
