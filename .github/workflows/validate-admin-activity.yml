@@ -1,0 +1,190 @@
+name: Validate administrative activity timeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - server/pocketbase/pb_hooks/admin_activity_utils.js
+      - server/pocketbase/pb_hooks/isivolt_admin_activity.pb.js
+      - src/admin/adminActivityRuntime.js
+      - src/admin/AdminActivityPanel.jsx
+      - src/admin/admin-activity.css
+      - src/sync/adminActivityRuntime.test.js
+      - scripts/smoke-admin-activity.mjs
+      - scripts/mount-admin-activity-panel.mjs
+      - .github/workflows/validate-admin-activity.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-admin-activity
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Mount activity panel idempotently
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check scripts/mount-admin-activity-panel.mjs
+          node scripts/mount-admin-activity-panel.mjs
+          git diff --check
+          first_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          node scripts/mount-admin-activity-panel.mjs
+          git diff --check
+          second_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          test "$first_hash" = "$second_hash"
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-admin-activity.zip
+          mkdir -p /tmp/pocketbase-admin-activity/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-admin-activity.zip -d /tmp/pocketbase-admin-activity
+          chmod +x /tmp/pocketbase-admin-activity/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-admin-activity/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-admin-activity/pb_migrations/
+          cd /tmp/pocketbase-admin-activity
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real administrative activity lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8106
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-admin-activity.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-admin-activity
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8106 > /tmp/pocketbase-admin-activity.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8106/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-admin-activity.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-admin-activity.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-admin-activity.log; then
+            cat /tmp/pocketbase-admin-activity.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check activity contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq '/api/isivolt/v1/admin/activity' server/pocketbase/pb_hooks/isivolt_admin_activity.pb.js
+          grep -Fq 'Solo un administrador puede consultar el historial de actividad' server/pocketbase/pb_hooks/admin_activity_utils.js
+          grep -Fq 'items.sort' server/pocketbase/pb_hooks/admin_activity_utils.js
+          grep -Fq 'export default function AdminActivityPanel' src/admin/AdminActivityPanel.jsx
+          grep -Fq 'loadAdminActivity' src/admin/adminActivityRuntime.js
+          grep -Fq 'import AdminActivityPanel' src/desktop/DesktopWorkspace.jsx
+          grep -Fq '<AdminActivityPanel firebaseUser={user} />' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'Historial administrativo real validado' scripts/smoke-admin-activity.mjs
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write validation marker
+        shell: bash
+        run: |
+          cat > docs/admin-activity-validation.md <<EOF
+          # Validación · Historial administrativo
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - ruta protegida disponible únicamente para administradores activos;
+          - el perfil Solo consulta recibe un bloqueo real;
+          - accesos de técnicos y eventos de expedientes se unifican en una línea temporal;
+          - los eventos quedan ordenados del más reciente al más antiguo;
+          - se muestran actor, técnico, expediente, rol, especialidad y revisión sin exponer contraseñas;
+          - filtros por categoría y búsqueda por técnico, expediente o acción;
+          - recuentos de actividad reciente, accesos, asignaciones y cierres;
+          - montaje visual ejecutado dos veces sin duplicaciones;
+          - auditoría, pruebas, PocketBase real, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validated activity panel
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/desktop/DesktopWorkspace.jsx docs/admin-activity-validation.md
+          if git diff --cached --quiet; then
+            echo 'Administrative activity panel already validated.'
+            exit 0
+          fi
+          git commit -m "feat: add protected administrative activity timeline"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
