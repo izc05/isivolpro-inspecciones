@@ -59,7 +59,10 @@ function recordApplications(record) {
       preinspectionsBt: booleanSetting(result.preinspectionsBt, true),
     };
   } catch (error) {
-    return recordApplications(record);
+    const fallback = objectValue(record.get("applications"));
+    return {
+      preinspectionsBt: booleanSetting(fallback.preinspectionsBt, true),
+    };
   }
 }
 
