@@ -182,9 +182,9 @@ function getReportBrand(plan, companySettings) {
 
   return {
     main: "IsiVoltPro",
-    sub: "INSPECCIONES ELÉCTRICAS",
+    sub: "PREINSPECCIONES BT",
     logoDataUrl: "",
-    footer: ["www.isivoltpro.com", "info@isivoltpro.com", "600 123 456"],
+    footer: ["www.isivoltpro.com", "info@isivoltpro.com", "Beta local-first"],
     poweredBy: "",
     isCompany: false,
   };
@@ -292,7 +292,7 @@ const INSPECTION_SCOPE_OPTIONS = [
   { value: "mediciones", label: "Mediciones" },
 ];
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.5.8";
 const LEGAL_VERSION = "1.0.0";
 const LEGAL_UPDATED_AT = "2026-05-11";
 
@@ -315,13 +315,13 @@ Domicilio: [indicar]
 Correo de contacto: [indicar]
 Sitio web: [indicar]
 
-La aplicación IsiVolt Pro está destinada a servir como herramienta de apoyo para la realización de inspecciones, revisiones técnicas, toma de datos, generación de informes y organización de documentación relacionada con instalaciones eléctricas de baja tensión.
+La aplicación IsiVoltPro Preinspecciones BT está destinada a servir como herramienta de apoyo para la realización de inspecciones, revisiones técnicas, toma de datos, generación de informes y organización de documentación relacionada con instalaciones eléctricas de baja tensión.
 
 El uso de la aplicación no sustituye el criterio profesional del técnico competente, ni la obligación de aplicar la normativa vigente, reglamentos, guías técnicas, instrucciones de organismos de control, normas UNE aplicables o criterios de la administración competente.
 
 El usuario es responsable de comprobar la veracidad de los datos introducidos, la adecuación de las mediciones realizadas y la validez técnica del informe generado.
 
-IsiVolt Pro no garantiza que el resultado obtenido sea válido para todos los casos, ya que cada instalación puede requerir comprobaciones adicionales según su uso, emplazamiento, potencia, reglamento aplicable, documentación disponible y normativa autonómica o sectorial.
+IsiVoltPro Preinspecciones BT no garantiza que el resultado obtenido sea válido para todos los casos, ya que cada instalación puede requerir comprobaciones adicionales según su uso, emplazamiento, potencia, reglamento aplicable, documentación disponible y normativa autonómica o sectorial.
 
 Queda prohibido utilizar la aplicación para emitir informes falsos, manipular datos técnicos, ocultar defectos o sustituir inspecciones oficiales cuando estas sean obligatorias.`,
   },
@@ -349,7 +349,7 @@ Los datos se utilizan para crear y gestionar inspecciones, guardar el progreso d
 
 4. Almacenamiento local
 
-En la versión actual, IsiVolt Pro guarda los datos de forma local en el dispositivo o navegador del usuario. Los datos no se envían automáticamente a servidores externos mientras no se active una función de sincronización, exportación, copia de seguridad, envío por email, nube o iíntegración externa.
+En la versión actual, IsiVoltPro Preinspecciones BT guarda los datos de forma local en el dispositivo o navegador del usuario. Los datos no se envían automáticamente a servidores externos mientras no se active una función de sincronización, exportación, copia de seguridad, envío por email, nube o iíntegración externa.
 
 Si el usuario borra los datos del navegador, limpia la caché, elimina la app o pulsa una opción de reset, los datos locales pueden perderse.
 
@@ -375,7 +375,7 @@ El usuario puede ejercer sus derechos de acceso, rectificación, supresión, opo
 
 10. Seguridad
 
-IsiVolt Pro aplica medidas razonables para mantener los datos organizados y almacenados de forma local, pero el usuario es responsable de proteger su dispositivo y realizar copias de seguridad cuando sea necesario.
+IsiVoltPro Preinspecciones BT aplica medidas razonables para mantener los datos organizados y almacenados de forma local, pero el usuario es responsable de proteger su dispositivo y realizar copias de seguridad cuando sea necesario.
 
 11. Cambios
 
@@ -388,7 +388,7 @@ Esta política podrá actualizarse si se añaden sincronización en la nube, usu
 
 1. Objeto
 
-IsiVolt Pro es una herramienta digital de apoyo para técnicos, instaladores, mantenedores o inspectores eléctricos. Permite crear inspecciones, seleccionar bloques de revisión, registrar respuestas, añadir observaciones, incorporar fotografías, introducir mediciones y generar informes técnicos.
+IsiVoltPro Preinspecciones BT es una herramienta digital de apoyo para técnicos, instaladores, mantenedores o inspectores eléctricos. Permite crear inspecciones, seleccionar bloques de revisión, registrar respuestas, añadir observaciones, incorporar fotografías, introducir mediciones y generar informes técnicos.
 
 2. Uso profesional
 
@@ -396,7 +396,7 @@ La aplicación está pensada para usuarios con conocimientos técnicos en instal
 
 3. Limitación de responsabilidad
 
-IsiVolt Pro no sustituye el criterio de un técnico competente, el proyecto o memoria técnica, la inspección oficial de un organismo de control, la normativa vigente, las instrucciones de la administración competente, las normas UNE aplicables ni las guías técnicas oficiales.
+IsiVoltPro Preinspecciones BT no sustituye el criterio de un técnico competente, el proyecto o memoria técnica, la inspección oficial de un organismo de control, la normativa vigente, las instrucciones de la administración competente, las normas UNE aplicables ni las guías técnicas oficiales.
 
 El desarrollador no será responsable de errores derivados de datos introducidos incorrectamente, omisión de información relevante, fotografías incompletas, mediciones mal realizadas, uso de normativa no aplicable, manipulación posterior de informes o uso fuera de la finalidad prevista.
 
@@ -425,7 +425,7 @@ El uso de la aplicación implica la aceptación de estas condiciones.`,
     subtitle: "Cámara, archivos, ubicación y notificaciones",
     body: `PERMISOS DE LA APP
 
-IsiVolt Pro puede solicitar algunos permisos según la función utilizada:
+IsiVoltPro Preinspecciones BT puede solicitar algunos permisos según la función utilizada:
 
 Cámara: se usa para añadir fotografías de defectos, cuadros, documentos, equipos o instalaciones.
 
@@ -442,7 +442,7 @@ La app no debe solicitar permisos que no sean necesarios para su funcionamiento.
     subtitle: "Datos guardados en este dispositivo",
     body: `ALMACENAMIENTO LOCAL
 
-IsiVolt Pro utiliza almacenamiento local del navegador o del dispositivo para guardar inspecciones, respuestas, observaciones, ajustes y datos temporales.
+IsiVoltPro Preinspecciones BT utiliza almacenamiento local del navegador o del dispositivo para guardar inspecciones, respuestas, observaciones, ajustes y datos temporales.
 
 Este almacenamiento permite que la aplicación funcione aunque no exista conexión a internet, pero también implica que:
 
@@ -458,7 +458,7 @@ El usuario puede borrar los datos desde la opción de reset o desde los ajustes 
     subtitle: "Referencias técnicas y comprobación oficial",
     body: `LICENCIAS Y NORMATIVA
 
-IsiVolt Pro puede utilizar referencias normativas, criterios técnicos y estructuras de inspección basadas en reglamentos, guías técnicas, normas y documentación pública o profesional.
+IsiVoltPro Preinspecciones BT puede utilizar referencias normativas, criterios técnicos y estructuras de inspección basadas en reglamentos, guías técnicas, normas y documentación pública o profesional.
 
 Las referencias normativas incluidas tienen carácter orientativo y deben comprobarse siempre con la versión oficial vigente.
 
@@ -2632,7 +2632,7 @@ function SettingsScreen({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-black text-slate-900">Tema de la app</p>
-              <select 
+              <select
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 className="w-full mt-1 bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-700 font-medium focus:ring-2 focus:ring-[#FFC928] outline-none"
@@ -2661,22 +2661,22 @@ function SettingsScreen({
 
         <Section title="Seguridad y versión" number="06">
           <SettingsRow icon={LockKeyhole} title="PIN de acceso" text="Preparado para proteger inspecciones locales." />
-          <SettingsRow icon={Store} title="Play Store" text="IsiVolt Pro V1.0.0 - Base técnica REBT 2002 V1." />
+          <SettingsRow icon={Store} title="Play Store" text="Versión 1.5.8 · Beta local-first · REBT 1973/2002." />
           <Button variant="soft" onClick={() => setPlan("demo")} className="w-full"><RotateCcw className="w-4 h-4" />Volver a Demo</Button>
         </Section>
 
         <Section title="Ayuda y soporte" number="07">
-          <SettingsRow 
-            icon={MessageCircle} 
-            title="Contactar con soporte" 
-            text="Envíanos un correo con tus dudas o sugerencias." 
-            onClick={() => window.location.href = "mailto:soporte@isivolt.com?subject=Soporte IsiVolt Pro"} 
+          <SettingsRow
+            icon={MessageCircle}
+            title="Contactar con soporte"
+            text="Envíanos un correo con tus dudas o sugerencias."
+            onClick={() => window.location.href = "mailto:info@isivoltpro.com?subject=Soporte Preinspecciones BT"}
           />
-          <SettingsRow 
-            icon={Star} 
-            title="Valorar IsiVolt Pro" 
-            text="Ayúdanos dejando una reseña en la Play Store." 
-            onClick={() => alert("Próximamente disponible en Play Store.")} 
+          <SettingsRow
+            icon={Star}
+            title="Enviar comentarios sobre la beta"
+            text="Comunica mejoras o incidencias antes de la publicación estable."
+            onClick={() => window.location.href = "mailto:info@isivoltpro.com?subject=Comentarios beta Preinspecciones BT"}
           />
         </Section>
 
@@ -2729,7 +2729,7 @@ function SettingsScreen({
         </Section>
 
         <Section title="Peligro" number="10">
-          <button 
+          <button
             onClick={factoryReset}
             className="w-full flex items-center justify-center gap-2 rounded-2xl bg-red-50 border border-red-100 p-4 text-red-600 font-black active:scale-95 transition hover:bg-red-100"
           >
@@ -2814,7 +2814,7 @@ function CompanySettingsModal({ settings, onSave, onClose }) {
             <p className="text-xs font-black text-[#FFC928] uppercase tracking-widest">Plan Pro</p>
             <h2 className="text-xl font-black text-[#071E3D]">Datos de empresa</h2>
             <p className="text-xs font-bold text-slate-500 mt-1">
-              Estos datos sustituyen la marca IsiVolt Pro en el informe cuando estén completos.
+              Estos datos sustituyen la marca IsiVoltPro Preinspecciones BT en el informe cuando estén completos.
             </p>
           </div>
           <button type="button" onClick={onClose} className="p-2 rounded-2xl bg-slate-100 text-slate-500 active:scale-90 transition" aria-label="Cerrar">
@@ -2947,7 +2947,7 @@ function LegalIntroModal({ onAccept, onViewPolicy, canSkip = true, onSkip }) {
         <div className="bg-[#071E3D] text-white p-6">
           <p className="text-yellow-300 text-xs font-black uppercase tracking-widest">Legal, privacidad y versión</p>
           <h2 className="text-2xl font-black mt-2">Antes de generar informes finales</h2>
-          <p className="text-white/70 text-sm mt-2">IsiVolt Pro guarda los datos localmente y funciona como apoyo técnico profesional.</p>
+          <p className="text-white/70 text-sm mt-2">IsiVoltPro Preinspecciones BT guarda los datos localmente y funciona como apoyo técnico profesional.</p>
         </div>
         <div className="p-6 space-y-4">
           {[
@@ -3011,7 +3011,7 @@ function ProLockCard({ onUpgrade, compact = false }) {
         </div>
         <div className="flex-1">
           <p className="font-black text-yellow-900">Funcion Pro</p>
-          <p className="text-sm text-yellow-800 mt-1">Exportar informes PDF completos, quitar la marca de agua y usar inspecciones ilimitadas está incluido en IsiVolt Pro.</p>
+          <p className="text-sm text-yellow-800 mt-1">Exportar informes PDF completos, quitar la marca de agua y usar inspecciones ilimitadas está incluido en IsiVoltPro Preinspecciones BT.</p>
           {!compact && <Button variant="gold" onClick={onUpgrade} className="mt-3 w-full">Ver planes</Button>}
         </div>
       </div>
@@ -4000,8 +4000,8 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
                         </div>
                       </div>
                     ))}
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setShowCustomModal(block.id)}
                       className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white p-4 text-slate-500 font-black hover:bg-slate-50 hover:text-[#071E3D] active:scale-95 transition-all mt-4"
                     >
@@ -4016,12 +4016,12 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
       </div>
       {helpItem && <HelpModal item={helpItem} onClose={() => setHelpItem(null)} />}
       {editingCustomItem && (
-        <CustomItemModal 
-          blockId={editingCustomItem.blockId} 
+        <CustomItemModal
+          blockId={editingCustomItem.blockId}
           blockCode={getBlock(editingCustomItem.blockId)?.code || "99"}
           blockItems={items.filter(i => i.blockId === editingCustomItem.blockId)}
           initialItem={editingCustomItem}
-          onClose={() => setEditingCustomItem(null)} 
+          onClose={() => setEditingCustomItem(null)}
           onSave={(updatedItem) => {
             setCustomItems(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
             setEditingCustomItem(null);
@@ -4029,11 +4029,11 @@ function ChecklistScreen({ selectedBlocks, responses, setResponses, setScreen, c
         />
       )}
       {showCustomModal && (
-        <CustomItemModal 
-          blockId={showCustomModal} 
+        <CustomItemModal
+          blockId={showCustomModal}
           blockCode={getBlock(showCustomModal)?.code || "99"}
           blockItems={items.filter(i => i.blockId === showCustomModal)}
-          onClose={() => setShowCustomModal(null)} 
+          onClose={() => setShowCustomModal(null)}
           onSave={(newItem) => {
             setCustomItems(prev => [...prev, newItem]);
             setShowCustomModal(null);
@@ -4075,7 +4075,7 @@ function CustomItemModal({ blockId, blockCode, blockItems, initialItem, onClose,
       alert("Debes indicar un código, título y descripción.");
       return;
     }
-    
+
     // Check if ID already exists when creating new
     if (!initialItem && blockItems.some(i => i.id === customId.trim())) {
       alert("Este código de punto ya existe en este bloque. Por favor, elige otro.");
@@ -4102,16 +4102,16 @@ function CustomItemModal({ blockId, blockCode, blockItems, initialItem, onClose,
           <h2 className="font-black text-xl text-[#071E3D]">Añadir punto</h2>
           <button onClick={onClose} className="p-2 bg-slate-100 rounded-full text-slate-500"><X className="w-5 h-5" /></button>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Código del punto</label>
-            <input 
-              value={customId} 
-              onChange={e => setCustomId(e.target.value)} 
+            <input
+              value={customId}
+              onChange={e => setCustomId(e.target.value)}
               disabled={!!initialItem}
-              placeholder="Ej. 01.01.35" 
-              className={classNames("mt-1 w-full border rounded-2xl px-4 py-3 font-black text-sm outline-none focus:ring-2 focus:ring-[#FFC928]", initialItem ? "bg-slate-100 border-transparent text-slate-400" : "bg-slate-50 border-slate-200")} 
+              placeholder="Ej. 01.01.35"
+              className={classNames("mt-1 w-full border rounded-2xl px-4 py-3 font-black text-sm outline-none focus:ring-2 focus:ring-[#FFC928]", initialItem ? "bg-slate-100 border-transparent text-slate-400" : "bg-slate-50 border-slate-200")}
             />
             {!!initialItem && <p className="text-[10px] text-slate-400 mt-1">El código no se puede modificar una vez creado.</p>}
           </div>
@@ -4843,7 +4843,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
             <Wrench className="w-5 h-5 text-[#071E3D]" />
             <h3 className="font-black text-[#071E3D] text-base">Parámetros de Diseño</h3>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Potencia activa (W)" value={calc.powerW} onChange={(v) => updateCalc("powerW", v)} placeholder="5000" />
             <Select label="Tensión nominal (V)" value={calc.voltage} onChange={(v) => updateCalc("voltage", v)} options={["230", "400"]} />
@@ -4885,7 +4885,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
               <span className="text-white/60 text-xs font-bold">Sección criterio térmico:</span>
               <span className="font-black text-white text-sm">{sectionThermal} mm² (Lím: {ampLimits[sectionThermal]} A)</span>
             </div>
-            
+
             <div className="bg-[#ffc928] text-[#071E3D] rounded-2xl p-4 mt-4 flex flex-col items-center justify-center shadow-md">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#071E3D]/70">Sección Recomendada Final</span>
               <span className="text-3xl font-black mt-1">{recommendedSection} mm²</span>
@@ -4903,7 +4903,7 @@ function FieldSheetsScreen({ fieldSheets, setFieldSheets, calculations, setCalcu
     <div className="pb-32">
       <Header title="Hoja de campo" subtitle="Mediciones y cálculos de línea" onBack={() => setScreen("checklist")} right={<Gauge className="w-6 h-6 text-yellow-300" />} />
       <StageFlow current="fieldSheet" setScreen={setScreen} onReportClick={onReportClick} />
-      
+
       <div className="px-5 pt-4 flex gap-2">
         <button
           type="button"
@@ -5182,7 +5182,7 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, field
         doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin, 15);
       }
     } else {
-      doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 15);
+      doc.text(fixText(reportBrand.main || "IsiVoltPro Preinspecciones BT"), page.margin, 15);
     }
     doc.setTextColor(...navy);
     doc.setFontSize(22);
@@ -5218,11 +5218,11 @@ function exportIsiVoltPdf({ data, selectedBlocks, responses, measurements, field
       doc.text(fixText(reportBrand.main || "Empresa inspectora"), page.margin, 26);
     }
   } else {
-    doc.text(fixText(reportBrand.main || "IsiVolt Pro"), page.margin, 26);
+    doc.text(fixText(reportBrand.main || "IsiVoltPro Preinspecciones BT"), page.margin, 26);
   }
   doc.setFontSize(10);
   doc.setTextColor(...gold);
-  doc.text(fixText(reportBrand.sub || "INSPECCIONES ELÉCTRICAS"), page.margin, 36);
+  doc.text(fixText(reportBrand.sub || "PREINSPECCIONES BT"), page.margin, 36);
   doc.setTextColor(...navy);
   doc.setFontSize(draft ? 26 : 30);
   const fallbackTitleLines = doc.splitTextToSize(fixText(reportTitle || DEFAULT_REPORT_TITLE), 150);
@@ -6031,9 +6031,9 @@ const ReportDocument = React.forwardRef(({ data, selectedBlocks, responses, meas
             <SummaryBox label="Potencia" value={data.powerKW ? `${data.powerKW} kW` : "Sin indicar"} />
             <SummaryBox label="Distribución" value={data.distributionSystem} />
             <SummaryBox label="Reglamento" value={data.regulation} />
-            <SummaryBox 
-              label="ITC principales" 
-              value={itcDisplay} 
+            <SummaryBox
+              label="ITC principales"
+              value={itcDisplay}
               onClick={onItcClick}
             />
           </div>
@@ -6531,7 +6531,7 @@ function ReportScreen({
             <h3 className="font-black text-[#071E3D] text-sm">Firmas Oficiales de la Inspección</h3>
           </div>
           <p className="text-slate-400 text-xs">Firme directamente en los recuadros táctiles inferiores para validar legalmente este informe técnico.</p>
-          
+
           <div className="grid grid-cols-2 gap-3.5 pt-1">
             {/* Box Firma Inspector */}
             <div className="flex flex-col">
@@ -6720,9 +6720,9 @@ function SummaryBox({ label, value, onClick }) {
 
   if (onClick) {
     return (
-      <button 
-        type="button" 
-        onClick={onClick} 
+      <button
+        type="button"
+        onClick={onClick}
         className="summary-box clickable text-left w-full transition-all active:scale-[0.98] hover:bg-slate-50 group"
       >
         <div className="flex items-center justify-between gap-2 w-full">
@@ -7028,7 +7028,7 @@ function CalculationsReportView({ calculations }) {
   return (
     <div className="report-calculations-view">
       <p className="report-subtitle mb-4">Dimensionamiento de conductores y caída de tensión reglamentaria según ITC-BT-19.</p>
-      
+
       <div className="space-y-4">
         <h3 className="font-black text-slate-900 border-b-2 border-[#FFC928] pb-1">DATOS DE ENTRADA</h3>
         <ReportTable rows={[
@@ -7444,7 +7444,7 @@ function InlineSignatureCanvas({ signature, onChange, label }) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasDrawn(false);
-    
+
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
