@@ -56,6 +56,14 @@ function buildRemote({
   id = "remote-local-id",
   name = "Instalación remota",
   deletedAt = "",
+  ownerUserId = "owner-1",
+  assignedUserId = "technician-1",
+  permissions = {
+    canEdit: true,
+    canAssign: false,
+    isOwner: false,
+    isAssigned: true,
+  },
 } = {}) {
   return {
     inspectionId,
@@ -68,6 +76,9 @@ function buildRemote({
       selectedBlocks: [],
       responses: {},
     },
+    ownerUserId,
+    assignedUserId,
+    permissions,
     sourceDeviceId: "pc-device",
     clientUpdatedAt: "2026-08-04T20:00:00.000Z",
     lastSyncedAt: "2026-08-04T20:00:01.000Z",
@@ -88,6 +99,29 @@ test("añade una inspección creada en otro dispositivo", () => {
   assert.equal(result.inspections[0].sync.inspectionId, "remote-inspection-1");
   assert.equal(result.inspections[0].sync.serverRevision, 1);
   assert.equal(result.inspections[0].sync.syncStatus, SYNC_STATUS.SYNCED);
+  assert.equal(result.inspections[0].assignedUserId, "technician-1");
+  assert.equal(result.inspections[0].permissions.isAssigned, true);
+  assert.equal(result.inspections[0].sync.assignedUserId, "technician-1");
+});
+
+test("conserva acceso de solo consulta recibido desde el servidor", () => {
+  resetStores();
+  const remote = buildRemote({
+    inspectionId: "remote-read-only",
+    assignedUserId: "",
+    permissions: {
+      canEdit: false,
+      canAssign: false,
+      isOwner: false,
+      isAssigned: false,
+    },
+  });
+
+  const result = mergeRemoteInspectionRecords([], [remote]);
+
+  assert.equal(result.inspections[0].permissions.canEdit, false);
+  assert.equal(result.inspections[0].sync.permissions.canEdit, false);
+  assert.equal(result.inspections[0].ownerUserId, "owner-1");
 });
 
 test("actualiza una inspección local cuando no existen cambios pendientes", () => {
@@ -107,6 +141,13 @@ test("actualiza una inspección local cuando no existen cambios pendientes", () 
     localRevision: 5,
     id: local.id,
     name: "Nombre actualizado desde PC",
+    assignedUserId: "technician-2",
+    permissions: {
+      canEdit: true,
+      canAssign: true,
+      isOwner: false,
+      isAssigned: false,
+    },
   });
 
   const result = mergeRemoteInspectionRecords([synchronizedLocal], [remote]);
@@ -115,6 +156,8 @@ test("actualiza una inspección local cuando no existen cambios pendientes", () 
   assert.equal(result.inspections[0].id, local.id);
   assert.equal(result.inspections[0].data.name, "Nombre actualizado desde PC");
   assert.equal(result.inspections[0].sync.serverRevision, 2);
+  assert.equal(result.inspections[0].assignedUserId, "technician-2");
+  assert.equal(result.inspections[0].permissions.canAssign, true);
 });
 
 test("no sobrescribe cambios locales pendientes cuando el servidor también cambió", () => {
