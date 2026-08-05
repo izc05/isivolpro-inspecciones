@@ -30,6 +30,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import TechnicianAdminPanel from "../admin/TechnicianAdminPanel.jsx";
 import "./desktop-workspace.css";
 
 const WORKSPACE_SCREENS = new Set(["home", "inspections", "settings", "plan"]);
@@ -491,7 +492,12 @@ export default function DesktopWorkspace({
           )}
 
           {activeSection === "reports" && <ReportsOverview inspections={inspections} onReport={onReport} />}
-          {activeSection === "admin" && <AdminOverview plan={plan} generatedReportsCount={generatedReportsCount} onOpenSettings={() => setSettingsFocus(true)} onExportBackup={onExportBackup} onImportBackup={onImportBackup} />}
+          {activeSection === "admin" && (
+            <>
+              <AdminOverview plan={plan} generatedReportsCount={generatedReportsCount} onOpenSettings={() => setSettingsFocus(true)} onExportBackup={onExportBackup} onImportBackup={onImportBackup} />
+              <TechnicianAdminPanel firebaseUser={user} />
+            </>
+          )}
         </main>
       </div>
     </div>

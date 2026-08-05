@@ -37,6 +37,12 @@ function requireActiveUser(e) {
   if (!companyId) {
     throw new ForbiddenError("La cuenta no tiene una empresa asignada");
   }
+  const applications = e.auth.get("applications");
+  if (applications && typeof applications === "object" && applications.preinspectionsBt === false) {
+    throw new ForbiddenError("El acceso a Preinspecciones BT está desactivado", {
+      code: "PREINSPECTIONS_ACCESS_DISABLED",
+    });
+  }
 
   return {
     userId: e.auth.id,
@@ -190,12 +196,32 @@ routerAdd("POST", "/api/isivolt/v1/auth/firebase", (e) => {
       code: "FIREBASE_UID_MISMATCH",
     });
   }
+  const firstLink = !linkedUid;
   if (!linkedUid) {
     record.set("firebaseUid", firebaseUser.uid);
     if (!record.getString("name") && firebaseUser.displayName) {
       record.set("name", firebaseUser.displayName);
     }
-    e.app.save(record);
+  }
+  const accessNow = new Date().toISOString();
+  record.set("lastAccessAt", accessNow);
+  record.set("invitationStatus", "linked");
+  e.app.save(record);
+
+  if (firstLink) {
+    try {
+      const eventCollection = e.app.findCollectionByNameOrId("technician_access_events");
+      const accessEvent = new Record(eventCollection);
+      accessEvent.set("company", record.getString("company"));
+      accessEvent.set("targetUser", record.id);
+      accessEvent.set("actorUser", record.id);
+      accessEvent.set("eventType", "LINKED");
+      accessEvent.set("details", { email: firebaseUser.email });
+      accessEvent.set("occurredAt", accessNow);
+      e.app.save(accessEvent);
+    } catch (error) {
+      console.warn("No se pudo registrar la vinculación del técnico", error);
+    }
   }
 
   return $apis.recordAuthResponse(e, record, "firebase");

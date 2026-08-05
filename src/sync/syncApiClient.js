@@ -155,6 +155,29 @@ export function createSyncApiClient({
       });
     },
 
+    listTechnicians(options = {}) {
+      return request("/api/isivolt/v1/admin/technicians", {
+        signal: options.signal,
+      });
+    },
+
+    createTechnician(technician, options = {}) {
+      return request("/api/isivolt/v1/admin/technicians", {
+        method: "POST",
+        body: technician,
+        signal: options.signal,
+      });
+    },
+
+    updateTechnician(userId, technician, options = {}) {
+      if (!userId) throw new Error("userId es obligatorio para actualizar el acceso técnico");
+      return request(`/api/isivolt/v1/admin/technicians/${encodeURIComponent(userId)}`, {
+        method: "PUT",
+        body: technician,
+        signal: options.signal,
+      });
+    },
+
     closeInspection(inspectionId, closure, options = {}) {
       if (!inspectionId) throw new Error("inspectionId es obligatorio para cerrar");
       return request(`/api/isivolt/v1/inspections/${encodeURIComponent(inspectionId)}/close`, {
