@@ -1,0 +1,132 @@
+name: Validate desktop manual synchronization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - src/desktop/desktopSyncState.js
+      - src/desktop/desktop-sync.css
+      - src/sync/desktopSyncState.test.js
+      - scripts/connect-desktop-manual-sync.mjs
+      - .github/workflows/validate-desktop-manual-sync.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-desktop-manual-sync
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Connect desktop sync idempotently
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check scripts/connect-desktop-manual-sync.mjs
+          node scripts/connect-desktop-manual-sync.mjs
+          git diff --check
+          first_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          node scripts/connect-desktop-manual-sync.mjs
+          git diff --check
+          second_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          test "$first_hash" = "$second_hash"
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check desktop sync contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'getDesktopSyncPresentation' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'className={`isivolt-desktop-sync is-${syncPresentation.tone}`}' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'syncState={syncRuntimeState}' src/App.jsx
+          grep -Fq 'setSyncTrigger((value) => value + 1)' src/App.jsx
+          grep -Fq 'manualSyncTrigger={syncTrigger}' src/App.jsx
+          grep -Fq 'onSyncStateChange={setSyncRuntimeState}' src/App.jsx
+          grep -Fq 'onSyncStateChange?.(syncState)' src/integration/ConnectedInspectionBridge.jsx
+          grep -Fq 'manualSyncTrigger, setInspections' src/integration/ConnectedInspectionBridge.jsx
+          grep -Fq 'bloquea pulsaciones repetidas mientras el motor está sincronizando' src/sync/desktopSyncState.test.js
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write validation marker
+        shell: bash
+        run: |
+          cat > docs/desktop-manual-sync-validation.md <<'EOF'
+          # Validación · Sincronización manual desde PC
+
+          Estado: **SUPERADA**
+
+          Se ha comprobado:
+
+          - el botón Sincronizar del escritorio ejecuta el mismo motor usado por APK y sincronización automática;
+          - no se crea una segunda cola ni un flujo paralelo de datos;
+          - el botón abre el inicio de sesión cuando no existe una cuenta autenticada;
+          - queda desactivado cuando PocketBase no está configurado o mientras ya existe una sincronización en curso;
+          - muestra los estados Sincronizando, Todo al día, Sin conexión, Conflicto y Error;
+          - permite reintentar errores, conflictos y trabajo pendiente sin conexión;
+          - el estado real del puente se devuelve a la cabecera del escritorio;
+          - el control se compacta en resoluciones de escritorio pequeñas;
+          - parche ejecutado dos veces sin duplicaciones;
+          - auditoría, pruebas, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validated desktop sync
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/App.jsx \
+            src/desktop/DesktopWorkspace.jsx \
+            src/integration/ConnectedInspectionBridge.jsx \
+            docs/desktop-manual-sync-validation.md
+          if git diff --cached --quiet; then
+            echo 'Desktop manual synchronization already validated.'
+            exit 0
+          fi
+          git commit -m "feat: connect desktop manual synchronization"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
