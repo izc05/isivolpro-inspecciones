@@ -1,17 +1,15 @@
 migrate((app) => {
-  const evidenceAccess = [
-    "@request.auth.id != ''",
-    "@request.auth.active = true",
-    "@request.auth.applications.preinspectionsBt = true",
-    "company = @request.auth.company",
-    "(",
-    "  @request.auth.role = 'admin' ||",
-    "  @request.auth.role = 'coordinator' ||",
-    "  @request.auth.role = 'viewer' ||",
-    "  inspection.assignedUser = @request.auth.id ||",
-    "  inspection.ownerUser = @request.auth.id",
-    ")",
-  ].join(" && ").replace("( &&", "(").replaceAll("|| &&", "||");
+  const evidenceAccess = "@request.auth.id != '' && " +
+    "@request.auth.active = true && " +
+    "@request.auth.applications.preinspectionsBt = true && " +
+    "company = @request.auth.company && " +
+    "(" +
+      "@request.auth.role = 'admin' || " +
+      "@request.auth.role = 'coordinator' || " +
+      "@request.auth.role = 'viewer' || " +
+      "inspection.assignedUser = @request.auth.id || " +
+      "inspection.ownerUser = @request.auth.id" +
+    ")";
 
   const writableEvidence = evidenceAccess + " && @request.auth.role != 'viewer'";
 
