@@ -66,6 +66,7 @@ import { useAuth } from "./context/AuthContext";
 import { CHECKLIST } from "./data/checklistRebt2002";
 import ConnectedInspectionBridge from "./integration/ConnectedInspectionBridge.jsx";
 import DesktopWorkspace from "./desktop/DesktopWorkspace.jsx";
+import "./desktop/desktop-workspace-accessibility.css";
 import {
   buildInspectionSyncPayload,
   createLocalInspectionRecord,
