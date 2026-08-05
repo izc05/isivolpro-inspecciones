@@ -54,6 +54,26 @@ function getRemoteClosureConfig(remote) {
     : null;
 }
 
+function getRemotePermissions(remote) {
+  const source = remote?.permissions && typeof remote.permissions === "object" && !Array.isArray(remote.permissions)
+    ? remote.permissions
+    : {};
+  return {
+    canEdit: source.canEdit !== false,
+    canAssign: source.canAssign === true,
+    isOwner: source.isOwner === true,
+    isAssigned: source.isAssigned === true,
+  };
+}
+
+function getRemoteAccess(remote) {
+  return {
+    ownerUserId: String(remote?.ownerUserId || ""),
+    assignedUserId: String(remote?.assignedUserId || ""),
+    permissions: getRemotePermissions(remote),
+  };
+}
+
 function findLocalByInspectionId(inspections, inspectionId) {
   return inspections.find((inspection) =>
     inspection?.sync?.inspectionId === inspectionId ||
@@ -74,6 +94,7 @@ function chooseLocalId(inspections, remote) {
 function applyRemoteMetadata(localId, remote) {
   const inspectionId = getRemoteInspectionId(remote);
   const serverRevision = getRemoteRevision(remote);
+  const access = getRemoteAccess(remote);
   ensureSyncMetadata(localId, { inspectionId });
   return updateSyncMetadata(localId, (current) => ({
     ...current,
@@ -92,6 +113,9 @@ function applyRemoteMetadata(localId, remote) {
       Number(remote.localRevision || 1),
       serverRevision,
     ),
+    ownerUserId: access.ownerUserId,
+    assignedUserId: access.assignedUserId,
+    permissions: access.permissions,
     updatedAt: remote.clientUpdatedAt || remote.updated || current.updatedAt,
     lastSyncedAt: remote.lastSyncedAt || remote.updated || new Date().toISOString(),
     deletedAt: remote.deletedAt || null,
@@ -120,12 +144,16 @@ function mergeClosureConfigIntoData(data, closureConfig) {
 function buildRemoteLocalRecord(localId, remote) {
   const payload = getRemotePayload(remote);
   const closureConfig = getRemoteClosureConfig(remote);
+  const access = getRemoteAccess(remote);
   const sync = applyRemoteMetadata(localId, remote);
   return {
     ...payload,
     id: localId,
     data: mergeClosureConfigIntoData(payload.data, closureConfig),
     closureConfig,
+    ownerUserId: access.ownerUserId,
+    assignedUserId: access.assignedUserId,
+    permissions: access.permissions,
     sync,
     updatedAt: payload.updatedAt || remote.clientUpdatedAt || remote.updated,
   };
