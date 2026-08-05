@@ -10,6 +10,9 @@ on:
       - capacitor.config.ts
       - index.html
       - public/manifest.webmanifest
+      - src/main.jsx
+      - src/components/EcosystemDock.jsx
+      - src/ecosystem-dock.css
       - .github/workflows/android-release.yml
       - .github/workflows/validate-android-release-tooling.yml
       - docs/android-release-signing.md
@@ -85,6 +88,9 @@ jobs:
           grep -Fq '<title>IsiVoltPro Preinspecciones BT</title>' index.html
           grep -Fq '"name": "IsiVoltPro Preinspecciones BT"' public/manifest.webmanifest
           grep -Fq '<string name="app_name">IsiVoltPro Preinspecciones BT</string>' android/app/src/main/res/values/strings.xml
+          grep -Fq 'https://www.isivoltpro.com/aplicaciones/inspecciones-bt' src/components/EcosystemDock.jsx
+          grep -Fq '<EcosystemDock />' src/main.jsx
+          grep -Fq '@media print' src/ecosystem-dock.css
           git diff --check
 
       - name: Write release tooling validation marker
@@ -101,6 +107,7 @@ jobs:
           - ausencia de almacenes de claves dentro del repositorio;
           - pruebas de sincronización, PocketBase y compilación web;
           - identidad coherente `IsiVoltPro Preinspecciones BT` en web, PWA, Capacitor y Android;
+          - acceso responsive y accesible desde la app hacia el ecosistema IsiVoltPro;
           - sincronización del proyecto Capacitor Android;
           - construcción de APK release sin firma para validar el empaquetado;
           - construcción de AAB release;
