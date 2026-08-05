@@ -11,12 +11,15 @@ migrate((app) => {
       "inspection.ownerUser = @request.auth.id" +
     ")";
 
-  const writableEvidence = evidenceAccess + " && @request.auth.role != 'viewer'";
+  const evidenceCreate = "@request.auth.id != '' && " +
+    "@request.auth.active = true && " +
+    "@request.auth.applications.preinspectionsBt = true && " +
+    "@request.auth.role != 'viewer'";
 
   const files = app.findCollectionByNameOrId("inspection_files");
   files.listRule = evidenceAccess;
   files.viewRule = evidenceAccess;
-  files.createRule = writableEvidence;
+  files.createRule = evidenceCreate;
   files.updateRule = null;
   files.deleteRule = null;
   app.save(files);
