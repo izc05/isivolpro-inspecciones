@@ -1,136 +1,17 @@
-const TECHNICIAN_ALLOWED_ROLES = ["inspector", "coordinator", "viewer"];
-
-function technicianObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-}
-
-function technicianEmail(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function technicianText(value, maximum) {
-  return String(value || "").trim().slice(0, maximum);
-}
-
-function technicianApplications(value) {
-  let enabled;
-  if (value && typeof value.get === "function") {
-    enabled = value.get("preinspectionsBt");
-  } else {
-    const source = technicianObject(value);
-    enabled = source.preinspectionsBt;
-  }
-  return {
-    preinspectionsBt: enabled === undefined || enabled === null ? true : Boolean(enabled),
-  };
-}
-
-function technicianRole(value) {
-  const role = String(value || "inspector").trim().toLowerCase();
-  return TECHNICIAN_ALLOWED_ROLES.indexOf(role) >= 0 ? role : "inspector";
-}
-
-function requireTechnicianAdmin(e) {
-  if (!e.auth || e.auth.collection().name !== "users") {
-    throw new UnauthorizedError("Se necesita una cuenta IsiVoltPro válida");
-  }
-  if (!e.auth.getBool("active")) {
-    throw new ForbiddenError("La cuenta está desactivada");
-  }
-  if (e.auth.getString("role") !== "admin") {
-    throw new ForbiddenError("Solo un administrador puede gestionar accesos técnicos", {
-      code: "ADMIN_ROLE_REQUIRED",
-    });
-  }
-  const companyId = e.auth.getString("company");
-  if (!companyId) {
-    throw new ForbiddenError("La cuenta no tiene empresa asignada");
-  }
-  return {
-    userId: e.auth.id,
-    companyId: companyId,
-  };
-}
-
-function technicianInvitationStatus(record) {
-  if (!record.getBool("active")) return "disabled";
-  if (record.getString("firebaseUid")) return "linked";
-  return "pending";
-}
-
-function serializeTechnician(record) {
-  return {
-    id: record.id,
-    email: record.email(),
-    name: record.getString("name"),
-    phone: record.getString("phone"),
-    specialty: record.getString("specialty"),
-    role: record.getString("role"),
-    active: record.getBool("active"),
-    applications: technicianApplications(record.get("applications")),
-    linked: Boolean(record.getString("firebaseUid")),
-    invitationStatus: technicianInvitationStatus(record),
-    invitedAt: record.getString("invitedAt"),
-    lastAccessAt: record.getString("lastAccessAt"),
-    created: record.getString("created"),
-    updated: record.getString("updated"),
-  };
-}
-
-function technicianFindById(app, userId, companyId) {
-  const record = app.findRecordById("users", userId);
-  if (record.getString("company") !== companyId || record.getString("role") === "admin") {
-    throw new NotFoundError("No se ha encontrado el acceso técnico");
-  }
-  return record;
-}
-
-function technicianAccessEvent(app, auth, target, eventType, details) {
-  const collection = app.findCollectionByNameOrId("technician_access_events");
-  const event = new Record(collection);
-  event.set("company", auth.companyId);
-  event.set("targetUser", target.id);
-  event.set("actorUser", auth.userId);
-  event.set("eventType", eventType);
-  event.set("details", technicianObject(details));
-  event.set("occurredAt", new Date().toISOString());
-  app.save(event);
-}
-
-function technicianFindByEmail(app, email) {
-  try {
-    return app.findAuthRecordByEmail("users", email);
-  } catch (error) {
-    return null;
-  }
-}
-
 routerAdd("GET", "/api/isivolt/v1/admin/technicians", (e) => {
-  const auth = requireTechnicianAdmin(e);
-  const companyRecords = e.app.findAllRecords(
-    "users",
-    $dbx.hashExp({ company: auth.companyId }),
-  );
-  const records = [];
-  for (let index = 0; index < companyRecords.length; index += 1) {
-    if (companyRecords[index].getString("role") !== "admin") {
-      records.push(companyRecords[index]);
-    }
-  }
-  records.sort((first, second) => {
-    const firstKey = `${first.getString("name")} ${first.email()}`.toLowerCase();
-    const secondKey = `${second.getString("name")} ${second.email()}`.toLowerCase();
-    return firstKey < secondKey ? -1 : firstKey > secondKey ? 1 : 0;
-  });
+  const tech = require(`${__hooks}/technician_access_utils.js`);
+  const auth = tech.requireAdmin(e);
+  const records = tech.listForCompany(e.app, auth.companyId);
   const technicians = [];
   for (let index = 0; index < records.length; index += 1) {
-    technicians.push(serializeTechnician(records[index]));
+    technicians.push(tech.serialize(records[index]));
   }
   return e.json(200, { technicians: technicians });
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/isivolt/v1/admin/technicians", (e) => {
-  const auth = requireTechnicianAdmin(e);
+  const tech = require(`${__hooks}/technician_access_utils.js`);
+  const auth = tech.requireAdmin(e);
   const body = new DynamicModel({
     email: "",
     name: "",
@@ -142,20 +23,16 @@ routerAdd("POST", "/api/isivolt/v1/admin/technicians", (e) => {
   });
   e.bindBody(body);
 
-  const email = technicianEmail(body.email);
-  const name = technicianText(body.name, 160);
+  const email = tech.normalizeEmail(body.email);
+  const name = tech.normalizeText(body.name, 160);
   if (!email || email.indexOf("@") <= 0) {
-    throw new BadRequestError("El correo del técnico no es válido", {
-      code: "INVALID_TECHNICIAN_EMAIL",
-    });
+    throw new BadRequestError("El correo del técnico no es válido");
   }
   if (!name) {
-    throw new BadRequestError("El nombre del técnico es obligatorio", {
-      code: "TECHNICIAN_NAME_REQUIRED",
-    });
+    throw new BadRequestError("El nombre del técnico es obligatorio");
   }
 
-  const existing = technicianFindByEmail(e.app, email);
+  const existing = tech.findByEmail(e.app, email);
   if (existing) {
     return e.json(409, {
       code: existing.getString("company") === auth.companyId
@@ -174,30 +51,31 @@ routerAdd("POST", "/api/isivolt/v1/admin/technicians", (e) => {
   record.setVerified(false);
   record.set("name", name);
   record.set("company", auth.companyId);
-  record.set("role", technicianRole(body.role));
+  record.set("role", tech.role(body.role));
   record.set("active", body.active === undefined ? true : Boolean(body.active));
-  record.set("applications", technicianApplications(body.applications));
+  record.set("applications", tech.applications(body.applications));
   record.set("firebaseUid", "");
-  record.set("phone", technicianText(body.phone, 40));
-  record.set("specialty", technicianText(body.specialty, 160));
+  record.set("phone", tech.normalizeText(body.phone, 40));
+  record.set("specialty", tech.normalizeText(body.specialty, 160));
   record.set("invitationStatus", body.active === false ? "disabled" : "pending");
   record.set("invitedBy", auth.userId);
   record.set("invitedAt", new Date().toISOString());
   e.app.save(record);
 
-  technicianAccessEvent(e.app, auth, record, "INVITED", {
+  tech.audit(e.app, auth, record, "INVITED", {
     email: email,
     role: record.getString("role"),
-    applications: technicianApplications(record.get("applications")),
+    applications: tech.applications(record.get("applications")),
   });
 
-  return e.json(201, { technician: serializeTechnician(record) });
+  return e.json(201, { technician: tech.serialize(record) });
 }, $apis.requireAuth("users"));
 
 routerAdd("PUT", "/api/isivolt/v1/admin/technicians/{userId}", (e) => {
-  const auth = requireTechnicianAdmin(e);
+  const tech = require(`${__hooks}/technician_access_utils.js`);
+  const auth = tech.requireAdmin(e);
   const userId = String(e.request.pathValue("userId") || "").trim();
-  const record = technicianFindById(e.app, userId, auth.companyId);
+  const record = tech.findById(e.app, userId, auth.companyId);
   const body = new DynamicModel({
     name: "",
     phone: "",
@@ -209,36 +87,36 @@ routerAdd("PUT", "/api/isivolt/v1/admin/technicians/{userId}", (e) => {
   e.bindBody(body);
 
   const previousActive = record.getBool("active");
-  const previousApplications = technicianApplications(record.get("applications"));
-  const nextName = technicianText(body.name, 160);
+  const previousApplications = tech.applications(record.get("applications"));
+  const nextName = tech.normalizeText(body.name, 160);
   if (nextName) record.set("name", nextName);
-  record.set("phone", technicianText(body.phone, 40));
-  record.set("specialty", technicianText(body.specialty, 160));
+  record.set("phone", tech.normalizeText(body.phone, 40));
+  record.set("specialty", tech.normalizeText(body.specialty, 160));
   if (String(body.role || "").trim()) {
-    record.set("role", technicianRole(body.role));
+    record.set("role", tech.role(body.role));
   }
   if (body.active !== null && body.active !== undefined) {
     record.set("active", Boolean(body.active));
   }
   if (body.applications !== null && body.applications !== undefined) {
-    record.set("applications", technicianApplications(body.applications));
+    record.set("applications", tech.applications(body.applications));
   }
-  record.set("invitationStatus", technicianInvitationStatus(record));
+  record.set("invitationStatus", tech.invitationStatus(record));
   e.app.save(record);
 
   const currentActive = record.getBool("active");
-  const currentApplications = technicianApplications(record.get("applications"));
+  const currentApplications = tech.applications(record.get("applications"));
   let eventType = "UPDATED";
   if (previousActive !== currentActive) {
     eventType = currentActive ? "ACTIVATED" : "DEACTIVATED";
   } else if (JSON.stringify(previousApplications) !== JSON.stringify(currentApplications)) {
     eventType = "ACCESS_CHANGED";
   }
-  technicianAccessEvent(e.app, auth, record, eventType, {
+  tech.audit(e.app, auth, record, eventType, {
     active: currentActive,
     role: record.getString("role"),
     applications: currentApplications,
   });
 
-  return e.json(200, { technician: serializeTechnician(record) });
+  return e.json(200, { technician: tech.serialize(record) });
 }, $apis.requireAuth("users"));
