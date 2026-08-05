@@ -13,9 +13,15 @@ function technicianText(value, maximum) {
 }
 
 function technicianApplications(value) {
-  const source = technicianObject(value);
+  let enabled;
+  if (value && typeof value.get === "function") {
+    enabled = value.get("preinspectionsBt");
+  } else {
+    const source = technicianObject(value);
+    enabled = source.preinspectionsBt;
+  }
   return {
-    preinspectionsBt: source.preinspectionsBt === undefined ? true : Boolean(source.preinspectionsBt),
+    preinspectionsBt: enabled === undefined || enabled === null ? true : Boolean(enabled),
   };
 }
 
@@ -101,14 +107,21 @@ function technicianFindByEmail(app, email) {
 
 routerAdd("GET", "/api/isivolt/v1/admin/technicians", (e) => {
   const auth = requireTechnicianAdmin(e);
-  const records = e.app.findRecordsByFilter(
+  const companyRecords = e.app.findAllRecords(
     "users",
-    "company = {:company} && role != 'admin'",
-    "name,email",
-    500,
-    0,
-    { company: auth.companyId },
+    $dbx.hashExp({ company: auth.companyId }),
   );
+  const records = [];
+  for (let index = 0; index < companyRecords.length; index += 1) {
+    if (companyRecords[index].getString("role") !== "admin") {
+      records.push(companyRecords[index]);
+    }
+  }
+  records.sort((first, second) => {
+    const firstKey = `${first.getString("name")} ${first.email()}`.toLowerCase();
+    const secondKey = `${second.getString("name")} ${second.email()}`.toLowerCase();
+    return firstKey < secondKey ? -1 : firstKey > secondKey ? 1 : 0;
+  });
   const technicians = [];
   for (let index = 0; index < records.length; index += 1) {
     technicians.push(serializeTechnician(records[index]));
@@ -190,8 +203,8 @@ routerAdd("PUT", "/api/isivolt/v1/admin/technicians/{userId}", (e) => {
     phone: "",
     specialty: "",
     role: "",
-    active: null,
-    applications: null,
+    active: nullBool(),
+    applications: nullObject(),
   });
   e.bindBody(body);
 
