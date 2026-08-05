@@ -73,11 +73,11 @@ async function createAdminClient({ firebaseUser, baseUrl, fetchImpl }) {
       code: "SYNC_USER_NOT_AUTHENTICATED",
     });
   }
-  await ensureSyncSession({ firebaseUser, baseUrl, fetchImpl });
+  const session = await ensureSyncSession({ firebaseUser, baseUrl, fetchImpl });
   return createSyncApiClient({
     baseUrl,
     fetchImpl,
-    getAccessToken: getSyncAccessToken,
+    getAccessToken: () => session?.token || getSyncAccessToken(),
   });
 }
 
