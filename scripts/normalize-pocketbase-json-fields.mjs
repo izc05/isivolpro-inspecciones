@@ -29,7 +29,10 @@ function recordApplications(record) {
       preinspectionsBt: booleanSetting(result.preinspectionsBt, true),
     };
   } catch (error) {
-    return applications(record.get("applications"));
+    const fallback = objectValue(record.get("applications"));
+    return {
+      preinspectionsBt: booleanSetting(fallback.preinspectionsBt, true),
+    };
   }
 }`;
 
