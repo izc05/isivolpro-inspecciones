@@ -10,6 +10,12 @@ if (!source.includes(importLine)) {
   source = source.replace(marker, `${marker}\n${importLine}`);
 }
 
+const accessibilityImport = 'import "./desktop/desktop-workspace-accessibility.css";';
+if (!source.includes(accessibilityImport)) {
+  if (!source.includes(importLine)) throw new Error("No se encontró el import de DesktopWorkspace");
+  source = source.replace(importLine, `${importLine}\n${accessibilityImport}`);
+}
+
 const oldContainer = 'className="w-full max-w-md bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300"';
 const newContainer = 'className="w-full max-w-md lg:max-w-5xl bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl lg:shadow-xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300"';
 if (source.includes(oldContainer)) source = source.replace(oldContainer, newContainer);
@@ -47,6 +53,7 @@ if (source.includes(oldBottomNav)) source = source.replace(oldBottomNav, newBott
 
 const requiredFragments = [
   importLine,
+  accessibilityImport,
   "<DesktopWorkspace",
   "onCreate={createInspection}",
   "onImportBackup={importBackup}",
