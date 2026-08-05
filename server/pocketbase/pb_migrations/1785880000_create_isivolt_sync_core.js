@@ -138,7 +138,7 @@ migrate((app) => {
     ],
     indexes: [
       "CREATE UNIQUE INDEX idx_inspections_inspection_id ON inspections (inspectionId)",
-      "CREATE INDEX idx_inspections_company_updated ON inspections (company, updated)",
+      "CREATE INDEX idx_inspections_company_client_updated ON inspections (company, clientUpdatedAt)",
       "CREATE INDEX idx_inspections_company_assigned_status ON inspections (company, assignedUser, status)",
     ],
   });
