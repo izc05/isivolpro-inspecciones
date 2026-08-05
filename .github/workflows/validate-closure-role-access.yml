@@ -1,0 +1,170 @@
+name: Validate role-aware GPS closure
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - server/pocketbase/pb_hooks/isivolt_closure.pb.js
+      - server/pocketbase/pb_hooks/closure_utils.js
+      - scripts/smoke-closure-role-access.mjs
+      - .github/workflows/validate-closure-role-access.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-bt-closure-role-access
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-closure.zip
+          mkdir -p /tmp/pocketbase-closure/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-closure.zip -d /tmp/pocketbase-closure
+          chmod +x /tmp/pocketbase-closure/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-closure/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-closure/pb_migrations/
+          cd /tmp/pocketbase-closure
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real closure lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8103
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-closure.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-closure
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8103 > /tmp/pocketbase-closure.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8103/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-closure.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-closure-role-access.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-closure.log; then
+            cat /tmp/pocketbase-closure.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check closure contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'sync.requireUser(e, { write: true })' server/pocketbase/pb_hooks/isivolt_closure.pb.js
+          grep -Fq 'sync.assertCanWriteInspection(inspection, auth)' server/pocketbase/pb_hooks/isivolt_closure.pb.js
+          grep -Fq 'auth.role !== "admin"' server/pocketbase/pb_hooks/isivolt_closure.pb.js
+          grep -Fq 'record.unmarshalJSONField("payload", result)' server/pocketbase/pb_hooks/closure_utils.js
+          grep -Fq 'record.unmarshalJSONField(fieldName, result)' server/pocketbase/pb_hooks/closure_utils.js
+          grep -Fq 'Técnico ajeno y consulta: cierre bloqueado' scripts/smoke-closure-role-access.mjs
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write closure validation marker
+        shell: bash
+        run: |
+          cat > docs/closure-role-access-validation.md <<EOF
+          # Validación · Cierre presencial por rol y asignación
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - el técnico asignado puede cerrar su propia preinspección;
+          - otro técnico de la misma empresa no puede cerrarla;
+          - el perfil Solo consulta no puede cerrar expedientes;
+          - una excepción de cierre solo puede autorizarla un administrador;
+          - un expediente ya cerrado o cancelado queda bloqueado;
+          - la revisión se comprueba de nuevo dentro de la transacción;
+          - la política y el expediente se leen con unmarshalJSONField;
+          - los cierres y eventos quedan auditados y visibles según los permisos del expediente;
+          - auditoría del runtime, pruebas, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validation marker
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/closure-role-access-validation.md
+          if git diff --cached --quiet; then
+            echo 'Closure role access marker already exists.'
+            exit 0
+          fi
+          git commit -m "test: certify closure access by role"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
