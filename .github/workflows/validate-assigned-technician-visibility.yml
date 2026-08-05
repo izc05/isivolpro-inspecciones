@@ -1,0 +1,191 @@
+name: Validate assigned technician visibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - scripts/add-assigned-technician-visibility.mjs
+      - .github/workflows/validate-assigned-technician-visibility.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isivoltpro-assigned-technician-visibility
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/apk-pc-sync-gps-close
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply patch idempotently
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check scripts/add-assigned-technician-visibility.mjs
+          node scripts/add-assigned-technician-visibility.mjs
+          git diff --check
+          first_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          node scripts/add-assigned-technician-visibility.mjs
+          git diff --check
+          second_hash="$(git diff | sha256sum | cut -d' ' -f1)"
+          test "$first_hash" = "$second_hash"
+
+      - name: Require clean runtime audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Validate application and server
+        run: npm run test:integration
+
+      - name: Resolve latest official PocketBase release
+        id: pocketbase
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="$(curl -fsSL https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name')"
+          test -n "$tag"
+          test "$tag" != "null"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PocketBase runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="${{ steps.pocketbase.outputs.version }}"
+          curl -fsSL "https://github.com/pocketbase/pocketbase/releases/download/v${version}/pocketbase_${version}_linux_amd64.zip" -o /tmp/pocketbase-assigned-tech.zip
+          mkdir -p /tmp/pocketbase-assigned-tech/{pb_hooks,pb_migrations,pb_data}
+          unzip -q /tmp/pocketbase-assigned-tech.zip -d /tmp/pocketbase-assigned-tech
+          chmod +x /tmp/pocketbase-assigned-tech/pocketbase
+          cp -a server/pocketbase/pb_hooks/. /tmp/pocketbase-assigned-tech/pb_hooks/
+          cp -a server/pocketbase/pb_migrations/. /tmp/pocketbase-assigned-tech/pb_migrations/
+          cd /tmp/pocketbase-assigned-tech
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase migrate up
+          ./pocketbase superuser upsert validation@example.com Validation-Password-12345
+
+      - name: Run real role and assignment lifecycle
+        shell: bash
+        env:
+          POCKETBASE_URL: http://127.0.0.1:8104
+          POCKETBASE_SUPERUSER_EMAIL: validation@example.com
+          POCKETBASE_SUPERUSER_PASSWORD: Validation-Password-12345
+          POCKETBASE_LOG_PATH: /tmp/pocketbase-assigned-tech.log
+        run: |
+          set -Eeuo pipefail
+          cd /tmp/pocketbase-assigned-tech
+          FIREBASE_WEB_API_KEY=runtime-validation-placeholder ./pocketbase serve --dev --http=127.0.0.1:8104 > /tmp/pocketbase-assigned-tech.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" >/dev/null 2>&1 || true
+            wait "$server_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsSL http://127.0.0.1:8104/api/health >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/pocketbase-assigned-tech.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          cd "$GITHUB_WORKSPACE"
+          node scripts/smoke-role-access.mjs
+          if grep -Eiq 'hook.*error|migration.*error|panic|fatal' /tmp/pocketbase-assigned-tech.log; then
+            cat /tmp/pocketbase-assigned-tech.log >&2
+            exit 1
+          fi
+
+      - name: Synchronize and build Android
+        run: |
+          npx cap sync android
+          node scripts/run-gradle.mjs assembleDebug
+
+      - name: Check visibility contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'function serializeAssignedUser(app, userId)' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'recordApplications: recordApplications' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'assignedUser: serializeAssignedUser(app, assignedUserId)' server/pocketbase/pb_hooks/sync_core_utils.js
+          grep -Fq 'sync.serializeInspection(records[index], auth, e.app)' server/pocketbase/pb_hooks/isivolt_sync.pb.js
+          grep -Fq 'assignedUser: getRemoteAssignedUser(remote)' src/sync/remoteMerge.js
+          grep -Fq '<th>Técnico</th>' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'onAssignmentChange={handleAssignmentChange}' src/desktop/DesktopWorkspace.jsx
+          grep -Fq 'onAssignmentChange?.(next)' src/admin/InspectionAssignmentControl.jsx
+          grep -Fq 'result.inspections[0].assignedUser.name' src/sync/remoteMerge.test.js
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          git diff --check
+
+      - name: Write validation marker
+        shell: bash
+        run: |
+          cat > docs/assigned-technician-visibility-validation.md <<EOF
+          # Validación · Técnico asignado visible en PC y APK
+
+          Estado: **SUPERADA**
+
+          PocketBase probado: **${{ steps.pocketbase.outputs.tag }}**
+
+          Se ha comprobado:
+
+          - el servidor entrega nombre, correo, especialidad, perfil y estado del técnico asignado;
+          - la descarga PC/APK conserva ese resumen junto al identificador de usuario;
+          - la tabla de expedientes muestra técnico y especialidad;
+          - el buscador encuentra expedientes por nombre, correo o especialidad del técnico;
+          - el panel de detalle muestra el responsable actual;
+          - una reasignación actualiza tabla y detalle sin recargar toda la aplicación;
+          - el fallback JSON de aplicaciones sigue exportado para el enlace Firebase–PocketBase;
+          - parche ejecutado dos veces sin duplicaciones;
+          - auditoría, pruebas, PocketBase real, compilación web y APK Android debug superadas.
+          EOF
+
+      - name: Commit validated visibility
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            server/pocketbase/pb_hooks/sync_core_utils.js \
+            server/pocketbase/pb_hooks/isivolt_sync.pb.js \
+            src/sync/remoteMerge.js \
+            src/sync/remoteMerge.test.js \
+            src/admin/InspectionAssignmentControl.jsx \
+            src/desktop/DesktopWorkspace.jsx \
+            docs/assigned-technician-visibility-validation.md
+          if git diff --cached --quiet; then
+            echo 'Assigned technician visibility already validated.'
+            exit 0
+          fi
+          git commit -m "feat: show assigned technician across synchronized workspace"
+          for attempt in 1 2 3; do
+            git pull --rebase origin feat/apk-pc-sync-gps-close
+            if git push origin HEAD:feat/apk-pc-sync-gps-close; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
