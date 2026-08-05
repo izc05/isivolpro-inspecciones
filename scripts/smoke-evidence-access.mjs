@@ -149,7 +149,7 @@ try {
 
   const ownFile = await uploadFile(inspectorA.token, inspectionA, idA, `file-own-${suffix}`);
   await uploadFile(inspectorB.token, inspectionA, idA, `file-foreign-${suffix}`, 403);
-  await uploadFile(viewer.token, inspectionA, idA, `file-viewer-${suffix}`, 403);
+  await uploadFile(viewer.token, inspectionA, idA, `file-viewer-${suffix}`, 400);
   const adminFile = await uploadFile(admin.token, inspectionB, idB, `file-admin-${suffix}`);
 
   const listA = await listFiles(inspectorA.token, idA);
