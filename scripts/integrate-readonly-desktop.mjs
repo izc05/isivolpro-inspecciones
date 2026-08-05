@@ -13,8 +13,8 @@ function replaceOnce(search, replacement, label) {
 
 replaceOnce(
   'import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";\nimport "./desktop-workspace.css";',
-  'import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";\nimport { readSyncSession } from "../sync/syncAuth.js";\nimport "./desktop-workspace.css";',
-  "importar la sesión de sincronización",
+  'import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";\nimport { readSyncSession } from "../sync/syncAuth.js";\nimport "./desktop-workspace.css";\nimport "./readonly-workspace.css";',
+  "importar la sesión y estilos de consulta",
 );
 
 replaceOnce(
@@ -39,8 +39,8 @@ replaceOnce(
 
 replaceOnce(
   "function DetailPanel({ inspection, firebaseUser, onContinue, onEdit, onDocuments, onReport, onDelete }) {",
-  "function DetailPanel({ inspection, firebaseUser, readOnly = false, onContinue, onEdit, onDocuments, onReport, onDelete }) {",
-  "pasar el modo de consulta al detalle",
+  "function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssignments = false, onContinue, onEdit, onDocuments, onReport, onDelete }) {",
+  "pasar permisos al detalle",
 );
 
 replaceOnce(
@@ -48,7 +48,7 @@ replaceOnce(
   `  const closed = normalizedStatus(inspection) === "closed";
   const permissions = inspection?.permissions || inspection?.sync?.permissions || {};
   const canEdit = !readOnly && permissions.canEdit !== false;
-  const canAssign = !readOnly && permissions.canAssign === true;`,
+  const canAssign = !readOnly && (canManageAssignments || permissions.canAssign === true);`,
   "calcular permisos del expediente",
 );
 
@@ -108,6 +108,7 @@ replaceOnce(
   const currentRole = normalizeText(syncSession?.record?.role).toLowerCase();
   const readOnlyWorkspace = currentRole === "viewer";
   const canCreate = !readOnlyWorkspace;
+  const canManageAssignments = currentRole === "admin" || currentRole === "coordinator";
   const visibleNavItems = NAV_ITEMS.filter((item) => item.id !== "admin" || currentRole === "admin");`,
   "leer el rol de la cuenta",
 );
@@ -138,8 +139,8 @@ replaceOnce(
 
 replaceOnce(
   '<DetailPanel inspection={selectedInspection} firebaseUser={user} onContinue={onContinue}',
-  '<DetailPanel inspection={selectedInspection} firebaseUser={user} readOnly={readOnlyWorkspace} onContinue={onContinue}',
-  "pasar modo consulta al detalle",
+  '<DetailPanel inspection={selectedInspection} firebaseUser={user} readOnly={readOnlyWorkspace} canManageAssignments={canManageAssignments} onContinue={onContinue}',
+  "pasar permisos al detalle",
 );
 
 replaceOnce(
