@@ -1,0 +1,78 @@
+name: Audit Preinspecciones BT dependencies
+
+on:
+  push:
+    branches:
+      - feat/apk-pc-sync-gps-close
+    paths:
+      - package.json
+      - package-lock.json
+      - .github/workflows/security-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isivoltpro-bt-security-audit
+  cancel-in-progress: true
+
+jobs:
+  production-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Record complete audit summary
+        if: always()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require('node:child_process');
+          let result;
+          try {
+            result = execFileSync('npm', ['audit', '--json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+          } catch (error) {
+            result = String(error.stdout || '{}');
+          }
+          const audit = JSON.parse(result || '{}');
+          const vulnerabilities = audit.metadata?.vulnerabilities || {};
+          const total = vulnerabilities.total || 0;
+          const summary = [
+            '# Auditoría de dependencias',
+            '',
+            `Total: ${total}`,
+            `Critical: ${vulnerabilities.critical || 0}`,
+            `High: ${vulnerabilities.high || 0}`,
+            `Moderate: ${vulnerabilities.moderate || 0}`,
+            `Low: ${vulnerabilities.low || 0}`,
+            '',
+            'La compuerta de release utiliza únicamente vulnerabilidades high/critical de dependencias de producción.',
+          ].join('\n');
+          require('node:fs').writeFileSync('dependency-audit-summary.md', summary + '\n');
+          console.log(summary);
+          NODE
+
+      - name: Upload audit summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-summary
+          path: dependency-audit-summary.md
+          if-no-files-found: error
+          retention-days: 30
