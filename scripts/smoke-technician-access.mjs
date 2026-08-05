@@ -1,8 +1,10 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
 
 const baseUrl = String(process.env.POCKETBASE_URL || "http://127.0.0.1:8099").replace(/\/+$/, "");
 const superuserEmail = process.env.POCKETBASE_SUPERUSER_EMAIL || "validation@example.com";
 const superuserPassword = process.env.POCKETBASE_SUPERUSER_PASSWORD || "Validation-Password-12345";
+const serverLogPath = process.env.POCKETBASE_LOG_PATH || "/tmp/pocketbase-technicians.log";
 
 async function parse(response) {
   const text = await response.text();
@@ -176,6 +178,14 @@ try {
   console.log("Smoke test de accesos técnicos superado.");
   console.log(`Técnico temporal: ${technicianEmail}`);
   console.log(`Eventos auditados: ${events.items.length}`);
+} catch (error) {
+  console.error("Falló el ciclo real de accesos técnicos:", error);
+  if (fs.existsSync(serverLogPath)) {
+    console.error(`\n--- Diagnóstico PocketBase (${serverLogPath}) ---`);
+    console.error(fs.readFileSync(serverLogPath, "utf8"));
+    console.error("--- Fin diagnóstico PocketBase ---\n");
+  }
+  throw error;
 } finally {
   if (companyId && superuserToken) {
     await request(`/api/collections/companies/records/${companyId}`, {
