@@ -65,6 +65,7 @@ import {
 import { useAuth } from "./context/AuthContext";
 import { CHECKLIST } from "./data/checklistRebt2002";
 import ConnectedInspectionBridge from "./integration/ConnectedInspectionBridge.jsx";
+import DesktopWorkspace from "./desktop/DesktopWorkspace.jsx";
 import {
   buildInspectionSyncPayload,
   createLocalInspectionRecord,
@@ -8196,7 +8197,25 @@ export default function IsiVoltProInspecciones() {
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex justify-center print:block print:bg-white transition-colors duration-300">
-      <div className="w-full max-w-md bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300">
+      <div className="w-full max-w-md lg:max-w-5xl bg-slate-50 dark:bg-slate-800 min-h-screen shadow-2xl lg:shadow-xl relative print:max-w-full print:shadow-none print:bg-white transition-colors duration-300">
+        <DesktopWorkspace
+          screen={screen}
+          inspections={inspections}
+          currentId={currentId}
+          plan={plan}
+          user={user}
+          generatedReportsCount={generatedReportsCount}
+          onNavigate={setScreen}
+          onCreate={createInspection}
+          onContinue={onContinue}
+          onEdit={onEdit}
+          onReport={onReport}
+          onDocuments={onDocuments}
+          onDelete={deleteInspection}
+          onOpenSettings={() => setScreen("settings")}
+          onExportBackup={exportBackup}
+          onImportBackup={importBackup}
+        />
         {screen === "home" && <HomeScreen setScreen={setScreen} plan={plan} inspections={inspections} onContinue={onContinue} onEdit={onEdit} generatedReportsCount={generatedReportsCount} onExportBackup={exportBackup} onImportBackup={importBackup} />}
         {screen === "inspections" && <InspectionsScreen inspections={inspections} setScreen={setScreen} onContinue={onContinue} onEdit={onEdit} onReport={onReport} onDocuments={onDocuments} onDelete={deleteInspection} />}
         {screen === "plan" && <PlanScreen plan={plan} setPlan={setPlan} setScreen={setScreen} generatedReportsCount={generatedReportsCount} />}
@@ -8246,7 +8265,7 @@ export default function IsiVoltProInspecciones() {
           signatures={signatures}
           calculations={calculations}
         />
-        {screen !== "report" && <BottomNav screen={screen} setScreen={setScreen} onReportClick={openReportReview} />}
+        {screen !== "report" && <div className="lg:hidden"><BottomNav screen={screen} setScreen={setScreen} onReportClick={openReportReview} /></div>}
         {showFinalReview && (
           <FinalReviewModal
             completion={completion}
