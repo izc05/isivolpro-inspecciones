@@ -103,6 +103,27 @@ test("createTechnicianAccess posts a preauthorized email without a password", as
   assert.equal(technician.invitationStatus, "pending");
 });
 
+test("createTechnicianAccess rejects an invalid email before sending the technician request", async () => {
+  const { fetchImpl, calls } = createFetchMock(() => {
+    throw new Error("No debería enviarse la petición de alta");
+  });
+
+  await assert.rejects(
+    createTechnicianAccess({
+      firebaseUser: createFirebaseUser(),
+      technician: {
+        email: "correo-invalido",
+        name: "Técnico inválido",
+        role: "inspector",
+      },
+      baseUrl: "https://sync.example",
+      fetchImpl,
+    }),
+    (error) => error?.code === "INVALID_TECHNICIAN_EMAIL",
+  );
+  assert.equal(calls.length, 1, "solo debe intercambiarse la sesión antes de validar el formulario");
+});
+
 test("updateTechnicianAccess can suspend an existing technician", async () => {
   const { fetchImpl } = createFetchMock((url, options) => {
     assert.ok(url.endsWith("/api/isivolt/v1/admin/technicians/tech-2"));
