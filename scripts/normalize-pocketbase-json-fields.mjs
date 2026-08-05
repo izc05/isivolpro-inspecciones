@@ -33,30 +33,40 @@ function recordApplications(record) {
   }
 }`;
 
-function replaceFunction(source, name, replacement) {
+function functionRange(source, name) {
   const marker = `function ${name}(`;
   const start = source.indexOf(marker);
-  if (start < 0) throw new Error(`No se encontró ${name}`);
+  if (start < 0) return null;
   const brace = source.indexOf("{", start);
   let depth = 0;
-  let end = -1;
   for (let index = brace; index < source.length; index += 1) {
     if (source[index] === "{") depth += 1;
     if (source[index] === "}") {
       depth -= 1;
-      if (depth === 0) {
-        end = index + 1;
-        break;
-      }
+      if (depth === 0) return { start, end: index + 1 };
     }
   }
-  if (end < 0) throw new Error(`No se pudo delimitar ${name}`);
-  return source.slice(0, start) + replacement + source.slice(end);
+  throw new Error(`No se pudo delimitar ${name}`);
+}
+
+function removeFunction(source, name) {
+  const range = functionRange(source, name);
+  if (!range) return source;
+  let end = range.end;
+  while (source[end] === "\n") end += 1;
+  return source.slice(0, range.start) + source.slice(end);
+}
+
+function replaceFunction(source, name, replacement) {
+  const range = functionRange(source, name);
+  if (!range) throw new Error(`No se encontró ${name}`);
+  return source.slice(0, range.start) + replacement + source.slice(range.end);
 }
 
 for (const relativePath of files) {
   const filePath = path.join(root, relativePath);
   let source = fs.readFileSync(filePath, "utf8");
+  source = removeFunction(source, "recordApplications");
   source = replaceFunction(source, "applications", genericApplications);
   source = source.replaceAll('applications(event.auth.get("applications"))', "recordApplications(event.auth)");
   source = source.replaceAll('applications(record.get("applications"))', "recordApplications(record)");
