@@ -31,6 +31,7 @@ import {
   Zap,
 } from "lucide-react";
 import TechnicianAdminPanel from "../admin/TechnicianAdminPanel.jsx";
+import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";
 import "./desktop-workspace.css";
 
 const WORKSPACE_SCREENS = new Set(["home", "inspections", "settings", "plan"]);
@@ -213,7 +214,7 @@ function InspectionTable({ inspections, selectedId, onSelect }) {
   );
 }
 
-function DetailPanel({ inspection, onContinue, onEdit, onDocuments, onReport, onDelete }) {
+function DetailPanel({ inspection, firebaseUser, onContinue, onEdit, onDocuments, onReport, onDelete }) {
   if (!inspection) {
     return (
       <aside className="isivolt-detail-panel isivolt-detail-panel--empty">
@@ -260,6 +261,8 @@ function DetailPanel({ inspection, onContinue, onEdit, onDocuments, onReport, on
         <div><dt>Tipo</dt><dd>{normalizeText(data.inspectionType) || "Sin indicar"}</dd></div>
         <div><dt>Última edición</dt><dd>{formatDate(inspection.updatedAt || inspection.createdAt, true)}</dd></div>
       </dl>
+
+      <InspectionAssignmentControl firebaseUser={firebaseUser} inspection={inspection} />
 
       <section className="isivolt-detail-actions">
         <h3>Continuar trabajo</h3>
@@ -487,7 +490,7 @@ export default function DesktopWorkspace({
                 </div>
                 {filteredInspections.length === 0 ? <EmptyWorkspace onCreate={onCreate} /> : <InspectionTable inspections={activeSection === "overview" ? filteredInspections.slice(0, 8) : filteredInspections} selectedId={selectedInspection?.id} onSelect={setSelectedId} />}
               </div>
-              <DetailPanel inspection={selectedInspection} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
+              <DetailPanel inspection={selectedInspection} firebaseUser={user} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
             </section>
           )}
 
