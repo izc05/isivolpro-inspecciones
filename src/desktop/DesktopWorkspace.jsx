@@ -32,7 +32,9 @@ import {
 } from "lucide-react";
 import TechnicianAdminPanel from "../admin/TechnicianAdminPanel.jsx";
 import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";
+import { readSyncSession } from "../sync/syncAuth.js";
 import "./desktop-workspace.css";
+import "./readonly-workspace.css";
 
 const WORKSPACE_SCREENS = new Set(["home", "inspections", "settings", "plan"]);
 
@@ -142,15 +144,19 @@ function StatCard({ icon: Icon, label, value, detail, tone = "navy" }) {
   );
 }
 
-function EmptyWorkspace({ onCreate }) {
+function EmptyWorkspace({ onCreate, canCreate = true }) {
   return (
     <div className="isivolt-desktop-empty">
       <div className="isivolt-desktop-empty__icon"><ClipboardCheck size={30} /></div>
       <h3>Todavía no hay preinspecciones</h3>
       <p>Cree el primer expediente desde el ordenador o desde la APK. Ambos utilizarán el mismo identificador cuando el servidor esté activo.</p>
-      <button type="button" className="isivolt-button isivolt-button--primary" onClick={onCreate}>
-        <Plus size={17} /> Nueva preinspección
-      </button>
+      {canCreate ? (
+        <button type="button" className="isivolt-button isivolt-button--primary" onClick={onCreate}>
+          <Plus size={17} /> Nueva preinspección
+        </button>
+      ) : (
+        <span className="isivolt-readonly-label"><ShieldCheck size={15} /> Acceso de solo consulta</span>
+      )}
     </div>
   );
 }
@@ -214,7 +220,7 @@ function InspectionTable({ inspections, selectedId, onSelect }) {
   );
 }
 
-function DetailPanel({ inspection, firebaseUser, onContinue, onEdit, onDocuments, onReport, onDelete }) {
+function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssignments = false, onContinue, onEdit, onDocuments, onReport, onDelete }) {
   if (!inspection) {
     return (
       <aside className="isivolt-detail-panel isivolt-detail-panel--empty">
@@ -231,6 +237,9 @@ function DetailPanel({ inspection, firebaseUser, onContinue, onEdit, onDocuments
   const SyncIcon = sync.icon;
   const progress = Math.max(0, Math.min(100, Number(inspection.progress || 0)));
   const closed = normalizedStatus(inspection) === "closed";
+  const permissions = inspection?.permissions || inspection?.sync?.permissions || {};
+  const canEdit = !readOnly && permissions.canEdit !== false;
+  const canAssign = !readOnly && (canManageAssignments || permissions.canAssign === true);
 
   return (
     <aside className="isivolt-detail-panel">
@@ -262,25 +271,26 @@ function DetailPanel({ inspection, firebaseUser, onContinue, onEdit, onDocuments
         <div><dt>Última edición</dt><dd>{formatDate(inspection.updatedAt || inspection.createdAt, true)}</dd></div>
       </dl>
 
-      <InspectionAssignmentControl firebaseUser={firebaseUser} inspection={inspection} />
+      {canAssign && <InspectionAssignmentControl firebaseUser={firebaseUser} inspection={inspection} />}
 
       <section className="isivolt-detail-actions">
-        <h3>Continuar trabajo</h3>
+        <h3>{canEdit ? "Continuar trabajo" : "Consulta del expediente"}</h3>
+        {!canEdit && <p className="isivolt-readonly-notice"><ShieldCheck size={15} /> Puede revisar e imprimir, pero no modificar este expediente.</p>}
         <div className="isivolt-quick-actions">
-          <button type="button" onClick={() => onEdit(inspection.id)}><Building2 size={17} /><span>Datos</span></button>
-          <button type="button" onClick={() => onContinue(inspection.id)}><BookOpenCheck size={17} /><span>Checklist</span></button>
-          <button type="button" onClick={() => onDocuments(inspection.id)}><FileCheck2 size={17} /><span>Documentos</span></button>
+          {canEdit && <button type="button" onClick={() => onEdit(inspection.id)}><Building2 size={17} /><span>Datos</span></button>}
+          {canEdit && <button type="button" onClick={() => onContinue(inspection.id)}><BookOpenCheck size={17} /><span>Checklist</span></button>}
+          {canEdit && <button type="button" onClick={() => onDocuments(inspection.id)}><FileCheck2 size={17} /><span>Documentos</span></button>}
           <button type="button" onClick={() => onReport(inspection.id)}><FileText size={17} /><span>Informe</span></button>
         </div>
       </section>
 
       <div className="isivolt-detail-panel__footer">
-        <button type="button" className="isivolt-button isivolt-button--primary" onClick={() => onContinue(inspection.id)}>
-          {closed ? "Revisar expediente" : "Continuar preinspección"} <ArrowUpRight size={16} />
+        <button type="button" className="isivolt-button isivolt-button--primary" onClick={() => canEdit ? onContinue(inspection.id) : onReport(inspection.id)}>
+          {canEdit ? (closed ? "Revisar expediente" : "Continuar preinspección") : "Abrir informe"} <ArrowUpRight size={16} />
         </button>
-        <button type="button" className="isivolt-button isivolt-button--danger-ghost" onClick={() => onDelete(inspection.id)}>
+        {canEdit && <button type="button" className="isivolt-button isivolt-button--danger-ghost" onClick={() => onDelete(inspection.id)}>
           Eliminar
-        </button>
+        </button>}
       </div>
     </aside>
   );
@@ -377,6 +387,12 @@ export default function DesktopWorkspace({
   const [regulationFilter, setRegulationFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(currentId || inspections[0]?.id || null);
   const [settingsFocus, setSettingsFocus] = useState(false);
+  const syncSession = readSyncSession();
+  const currentRole = normalizeText(syncSession?.record?.role).toLowerCase();
+  const readOnlyWorkspace = currentRole === "viewer";
+  const canCreate = !readOnlyWorkspace;
+  const canManageAssignments = currentRole === "admin" || currentRole === "coordinator";
+  const visibleNavItems = NAV_ITEMS.filter((item) => item.id !== "admin" || currentRole === "admin");
 
   useEffect(() => {
     if (screen === "inspections") setActiveSection("inspections");
@@ -432,7 +448,7 @@ export default function DesktopWorkspace({
           <div><strong>IsiVoltPro</strong><small>Preinspecciones BT</small></div>
         </button>
         <nav aria-label="Navegación de escritorio">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+          {visibleNavItems.map(({ id, label, icon: Icon }) => (
             <button key={id} type="button" className={activeSection === id ? "is-active" : ""} onClick={() => chooseSection(id)}>
               <Icon size={18} /><span>{label}</span>{id === "inspections" && stats.total > 0 && <small>{stats.total}</small>}
             </button>
@@ -452,12 +468,12 @@ export default function DesktopWorkspace({
           <div>
             <button type="button" className="isivolt-mobile-menu" title="Menú"><Menu size={19} /></button>
             <span>IsiVoltPro /</span>
-            <strong>{NAV_ITEMS.find((item) => item.id === activeSection)?.label || "Inicio"}</strong>
+            <strong>{visibleNavItems.find((item) => item.id === activeSection)?.label || "Inicio"}</strong>
           </div>
           <div>
             <label className="isivolt-global-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar cliente, dirección, CUPS..." /></label>
             <button type="button" className="isivolt-icon-button" title="Sincronizar"><RefreshCw size={18} /></button>
-            <button type="button" className="isivolt-button isivolt-button--primary" onClick={onCreate}><Plus size={17} /> Nueva preinspección</button>
+            {canCreate && <button type="button" className="isivolt-button isivolt-button--primary" onClick={onCreate}><Plus size={17} /> Nueva preinspección</button>}
           </div>
         </header>
 
@@ -488,14 +504,14 @@ export default function DesktopWorkspace({
                     <label><select value={regulationFilter} onChange={(event) => setRegulationFilter(event.target.value)}><option value="all">Todos los reglamentos</option><option value="REBT 2002">REBT 2002</option><option value="REBT 1973">REBT 1973</option><option value="Mixto">Mixto</option></select></label>
                   </div>
                 </div>
-                {filteredInspections.length === 0 ? <EmptyWorkspace onCreate={onCreate} /> : <InspectionTable inspections={activeSection === "overview" ? filteredInspections.slice(0, 8) : filteredInspections} selectedId={selectedInspection?.id} onSelect={setSelectedId} />}
+                {filteredInspections.length === 0 ? <EmptyWorkspace onCreate={onCreate} canCreate={canCreate} /> : <InspectionTable inspections={activeSection === "overview" ? filteredInspections.slice(0, 8) : filteredInspections} selectedId={selectedInspection?.id} onSelect={setSelectedId} />}
               </div>
-              <DetailPanel inspection={selectedInspection} firebaseUser={user} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
+              <DetailPanel inspection={selectedInspection} firebaseUser={user} readOnly={readOnlyWorkspace} canManageAssignments={canManageAssignments} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
             </section>
           )}
 
           {activeSection === "reports" && <ReportsOverview inspections={inspections} onReport={onReport} />}
-          {activeSection === "admin" && (
+          {activeSection === "admin" && currentRole === "admin" && (
             <>
               <AdminOverview plan={plan} generatedReportsCount={generatedReportsCount} onOpenSettings={() => setSettingsFocus(true)} onExportBackup={onExportBackup} onImportBackup={onImportBackup} />
               <TechnicianAdminPanel firebaseUser={user} />
