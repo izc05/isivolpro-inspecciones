@@ -1,3 +1,19 @@
+function isivoltFindCollection(app, name) {
+  try {
+    return app.findCollectionByNameOrId(name);
+  } catch (error) {
+    return null;
+  }
+}
+
+function isivoltEnsureField(collection, field) {
+  try {
+    collection.fields.getByName(field.name);
+  } catch (error) {
+    collection.fields.add(field);
+  }
+}
+
 migrate((app) => {
   const companies = new Collection({
     type: "base",
@@ -22,32 +38,50 @@ migrate((app) => {
   });
   app.save(companies);
 
-  const users = new Collection({
-    type: "auth",
-    name: "users",
-    listRule: "company = @request.auth.company",
-    viewRule: "company = @request.auth.company",
-    createRule: null,
-    updateRule: "id = @request.auth.id && @request.body.company:isset = false && @request.body.role:isset = false && @request.body.active:isset = false && @request.body.applications:isset = false",
-    deleteRule: null,
-    manageRule: "id = @request.auth.id",
-    fields: [
-      { name: "name", type: "text", required: true, max: 160 },
-      { name: "company", type: "relation", required: true, collectionId: companies.id, maxSelect: 1, cascadeDelete: true },
-      { name: "role", type: "select", required: true, maxSelect: 1, values: ["admin", "coordinator", "inspector", "viewer"] },
-      { name: "active", type: "bool", required: true },
-      { name: "applications", type: "json" },
-      { name: "firebaseUid", type: "text", max: 160 },
-    ],
-    passwordAuth: {
-      enabled: true,
-      identityFields: ["email"],
-    },
-    indexes: [
-      "CREATE INDEX idx_users_company ON users (company)",
-      "CREATE UNIQUE INDEX idx_users_firebase_uid ON users (firebaseUid) WHERE firebaseUid != ''",
-    ],
-  });
+  let users = isivoltFindCollection(app, "users");
+  if (!users) {
+    users = new Collection({
+      type: "auth",
+      name: "users",
+    });
+  }
+
+  users.listRule = "company = @request.auth.company";
+  users.viewRule = "company = @request.auth.company";
+  users.createRule = null;
+  users.updateRule = "id = @request.auth.id && @request.body.company:isset = false && @request.body.role:isset = false && @request.body.active:isset = false && @request.body.applications:isset = false";
+  users.deleteRule = null;
+  users.manageRule = "id = @request.auth.id";
+  users.passwordAuth.enabled = true;
+  users.passwordAuth.identityFields = ["email"];
+
+  const existingName = users.fields.getByName("name");
+  existingName.required = true;
+  existingName.max = 160;
+  isivoltEnsureField(users, new RelationField({
+    name: "company",
+    required: true,
+    collectionId: companies.id,
+    maxSelect: 1,
+    cascadeDelete: true,
+  }));
+  isivoltEnsureField(users, new SelectField({
+    name: "role",
+    required: true,
+    maxSelect: 1,
+    values: ["admin", "coordinator", "inspector", "viewer"],
+  }));
+  isivoltEnsureField(users, new BoolField({
+    name: "active",
+    required: true,
+  }));
+  isivoltEnsureField(users, new JSONField({ name: "applications" }));
+  isivoltEnsureField(users, new TextField({
+    name: "firebaseUid",
+    max: 160,
+  }));
+  users.addIndex("idx_users_company", false, "company", "");
+  users.addIndex("idx_users_firebase_uid", true, "firebaseUid", "firebaseUid != ''");
   app.save(users);
 
   const installations = new Collection({
@@ -137,11 +171,27 @@ migrate((app) => {
   });
   app.save(events);
 }, (app) => {
-  for (const name of ["inspection_events", "inspections", "installations", "users", "companies"]) {
+  for (const name of ["inspection_events", "inspections", "installations", "companies"]) {
     try {
       app.delete(app.findCollectionByNameOrId(name));
     } catch (error) {
-      console.warn(`No se pudo eliminar la colección ${name}`, error);
+      console.warn("No se pudo eliminar la colección " + name, error);
     }
+  }
+
+  try {
+    const users = app.findCollectionByNameOrId("users");
+    for (const fieldName of ["company", "role", "active", "applications", "firebaseUid"]) {
+      try {
+        users.fields.removeByName(fieldName);
+      } catch (error) {
+        console.warn("No se pudo eliminar el campo " + fieldName, error);
+      }
+    }
+    users.removeIndex("idx_users_company");
+    users.removeIndex("idx_users_firebase_uid");
+    app.save(users);
+  } catch (error) {
+    console.warn("No se pudo restaurar la colección users", error);
   }
 });
