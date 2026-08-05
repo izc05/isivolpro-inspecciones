@@ -7,6 +7,7 @@ on:
     paths:
       - package.json
       - package-lock.json
+      - docs/runtime-dependency-validation.md
       - .github/workflows/security-audit.yml
   workflow_dispatch:
 
@@ -38,33 +39,58 @@ jobs:
       - name: Audit runtime dependencies
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Record complete audit summary
+      - name: Record runtime and complete audit summaries
         if: always()
         shell: bash
         run: |
           node <<'NODE'
           const { execFileSync } = require('node:child_process');
-          let result;
-          try {
-            result = execFileSync('npm', ['audit', '--json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-          } catch (error) {
-            result = String(error.stdout || '{}');
+          const fs = require('node:fs');
+
+          function readAudit(args) {
+            try {
+              return JSON.parse(execFileSync('npm', ['audit', '--json', ...args], {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'pipe'],
+              }) || '{}');
+            } catch (error) {
+              return JSON.parse(String(error.stdout || '{}'));
+            }
           }
-          const audit = JSON.parse(result || '{}');
-          const vulnerabilities = audit.metadata?.vulnerabilities || {};
-          const total = vulnerabilities.total || 0;
+
+          function counts(audit) {
+            const value = audit.metadata?.vulnerabilities || {};
+            return {
+              total: value.total || 0,
+              critical: value.critical || 0,
+              high: value.high || 0,
+              moderate: value.moderate || 0,
+              low: value.low || 0,
+            };
+          }
+
+          const runtime = counts(readAudit(['--omit=dev']));
+          const complete = counts(readAudit([]));
           const summary = [
             '# Auditoría de dependencias',
             '',
-            `Total: ${total}`,
-            `Critical: ${vulnerabilities.critical || 0}`,
-            `High: ${vulnerabilities.high || 0}`,
-            `Moderate: ${vulnerabilities.moderate || 0}`,
-            `Low: ${vulnerabilities.low || 0}`,
+            '## Runtime distribuido',
+            `Total: ${runtime.total}`,
+            `Critical: ${runtime.critical}`,
+            `High: ${runtime.high}`,
+            `Moderate: ${runtime.moderate}`,
+            `Low: ${runtime.low}`,
             '',
-            'La compuerta de release utiliza únicamente vulnerabilidades high/critical de dependencias de producción.',
+            '## Herramientas y árbol completo',
+            `Total: ${complete.total}`,
+            `Critical: ${complete.critical}`,
+            `High: ${complete.high}`,
+            `Moderate: ${complete.moderate}`,
+            `Low: ${complete.low}`,
+            '',
+            'La compuerta de release bloquea vulnerabilidades high o critical del runtime distribuido.',
           ].join('\n');
-          require('node:fs').writeFileSync('dependency-audit-summary.md', summary + '\n');
+          fs.writeFileSync('dependency-audit-summary.md', `${summary}\n`);
           console.log(summary);
           NODE
 
