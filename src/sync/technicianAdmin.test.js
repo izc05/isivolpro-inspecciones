@@ -103,9 +103,9 @@ test("createTechnicianAccess posts a preauthorized email without a password", as
   assert.equal(technician.invitationStatus, "pending");
 });
 
-test("createTechnicianAccess rejects an invalid email before sending the technician request", async () => {
+test("createTechnicianAccess rejects an invalid email before sending any request", async () => {
   const { fetchImpl, calls } = createFetchMock(() => {
-    throw new Error("No debería enviarse la petición de alta");
+    throw new Error("No debería enviarse ninguna petición");
   });
 
   await assert.rejects(
@@ -121,7 +121,7 @@ test("createTechnicianAccess rejects an invalid email before sending the technic
     }),
     (error) => error?.code === "INVALID_TECHNICIAN_EMAIL",
   );
-  assert.equal(calls.length, 1, "solo debe intercambiarse la sesión antes de validar el formulario");
+  assert.equal(calls.length, 0);
 });
 
 test("updateTechnicianAccess can suspend an existing technician", async () => {
