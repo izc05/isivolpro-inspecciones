@@ -7,9 +7,8 @@ function isivoltFindCollection(app, name) {
 }
 
 function isivoltEnsureField(collection, field) {
-  try {
-    collection.fields.getByName(field.name);
-  } catch (error) {
+  const existing = collection.fields.getByName(field.name);
+  if (!existing) {
     collection.fields.add(field);
   }
 }
