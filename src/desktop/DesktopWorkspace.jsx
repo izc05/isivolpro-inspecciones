@@ -31,6 +31,7 @@ import {
   Zap,
 } from "lucide-react";
 import TechnicianAdminPanel from "../admin/TechnicianAdminPanel.jsx";
+import AdminActivityPanel from "../admin/AdminActivityPanel.jsx";
 import InspectionAssignmentControl from "../admin/InspectionAssignmentControl.jsx";
 import { readSyncSession } from "../sync/syncAuth.js";
 import "./desktop-workspace.css";
@@ -554,6 +555,7 @@ export default function DesktopWorkspace({
             <>
               <AdminOverview plan={plan} generatedReportsCount={generatedReportsCount} onOpenSettings={() => setSettingsFocus(true)} onExportBackup={onExportBackup} onImportBackup={onImportBackup} />
               <TechnicianAdminPanel firebaseUser={user} />
+              <AdminActivityPanel firebaseUser={user} />
             </>
           )}
         </main>
