@@ -74,6 +74,8 @@ replaceRequired(
   'window.location.href = "mailto:info@isivoltpro.com?subject=Comentarios beta Preinspecciones BT"',
 );
 
+source = source.replace(/[ \t]+$/gm, "");
+
 const forbidden = [
   'const APP_VERSION = "1.0.0";',
   "INSPECCIONES ELÉCTRICAS",
@@ -101,4 +103,4 @@ for (const required of [
 }
 
 fs.writeFileSync(appPath, source);
-console.log("Identidad y versión visibles de Preinspecciones BT actualizadas correctamente.");
+console.log("Identidad, versión y formato visibles de Preinspecciones BT actualizados correctamente.");
