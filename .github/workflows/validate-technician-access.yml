@@ -8,8 +8,8 @@ on:
     paths:
       - src/admin/**
       - src/sync/technicianAdmin.test.js
-      - server/pocketbase/pb_hooks/isivolt_technicians.pb.js
-      - server/pocketbase/pb_migrations/1785884000_add_technician_access.js
+      - server/pocketbase/pb_hooks/**
+      - server/pocketbase/pb_migrations/**
       - scripts/integrate-technician-access.mjs
       - scripts/smoke-technician-access.mjs
       - .github/workflows/validate-technician-access.yml
@@ -131,6 +131,7 @@ jobs:
           grep -Fq 'record.set("invitationStatus", "linked")' server/pocketbase/pb_hooks/isivolt_sync.pb.js
           grep -Fq 'record.setRandomPassword()' server/pocketbase/pb_hooks/isivolt_technicians.pb.js
           grep -Fq 'technician_access_events' server/pocketbase/pb_migrations/1785884000_add_technician_access.js
+          grep -Fq 'active.required = false' server/pocketbase/pb_migrations/1785884100_allow_inactive_records.js
           ! grep -Eq 'password|contraseña' src/admin/TechnicianAdminPanel.jsx || grep -Fq 'sin compartir ni conocer contraseñas' src/admin/TechnicianAdminPanel.jsx
           test -s android/app/build/outputs/apk/debug/app-debug.apk
           git diff --check
