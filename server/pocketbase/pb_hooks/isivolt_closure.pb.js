@@ -1,303 +1,33 @@
-const CLOSURE_DEFAULTS = {
-  allowCloseFromWeb: false,
-  requireMobileClose: true,
-  requireLocation: true,
-  allowedRadiusMeters: 100,
-  maximumAccuracyMeters: 50,
-  requireInspectorSignature: true,
-  requireClientSignature: false,
-  minimumPhotoCount: 1,
-  requireServerSyncBeforeClose: true,
-  allowAdminOverride: true,
-};
-
-function closureRequireUser(e) {
-  if (!e.auth || e.auth.collection().name !== "users") {
-    throw new UnauthorizedError("Se necesita una cuenta IsiVoltPro válida");
-  }
-  if (!e.auth.getBool("active")) {
-    throw new ForbiddenError("La cuenta está desactivada");
-  }
-  const companyId = e.auth.getString("company");
-  if (!companyId) {
-    throw new ForbiddenError("La cuenta no tiene una empresa asignada");
-  }
-  return {
-    userId: e.auth.id,
-    companyId,
-    role: e.auth.getString("role"),
-  };
-}
-
-function closureObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-}
-
-function mergeClosurePolicy(companyPolicy, installationPolicy) {
-  return Object.assign(
-    {},
-    CLOSURE_DEFAULTS,
-    closureObject(companyPolicy),
-    closureObject(installationPolicy),
-  );
-}
-
-function closureFinite(value) {
-  const number = Number(value);
-  return isFinite(number) ? number : null;
-}
-
-function installationValue(installation, key) {
-  if (!installation) return null;
-  if (typeof installation.get === "function") return installation.get(key);
-  return installation[key];
-}
-
-function buildTrustedInspectionInstallation(inspection) {
-  const latitude = inspection.get("closureLatitude");
-  const longitude = inspection.get("closureLongitude");
-  const allowedRadiusMeters = inspection.get("closureRadiusMeters");
-  const policy = closureObject(inspection.get("closurePolicy"));
-
-  if (latitude === null && longitude === null) return null;
-  return {
-    latitude: latitude,
-    longitude: longitude,
-    allowedRadiusMeters: allowedRadiusMeters,
-    closurePolicy: policy,
-  };
-}
-
-function closureNullable(value) {
-  return value === undefined || value === null ? null : value;
-}
-
-function validLatitude(value) {
-  const number = closureFinite(value);
-  return number !== null && number >= -90 && number <= 90;
-}
-
-function validLongitude(value) {
-  const number = closureFinite(value);
-  return number !== null && number >= -180 && number <= 180;
-}
-
-function radians(value) {
-  return value * Math.PI / 180;
-}
-
-function distanceMeters(pointA, pointB) {
-  const earthRadius = 6371000;
-  const latA = radians(Number(pointA.latitude));
-  const latB = radians(Number(pointB.latitude));
-  const latDelta = radians(Number(pointB.latitude) - Number(pointA.latitude));
-  const lonDelta = radians(Number(pointB.longitude) - Number(pointA.longitude));
-  const sinLatitude = Math.sin(latDelta / 2);
-  const sinLongitude = Math.sin(lonDelta / 2);
-  const haversine = sinLatitude * sinLatitude +
-    Math.cos(latA) * Math.cos(latB) * sinLongitude * sinLongitude;
-  return earthRadius * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
-}
-
-function countPayloadPhotos(payload) {
-  const ids = {};
-  const responses = closureObject(payload.responses);
-  Object.keys(responses).forEach((key) => {
-    const photos = Array.isArray(responses[key] && responses[key].photos)
-      ? responses[key].photos
-      : [];
-    photos.forEach((photo, index) => {
-      const id = String((photo && (photo.fileId || photo.id || photo.fileName)) || (key + "-" + index));
-      ids[id] = true;
-    });
-  });
-
-  const fieldSheets = Array.isArray(payload.fieldSheets) ? payload.fieldSheets : [];
-  fieldSheets.forEach((sheet, index) => {
-    if (!sheet || !sheet.photo) return;
-    const photo = sheet.photo;
-    const id = String(photo.fileId || photo.id || photo.fileName || ("field-" + index));
-    ids[id] = true;
-  });
-
-  const attachments = Array.isArray(payload.data && payload.data.attachments)
-    ? payload.data.attachments
-    : [];
-  attachments.forEach((file, index) => {
-    const mime = String((file && file.mimeType) || "");
-    if (mime.indexOf("image/") !== 0) return;
-    const id = String(file.fileId || file.id || file.fileName || ("attachment-" + index));
-    ids[id] = true;
-  });
-
-  return Object.keys(ids).length;
-}
-
-function countUploadedInspectionPhotos(app, inspectionRecordId, companyId) {
-  const records = app.findRecordsByFilter(
-    "inspection_files",
-    "inspection = {:inspection} && company = {:company} && fileType = 'image'",
-    "",
-    500,
-    0,
-    { inspection: inspectionRecordId, company: companyId },
-  );
-  return records.length;
-}
-
-function checkClosureRequirements(payload, policy, platform, uploadedPhotoCount) {
-  const signatures = closureObject(payload.signatures);
-  const inspectorSigned = Boolean(signatures.inspector);
-  const clientSigned = Boolean(signatures.client);
-  const payloadPhotoCount = countPayloadPhotos(payload);
-  const synchronizedPhotoCount = Math.max(0, Number(uploadedPhotoCount || 0));
-  const photoCount = policy.requireServerSyncBeforeClose
-    ? synchronizedPhotoCount
-    : Math.max(payloadPhotoCount, synchronizedPhotoCount);
-  const missing = [];
-
-  if (policy.requireMobileClose && platform !== "android" && platform !== "ios") {
-    missing.push("MOBILE_DEVICE_REQUIRED");
-  }
-  if (policy.requireInspectorSignature && !inspectorSigned) {
-    missing.push("INSPECTOR_SIGNATURE_REQUIRED");
-  }
-  if (policy.requireClientSignature && !clientSigned) {
-    missing.push("CLIENT_SIGNATURE_REQUIRED");
-  }
-  if (photoCount < Number(policy.minimumPhotoCount || 0)) {
-    missing.push("MINIMUM_PHOTOS_REQUIRED");
-  }
-
-  return {
-    valid: missing.length === 0,
-    missing,
-    inspectorSigned,
-    clientSigned,
-    photoCount,
-  };
-}
-
-function validateClosureLocation(policy, installation, evidence) {
-  if (!policy.requireLocation) {
-    return {
-      valid: true,
-      result: "NOT_REQUIRED",
-      evidence: null,
-    };
-  }
-
-  if (!installation) {
-    return {
-      valid: false,
-      result: "ERROR",
-      code: "INSTALLATION_REQUIRED_FOR_LOCATION",
-      evidence: null,
-    };
-  }
-
-  const installationLatitude = closureFinite(installationValue(installation, "latitude"));
-  const installationLongitude = closureFinite(installationValue(installation, "longitude"));
-  const latitude = closureFinite(evidence.latitude);
-  const longitude = closureFinite(evidence.longitude);
-  const accuracyMeters = Math.max(0, closureFinite(evidence.accuracyMeters) || 0);
-
-  if (!validLatitude(installationLatitude) || !validLongitude(installationLongitude)) {
-    return {
-      valid: false,
-      result: "ERROR",
-      code: "INSTALLATION_LOCATION_MISSING",
-      evidence: null,
-    };
-  }
-  if (!validLatitude(latitude) || !validLongitude(longitude)) {
-    return {
-      valid: false,
-      result: "ERROR",
-      code: "DEVICE_LOCATION_INVALID",
-      evidence: null,
-    };
-  }
-
-  const allowedRadiusMeters = Math.max(
-    1,
-    Number(installationValue(installation, "allowedRadiusMeters") || policy.allowedRadiusMeters || 100),
-  );
-  const maximumAccuracyMeters = Math.max(1, Number(policy.maximumAccuracyMeters || 50));
-  const distance = distanceMeters(
-    { latitude, longitude },
-    { latitude: installationLatitude, longitude: installationLongitude },
-  );
-  const normalizedEvidence = {
-    latitude,
-    longitude,
-    accuracyMeters,
-    installationLatitude,
-    installationLongitude,
-    distanceMeters: distance,
-    allowedRadiusMeters,
-    maximumAccuracyMeters,
-    capturedAtDevice: String(evidence.capturedAtDevice || ""),
-  };
-
-  if (accuracyMeters > maximumAccuracyMeters) {
-    return {
-      valid: false,
-      result: "INSUFFICIENT_ACCURACY",
-      code: "GPS_ACCURACY_TOO_LOW",
-      evidence: normalizedEvidence,
-    };
-  }
-  if (distance > allowedRadiusMeters) {
-    return {
-      valid: false,
-      result: "OUTSIDE_RADIUS",
-      code: "OUTSIDE_ALLOWED_RADIUS",
-      evidence: normalizedEvidence,
-    };
-  }
-
-  return {
-    valid: true,
-    result: "VALIDATED",
-    code: "ON_SITE_LOCATION_VALIDATED",
-    evidence: normalizedEvidence,
-  };
-}
-
 routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
-  const auth = closureRequireUser(e);
+  const sync = require(`${__hooks}/sync_core_utils.js`);
+  const closure = require(`${__hooks}/closure_utils.js`);
+  const auth = sync.requireUser(e, { write: true });
   const inspectionId = String(e.request.pathValue("inspectionId") || "").trim();
-  const body = new DynamicModel({
-    baseRevision: 0,
-    deviceId: "",
-    platform: "web",
-    evidence: {},
-    overrideReason: "",
-    capturedAtDevice: "",
-  });
-  e.bindBody(body);
+  const body = e.requestInfo().body || {};
 
   if (!inspectionId) {
-    throw new BadRequestError("Falta inspectionId", { code: "INSPECTION_ID_REQUIRED" });
-  }
-  if (!String(body.deviceId || "").trim()) {
-    throw new BadRequestError("Falta deviceId", { code: "DEVICE_ID_REQUIRED" });
+    throw new BadRequestError("Falta inspectionId");
   }
 
-  const records = e.app.findRecordsByFilter(
-    "inspections",
-    "inspectionId = {:inspectionId} && company = {:company}",
-    "",
-    1,
-    0,
-    { inspectionId, company: auth.companyId },
-  );
-  if (!records.length) {
+  const deviceId = String(body.deviceId || "").trim().slice(0, 160);
+  if (!deviceId) {
+    throw new BadRequestError("Falta deviceId");
+  }
+
+  const inspection = sync.findInspection(e.app, auth.companyId, inspectionId);
+  if (!inspection) {
     throw new NotFoundError("No se ha encontrado la preinspección");
   }
+  sync.assertCanWriteInspection(inspection, auth);
 
-  const inspection = records[0];
+  const currentStatus = inspection.getString("status");
+  if (currentStatus === "CLOSED") {
+    throw new BadRequestError("La preinspección ya está cerrada");
+  }
+  if (currentStatus === "CANCELLED") {
+    throw new BadRequestError("No se puede cerrar una preinspección cancelada");
+  }
+
   const currentRevision = inspection.getInt("revision");
   if (Number(body.baseRevision || 0) !== currentRevision) {
     return e.json(409, {
@@ -308,60 +38,62 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
   }
 
   const company = e.app.findRecordById("companies", auth.companyId);
-  const payload = closureObject(inspection.get("payload"));
+  const payload = closure.readPayload(inspection);
   const installationId = inspection.getString("installation");
-  const installationRecord = installationId
-    ? e.app.findRecordById("installations", installationId)
-    : null;
-  const trustedInstallation = buildTrustedInspectionInstallation(inspection);
+  let installationRecord = null;
+  if (installationId) {
+    try {
+      installationRecord = e.app.findRecordById("installations", installationId);
+    } catch (error) {
+      installationRecord = null;
+    }
+  }
+  const trustedInstallation = closure.buildTrustedInspectionInstallation(inspection);
   const installation = installationRecord || trustedInstallation;
+  const companyPolicy = closure.readPolicy(company, "closurePolicy");
   const installationPolicy = installationRecord
-    ? installationRecord.get("closurePolicy")
+    ? closure.readPolicy(installationRecord, "closurePolicy")
     : trustedInstallation
       ? trustedInstallation.closurePolicy
       : {};
-  const policy = mergeClosurePolicy(
-    company.get("closurePolicy"),
-    installationPolicy,
-  );
-  const requestedPlatform = String(body.platform);
+  const policy = closure.mergePolicy(companyPolicy, installationPolicy);
+
+  const requestedPlatform = String(body.platform || "web").toLowerCase();
   const platform = ["android", "ios", "web"].indexOf(requestedPlatform) >= 0
     ? requestedPlatform
     : "web";
-  const uploadedPhotoCount = countUploadedInspectionPhotos(
+  const uploadedPhotoCount = closure.countUploadedPhotos(
     e.app,
     inspection.id,
     auth.companyId,
   );
-  const requirements = checkClosureRequirements(
+  const requirements = closure.checkRequirements(
     payload,
     policy,
     platform,
     uploadedPhotoCount,
   );
-  const location = validateClosureLocation(policy, installation, closureObject(body.evidence));
+  const location = closure.validateLocation(policy, installation, body.evidence || {});
   const overrideReason = String(body.overrideReason || "").trim();
   const wantsOverride = Boolean(overrideReason);
 
   if (wantsOverride) {
     if (!policy.allowAdminOverride || auth.role !== "admin") {
-      throw new ForbiddenError("No tiene permiso para autorizar un cierre excepcional", {
-        code: "CLOSURE_OVERRIDE_FORBIDDEN",
-      });
+      throw new ForbiddenError("No tiene permiso para autorizar un cierre excepcional");
     }
   } else {
     if (!requirements.valid) {
       return e.json(422, {
         code: "CLOSURE_REQUIREMENTS_NOT_MET",
         message: "Faltan requisitos obligatorios para cerrar",
-        requirements,
+        requirements: requirements,
       });
     }
     if (!location.valid) {
       return e.json(422, {
         code: location.code,
         message: "La ubicación no permite cerrar la preinspección",
-        location,
+        location: location,
       });
     }
   }
@@ -377,6 +109,7 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
 
   e.app.runInTransaction((txApp) => {
     const txInspection = txApp.findRecordById("inspections", inspection.id);
+    sync.assertCanWriteInspection(txInspection, auth);
     const txRevision = txInspection.getInt("revision");
     if (txRevision !== currentRevision) {
       response = {
@@ -384,6 +117,11 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
         serverRevision: txRevision,
       };
       return;
+    }
+
+    const txStatus = txInspection.getString("status");
+    if (txStatus === "CLOSED" || txStatus === "CANCELLED") {
+      throw new BadRequestError("El estado actual no permite cerrar la preinspección");
     }
 
     const nextRevision = txRevision + 1;
@@ -395,30 +133,30 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
     txApp.save(txInspection);
 
     const closureCollection = txApp.findCollectionByNameOrId("inspection_closures");
-    const closure = new Record(closureCollection);
+    const closureRecord = new Record(closureCollection);
     const evidence = location.evidence || {};
-    closure.set("company", auth.companyId);
-    closure.set("inspection", txInspection.id);
-    closure.set("inspectionId", inspectionId);
-    closure.set("closedBy", auth.userId);
-    closure.set("deviceId", String(body.deviceId).slice(0, 160));
-    closure.set("platform", platform);
-    closure.set("latitude", closureNullable(evidence.latitude));
-    closure.set("longitude", closureNullable(evidence.longitude));
-    closure.set("accuracyMeters", closureNullable(evidence.accuracyMeters));
-    closure.set("installationLatitude", closureNullable(evidence.installationLatitude));
-    closure.set("installationLongitude", closureNullable(evidence.installationLongitude));
-    closure.set("distanceMeters", closureNullable(evidence.distanceMeters));
-    closure.set("allowedRadiusMeters", closureNullable(evidence.allowedRadiusMeters));
-    closure.set("maximumAccuracyMeters", closureNullable(evidence.maximumAccuracyMeters));
-    closure.set("result", finalResult);
-    closure.set("requirements", requirements);
-    closure.set("evidence", evidence);
-    closure.set("overrideReason", wantsOverride ? overrideReason : "");
-    closure.set("capturedAtDevice", capturedAtDevice);
-    closure.set("receivedAtServer", now);
-    closure.set("serverRevision", nextRevision);
-    txApp.save(closure);
+    closureRecord.set("company", auth.companyId);
+    closureRecord.set("inspection", txInspection.id);
+    closureRecord.set("inspectionId", inspectionId);
+    closureRecord.set("closedBy", auth.userId);
+    closureRecord.set("deviceId", deviceId);
+    closureRecord.set("platform", platform);
+    closureRecord.set("latitude", closure.nullable(evidence.latitude));
+    closureRecord.set("longitude", closure.nullable(evidence.longitude));
+    closureRecord.set("accuracyMeters", closure.nullable(evidence.accuracyMeters));
+    closureRecord.set("installationLatitude", closure.nullable(evidence.installationLatitude));
+    closureRecord.set("installationLongitude", closure.nullable(evidence.installationLongitude));
+    closureRecord.set("distanceMeters", closure.nullable(evidence.distanceMeters));
+    closureRecord.set("allowedRadiusMeters", closure.nullable(evidence.allowedRadiusMeters));
+    closureRecord.set("maximumAccuracyMeters", closure.nullable(evidence.maximumAccuracyMeters));
+    closureRecord.set("result", finalResult);
+    closureRecord.set("requirements", requirements);
+    closureRecord.set("evidence", evidence);
+    closureRecord.set("overrideReason", wantsOverride ? overrideReason : "");
+    closureRecord.set("capturedAtDevice", capturedAtDevice);
+    closureRecord.set("receivedAtServer", now);
+    closureRecord.set("serverRevision", nextRevision);
+    txApp.save(closureRecord);
 
     const eventCollection = txApp.findCollectionByNameOrId("inspection_events");
     const event = new Record(eventCollection);
@@ -426,29 +164,31 @@ routerAdd("POST", "/api/isivolt/v1/inspections/{inspectionId}/close", (e) => {
     event.set("inspection", txInspection.id);
     event.set("inspectionId", inspectionId);
     event.set("user", auth.userId);
-    event.set("deviceId", String(body.deviceId).slice(0, 160));
+    event.set("deviceId", deviceId);
     event.set("eventType", wantsOverride ? "ADMIN_OVERRIDE" : "CLOSED_ON_SITE");
     event.set("revision", nextRevision);
     event.set("details", {
-      platform,
+      platform: platform,
       result: finalResult,
-      requirements,
-      evidence,
+      requirements: requirements,
+      evidence: evidence,
       overrideReason: wantsOverride ? overrideReason : null,
+      role: auth.role,
+      assignedUserId: txInspection.getString("assignedUser") || null,
     });
     event.set("clientCreatedAt", capturedAtDevice);
     txApp.save(event);
 
     response = {
       conflict: false,
-      closureId: closure.id,
-      inspectionId,
+      closureId: closureRecord.id,
+      inspectionId: inspectionId,
       status: "CLOSED",
       result: finalResult,
       revision: nextRevision,
       closedAt: now,
-      requirements,
-      evidence,
+      requirements: requirements,
+      evidence: evidence,
     };
   });
 
