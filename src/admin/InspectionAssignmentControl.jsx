@@ -13,7 +13,7 @@ function technicianLabel(technician) {
   return `${technician.name || technician.email}${detail ? ` — ${detail}` : ""}`;
 }
 
-export default function InspectionAssignmentControl({ firebaseUser, inspection }) {
+export default function InspectionAssignmentControl({ firebaseUser, inspection, onAssignmentChange }) {
   const inspectionId = inspection?.sync?.inspectionId || "";
   const [assignment, setAssignment] = useState(null);
   const [technicians, setTechnicians] = useState([]);
@@ -80,6 +80,7 @@ export default function InspectionAssignmentControl({ firebaseUser, inspection }
         assignedUserId: selectedId,
       });
       setAssignment(next);
+      onAssignmentChange?.(next);
       setMessage(selectedId ? "Técnico asignado correctamente" : "Expediente dejado sin asignar");
     } catch (error) {
       setMessage(error?.message || "No se pudo guardar la asignación");

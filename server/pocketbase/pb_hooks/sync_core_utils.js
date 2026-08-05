@@ -176,7 +176,25 @@ function normalizeStatus(value) {
   return VALID_STATUS.indexOf(status) >= 0 ? status : "DRAFT";
 }
 
-function serializeInspection(record, auth) {
+function serializeAssignedUser(app, userId) {
+  const normalizedId = String(userId || "").trim();
+  if (!app || !normalizedId) return null;
+  try {
+    const user = app.findRecordById("users", normalizedId);
+    return {
+      id: user.id,
+      name: user.getString("name"),
+      email: user.getString("email"),
+      specialty: user.getString("specialty"),
+      role: user.getString("role") || "inspector",
+      active: user.getBool("active"),
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function serializeInspection(record, auth, app) {
   const assignedUserId = record.getString("assignedUser");
   const ownerUserId = record.getString("ownerUser");
   return {
@@ -192,6 +210,7 @@ function serializeInspection(record, auth) {
     deletedAt: record.getString("deletedAt"),
     ownerUserId: ownerUserId,
     assignedUserId: assignedUserId,
+    assignedUser: serializeAssignedUser(app, assignedUserId),
     permissions: {
       canEdit: auth ? auth.canWrite && canAccessInspection(record, auth) : false,
       canAssign: auth ? auth.canAssign : false,
@@ -263,6 +282,7 @@ function findProvisionedUser(app, firebaseUser) {
 module.exports = {
   CONTRACT_VERSION: CONTRACT_VERSION,
   applications: applications,
+  recordApplications: recordApplications,
   assertCanWriteInspection: assertCanWriteInspection,
   canAccessInspection: canAccessInspection,
   findInspection: findInspection,

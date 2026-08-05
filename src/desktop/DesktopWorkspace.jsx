@@ -131,6 +131,16 @@ function regulationLabel(inspection) {
   return "REBT 2002";
 }
 
+function assignedTechnician(inspection) {
+  const source = inspection?.assignedUser || inspection?.sync?.assignedUser;
+  return source && typeof source === "object" ? source : null;
+}
+
+function assignedTechnicianName(inspection) {
+  const technician = assignedTechnician(inspection);
+  return normalizeText(technician?.name) || normalizeText(technician?.email) || "Sin asignar";
+}
+
 function StatCard({ icon: Icon, label, value, detail, tone = "navy" }) {
   return (
     <article className={`isivolt-stat-card isivolt-stat-card--${tone}`}>
@@ -170,6 +180,7 @@ function InspectionTable({ inspections, selectedId, onSelect }) {
             <th>Expediente</th>
             <th>Reglamento</th>
             <th>Estado</th>
+            <th>Técnico</th>
             <th>Avance</th>
             <th>Defectos</th>
             <th>Sincronización</th>
@@ -194,6 +205,10 @@ function InspectionTable({ inspections, selectedId, onSelect }) {
                 </td>
                 <td><span className="isivolt-regulation-tag">{regulationLabel(inspection)}</span></td>
                 <td><span className={status.className}>{status.label}</span></td>
+                <td>
+                  <strong>{assignedTechnicianName(inspection)}</strong>
+                  <span>{normalizeText(assignedTechnician(inspection)?.specialty) || "Sin especialidad"}</span>
+                </td>
                 <td>
                   <div className="isivolt-progress-cell">
                     <span><i style={{ width: `${progress}%` }} /></span>
@@ -220,7 +235,7 @@ function InspectionTable({ inspections, selectedId, onSelect }) {
   );
 }
 
-function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssignments = false, onContinue, onEdit, onDocuments, onReport, onDelete }) {
+function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssignments = false, onAssignmentChange, onContinue, onEdit, onDocuments, onReport, onDelete }) {
   if (!inspection) {
     return (
       <aside className="isivolt-detail-panel isivolt-detail-panel--empty">
@@ -240,6 +255,7 @@ function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssi
   const permissions = inspection?.permissions || inspection?.sync?.permissions || {};
   const canEdit = !readOnly && permissions.canEdit !== false;
   const canAssign = !readOnly && (canManageAssignments || permissions.canAssign === true);
+  const technician = assignedTechnician(inspection);
 
   return (
     <aside className="isivolt-detail-panel">
@@ -268,10 +284,11 @@ function DetailPanel({ inspection, firebaseUser, readOnly = false, canManageAssi
         <div><dt>Titular</dt><dd>{normalizeText(data.ownerName) || "Sin indicar"}</dd></div>
         <div><dt>Orden / referencia</dt><dd>{normalizeText(data.orderNumber) || "Sin indicar"}</dd></div>
         <div><dt>Tipo</dt><dd>{normalizeText(data.inspectionType) || "Sin indicar"}</dd></div>
+        <div><dt>Técnico</dt><dd>{assignedTechnicianName(inspection)}{technician?.specialty ? ` · ${technician.specialty}` : ""}</dd></div>
         <div><dt>Última edición</dt><dd>{formatDate(inspection.updatedAt || inspection.createdAt, true)}</dd></div>
       </dl>
 
-      {canAssign && <InspectionAssignmentControl firebaseUser={firebaseUser} inspection={inspection} />}
+      {canAssign && <InspectionAssignmentControl firebaseUser={firebaseUser} inspection={inspection} onAssignmentChange={(assignment) => onAssignmentChange?.(inspection.id, assignment)} />}
 
       <section className="isivolt-detail-actions">
         <h3>{canEdit ? "Continuar trabajo" : "Consulta del expediente"}</h3>
@@ -387,6 +404,7 @@ export default function DesktopWorkspace({
   const [regulationFilter, setRegulationFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(currentId || inspections[0]?.id || null);
   const [settingsFocus, setSettingsFocus] = useState(false);
+  const [assignmentOverrides, setAssignmentOverrides] = useState({});
   const syncSession = readSyncSession();
   const currentRole = normalizeText(syncSession?.record?.role).toLowerCase();
   const readOnlyWorkspace = currentRole === "viewer";
@@ -406,27 +424,48 @@ export default function DesktopWorkspace({
     else if (!selectedId && inspections[0]?.id) setSelectedId(inspections[0].id);
   }, [currentId, inspections, selectedId]);
 
-  const selectedInspection = inspections.find((inspection) => inspection.id === selectedId) || inspections[0] || null;
+  const displayInspections = useMemo(() => inspections.map((inspection) => {
+    const assignment = assignmentOverrides[inspection.id];
+    if (!assignment) return inspection;
+    return {
+      ...inspection,
+      assignedUserId: assignment.assignedUserId || "",
+      assignedUser: assignment.assignedUser || null,
+      sync: {
+        ...(inspection.sync || {}),
+        assignedUserId: assignment.assignedUserId || "",
+        assignedUser: assignment.assignedUser || null,
+        serverRevision: Math.max(Number(inspection?.sync?.serverRevision || 0), Number(assignment.revision || 0)),
+      },
+    };
+  }), [inspections, assignmentOverrides]);
+
+  const selectedInspection = displayInspections.find((inspection) => inspection.id === selectedId) || displayInspections[0] || null;
   const filteredInspections = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return inspections.filter((inspection) => {
+    return displayInspections.filter((inspection) => {
       const data = inspectionData(inspection);
-      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups].join(" ").toLowerCase();
+      const technician = assignedTechnician(inspection);
+      const haystack = [inspectionTitle(inspection), inspectionSubtitle(inspection), data.ownerName, data.orderNumber, data.cups, technician?.name, technician?.email, technician?.specialty].join(" ").toLowerCase();
       const status = normalizedStatus(inspection);
       const regulation = regulationLabel(inspection);
       return (!normalizedQuery || haystack.includes(normalizedQuery))
         && (statusFilter === "all" || status === statusFilter)
         && (regulationFilter === "all" || regulation === regulationFilter);
     });
-  }, [inspections, query, statusFilter, regulationFilter]);
+  }, [displayInspections, query, statusFilter, regulationFilter]);
 
   const stats = useMemo(() => ({
-    total: inspections.length,
-    active: inspections.filter((inspection) => ["progress", "review"].includes(normalizedStatus(inspection))).length,
-    defects: inspections.reduce((sum, inspection) => sum + Number(inspection.defects || 0), 0),
-    closed: inspections.filter((inspection) => normalizedStatus(inspection) === "closed").length,
-    pendingSync: inspections.filter((inspection) => ["PENDING", "LOCAL_ONLY", "CONFLICT", "ERROR"].includes(normalizeText(inspection?.sync?.syncStatus).toUpperCase())).length,
-  }), [inspections]);
+    total: displayInspections.length,
+    active: displayInspections.filter((inspection) => ["progress", "review"].includes(normalizedStatus(inspection))).length,
+    defects: displayInspections.reduce((sum, inspection) => sum + Number(inspection.defects || 0), 0),
+    closed: displayInspections.filter((inspection) => normalizedStatus(inspection) === "closed").length,
+    pendingSync: displayInspections.filter((inspection) => ["PENDING", "LOCAL_ONLY", "CONFLICT", "ERROR"].includes(normalizeText(inspection?.sync?.syncStatus).toUpperCase())).length,
+  }), [displayInspections]);
+
+  const handleAssignmentChange = (localId, assignment) => {
+    setAssignmentOverrides((current) => ({ ...current, [localId]: assignment }));
+  };
 
   const isWorkspaceScreen = WORKSPACE_SCREENS.has(screen) && !(screen === "settings" && settingsFocus);
   if (!isWorkspaceScreen) {
@@ -506,11 +545,11 @@ export default function DesktopWorkspace({
                 </div>
                 {filteredInspections.length === 0 ? <EmptyWorkspace onCreate={onCreate} canCreate={canCreate} /> : <InspectionTable inspections={activeSection === "overview" ? filteredInspections.slice(0, 8) : filteredInspections} selectedId={selectedInspection?.id} onSelect={setSelectedId} />}
               </div>
-              <DetailPanel inspection={selectedInspection} firebaseUser={user} readOnly={readOnlyWorkspace} canManageAssignments={canManageAssignments} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
+              <DetailPanel inspection={selectedInspection} firebaseUser={user} readOnly={readOnlyWorkspace} canManageAssignments={canManageAssignments} onAssignmentChange={handleAssignmentChange} onContinue={onContinue} onEdit={onEdit} onDocuments={onDocuments} onReport={onReport} onDelete={onDelete} />
             </section>
           )}
 
-          {activeSection === "reports" && <ReportsOverview inspections={inspections} onReport={onReport} />}
+          {activeSection === "reports" && <ReportsOverview inspections={displayInspections} onReport={onReport} />}
           {activeSection === "admin" && currentRole === "admin" && (
             <>
               <AdminOverview plan={plan} generatedReportsCount={generatedReportsCount} onOpenSettings={() => setSettingsFocus(true)} onExportBackup={onExportBackup} onImportBackup={onImportBackup} />

@@ -76,7 +76,7 @@ routerAdd("POST", "/api/isivolt/v1/inspections/sync", (e) => {
       result = {
         conflict: true,
         serverRevision: currentServerRevision,
-        serverInspection: existing ? sync.serializeInspection(existing, auth) : null,
+        serverInspection: existing ? sync.serializeInspection(existing, auth, txApp) : null,
       };
       return;
     }
@@ -150,7 +150,7 @@ routerAdd("GET", "/api/isivolt/v1/inspections", (e) => {
   const records = sync.listVisibleInspections(e.app, auth, since);
   const items = [];
   for (let index = 0; index < records.length; index += 1) {
-    items.push(sync.serializeInspection(records[index], auth));
+    items.push(sync.serializeInspection(records[index], auth, e.app));
   }
 
   return e.json(200, {

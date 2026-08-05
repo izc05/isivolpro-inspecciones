@@ -58,6 +58,7 @@ function buildRemote({
   deletedAt = "",
   ownerUserId = "owner-1",
   assignedUserId = "technician-1",
+  assignedUser = { id: "technician-1", name: "Ana Técnica", email: "ana@example.com", specialty: "Electricidad", role: "inspector", active: true },
   permissions = {
     canEdit: true,
     canAssign: false,
@@ -78,6 +79,7 @@ function buildRemote({
     },
     ownerUserId,
     assignedUserId,
+    assignedUser,
     permissions,
     sourceDeviceId: "pc-device",
     clientUpdatedAt: "2026-08-04T20:00:00.000Z",
@@ -100,6 +102,9 @@ test("añade una inspección creada en otro dispositivo", () => {
   assert.equal(result.inspections[0].sync.serverRevision, 1);
   assert.equal(result.inspections[0].sync.syncStatus, SYNC_STATUS.SYNCED);
   assert.equal(result.inspections[0].assignedUserId, "technician-1");
+  assert.equal(result.inspections[0].assignedUser.name, "Ana Técnica");
+  assert.equal(result.inspections[0].assignedUser.specialty, "Electricidad");
+  assert.equal(result.inspections[0].sync.assignedUser.name, "Ana Técnica");
   assert.equal(result.inspections[0].permissions.isAssigned, true);
   assert.equal(result.inspections[0].sync.assignedUserId, "technician-1");
 });
@@ -142,6 +147,7 @@ test("actualiza una inspección local cuando no existen cambios pendientes", () 
     id: local.id,
     name: "Nombre actualizado desde PC",
     assignedUserId: "technician-2",
+    assignedUser: { id: "technician-2", name: "Luis Coordinador", email: "luis@example.com", specialty: "Coordinación", role: "coordinator", active: true },
     permissions: {
       canEdit: true,
       canAssign: true,
@@ -157,6 +163,8 @@ test("actualiza una inspección local cuando no existen cambios pendientes", () 
   assert.equal(result.inspections[0].data.name, "Nombre actualizado desde PC");
   assert.equal(result.inspections[0].sync.serverRevision, 2);
   assert.equal(result.inspections[0].assignedUserId, "technician-2");
+  assert.equal(result.inspections[0].assignedUser.name, "Luis Coordinador");
+  assert.equal(result.inspections[0].sync.assignedUser.role, "coordinator");
   assert.equal(result.inspections[0].permissions.canAssign, true);
 });
 

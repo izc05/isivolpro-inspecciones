@@ -66,10 +66,26 @@ function getRemotePermissions(remote) {
   };
 }
 
+function getRemoteAssignedUser(remote) {
+  const source = remote?.assignedUser && typeof remote.assignedUser === "object" && !Array.isArray(remote.assignedUser)
+    ? remote.assignedUser
+    : null;
+  if (!source || !String(source.id || remote?.assignedUserId || "").trim()) return null;
+  return {
+    id: String(source.id || remote.assignedUserId || ""),
+    name: String(source.name || "").trim(),
+    email: String(source.email || "").trim().toLowerCase(),
+    specialty: String(source.specialty || "").trim(),
+    role: String(source.role || "inspector"),
+    active: source.active !== false,
+  };
+}
+
 function getRemoteAccess(remote) {
   return {
     ownerUserId: String(remote?.ownerUserId || ""),
     assignedUserId: String(remote?.assignedUserId || ""),
+    assignedUser: getRemoteAssignedUser(remote),
     permissions: getRemotePermissions(remote),
   };
 }
@@ -115,6 +131,7 @@ function applyRemoteMetadata(localId, remote) {
     ),
     ownerUserId: access.ownerUserId,
     assignedUserId: access.assignedUserId,
+    assignedUser: access.assignedUser,
     permissions: access.permissions,
     updatedAt: remote.clientUpdatedAt || remote.updated || current.updatedAt,
     lastSyncedAt: remote.lastSyncedAt || remote.updated || new Date().toISOString(),
@@ -153,6 +170,7 @@ function buildRemoteLocalRecord(localId, remote) {
     closureConfig,
     ownerUserId: access.ownerUserId,
     assignedUserId: access.assignedUserId,
+    assignedUser: access.assignedUser,
     permissions: access.permissions,
     sync,
     updatedAt: payload.updatedAt || remote.clientUpdatedAt || remote.updated,
